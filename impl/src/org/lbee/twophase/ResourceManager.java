@@ -51,7 +51,7 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
             Thread.sleep(this.config.taskDuration);
 
         /* Resource manager is prepared to commit */
-        if (this.getState().equals("working"))
+        if (this.getState().equals("working") || this.config.prepareAnyway)
             this.prepare();
 
         return null;
@@ -165,11 +165,13 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
      * Configuration of a resource manager
      * @param shouldFail Is resource manager should fail, invoke an unknown exception
      * @param taskDuration Duration of the simulated task
+     * @param prepareAnyway Prepare resource manager even if is not in "working" state (introduce error in implementation)
      */
-    record ResourceManagerConfiguration(boolean shouldFail, int taskDuration) {
+    record ResourceManagerConfiguration(boolean shouldFail, int taskDuration, boolean prepareAnyway) {
 
-        ResourceManagerConfiguration(boolean shouldFail, int taskDuration) {
+        ResourceManagerConfiguration(boolean shouldFail, int taskDuration, boolean prepareAnyway) {
             this.shouldFail = shouldFail;
+            this.prepareAnyway = prepareAnyway;
 
             if (taskDuration == -1)
                 /* Set a random task duration */

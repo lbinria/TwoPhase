@@ -23,8 +23,9 @@ public class TransactionManager implements Callable<Void>, TLANamedProcess {
     /**
      * Configuration of a resource manager
      * @param timeout Is resource manager should fail, invoke an unknown exception
+     * @param commitAnyway Commit even if some RM are not prepared (introduce error in implementation)
      */
-    record TransactionManagerConfiguration(int timeout) {
+    record TransactionManagerConfiguration(int timeout, boolean commitAnyway) {
         @Override
         public String toString() {
             return "TransactionManagerConfiguration{" +
@@ -165,7 +166,7 @@ public class TransactionManager implements Callable<Void>, TLANamedProcess {
     }
 
     protected boolean checkCommit()  {
-        return this.preparedResourceManagers.containsAll(this.resourceManagers);
+        return this.preparedResourceManagers.containsAll(this.resourceManagers) || this.config.commitAnyway;
     }
 
     protected boolean checkTimeout() {

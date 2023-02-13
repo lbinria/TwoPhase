@@ -3,10 +3,14 @@ package org.lbee.twophase;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class App {
 
@@ -16,6 +20,23 @@ public class App {
 
         // Some printing
         System.out.println(config);
+
+        System.out.println("Create configuration file...");
+
+        // Create value of CONSTANTS RM for TLA
+        final Stream<String> resourceManagerNames = IntStream.rangeClosed(1, config.nResourceManager).mapToObj(i -> "\"rm" + i + "\"");
+        final String s = resourceManagerNames.collect(Collectors.joining(", "));
+        final String constantValue = "{" + s + "}";
+
+        // Write configuration file
+        final TLAConfigTemplate tlaConfig = new TLAConfigTemplate(Map.ofEntries(Map.entry("RM", constantValue)));
+        try {
+            tlaConfig.generate("TwoPhaseTrace.template.cfg");
+        } catch (IOException ex) {
+            System.out.printf("An error occurred when reading configuration template file. %s\n", ex);
+        }
+
+        System.out.println("Configuration file created.");
         System.out.println("Start...");
 
         // TODO In order to make a consistent total log file, we have to synchronize global clocks of processes !
@@ -56,10 +77,10 @@ public class App {
         public ResourceManager.ResourceManagerConfiguration[] resourceManagerConfig;
 
         public Configuration(String args[]) {
-            this.transactionManagerConfig = new TransactionManager.TransactionManagerConfiguration(1200);
+            this.transactionManagerConfig = new TransactionManager.TransactionManagerConfiguration(1500, false);
             this.resourceManagerConfig = new ResourceManager.ResourceManagerConfiguration[this.nResourceManager];
             for (int i = 0; i < this.nResourceManager; i++) {
-                this.resourceManagerConfig[i] = new ResourceManager.ResourceManagerConfiguration(false, -1);
+                this.resourceManagerConfig[i] = new ResourceManager.ResourceManagerConfiguration(false, -1, true);
             }
         }
 
