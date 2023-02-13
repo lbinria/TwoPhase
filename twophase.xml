@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="twophase" default="all">
+  
+  
+  <property file="twophase.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="700m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/*.rbc/**"/>
+    <exclude name="**/*.yarb/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/_svn/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.egg"/>
+    <include name="*.zip"/>
+    <include name="*.war"/>
+    <include name="*.swc"/>
+    <include name="*.ear"/>
+    <include name="*.jar"/>
+    <include name="*.klib"/>
+    <include name="*.ane"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <exclude name="**/?*.java"/>
+    <exclude name="**/?*.form"/>
+    <exclude name="**/?*.class"/>
+    <exclude name="**/?*.groovy"/>
+    <exclude name="**/?*.scala"/>
+    <exclude name="**/?*.flex"/>
+    <exclude name="**/?*.kt"/>
+    <exclude name="**/?*.clj"/>
+    <exclude name="**/?*.aj"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+  
+  <property name="jdk.bin.19" value="${jdk.home.19}/bin"/>
+  <path id="jdk.classpath.19">
+    <fileset dir="${jdk.home.19}">
+      <include name="../jdk-19!/java.base"/>
+      <include name="../jdk-19!/java.compiler"/>
+      <include name="../jdk-19!/java.datatransfer"/>
+      <include name="../jdk-19!/java.desktop"/>
+      <include name="../jdk-19!/java.instrument"/>
+      <include name="../jdk-19!/java.logging"/>
+      <include name="../jdk-19!/java.management"/>
+      <include name="../jdk-19!/java.management.rmi"/>
+      <include name="../jdk-19!/java.naming"/>
+      <include name="../jdk-19!/java.net.http"/>
+      <include name="../jdk-19!/java.prefs"/>
+      <include name="../jdk-19!/java.rmi"/>
+      <include name="../jdk-19!/java.scripting"/>
+      <include name="../jdk-19!/java.se"/>
+      <include name="../jdk-19!/java.security.jgss"/>
+      <include name="../jdk-19!/java.security.sasl"/>
+      <include name="../jdk-19!/java.smartcardio"/>
+      <include name="../jdk-19!/java.sql"/>
+      <include name="../jdk-19!/java.sql.rowset"/>
+      <include name="../jdk-19!/java.transaction.xa"/>
+      <include name="../jdk-19!/java.xml"/>
+      <include name="../jdk-19!/java.xml.crypto"/>
+      <include name="../jdk-19!/jdk.accessibility"/>
+      <include name="../jdk-19!/jdk.attach"/>
+      <include name="../jdk-19!/jdk.charsets"/>
+      <include name="../jdk-19!/jdk.compiler"/>
+      <include name="../jdk-19!/jdk.crypto.cryptoki"/>
+      <include name="../jdk-19!/jdk.crypto.ec"/>
+      <include name="../jdk-19!/jdk.dynalink"/>
+      <include name="../jdk-19!/jdk.editpad"/>
+      <include name="../jdk-19!/jdk.hotspot.agent"/>
+      <include name="../jdk-19!/jdk.httpserver"/>
+      <include name="../jdk-19!/jdk.incubator.concurrent"/>
+      <include name="../jdk-19!/jdk.incubator.vector"/>
+      <include name="../jdk-19!/jdk.internal.ed"/>
+      <include name="../jdk-19!/jdk.internal.jvmstat"/>
+      <include name="../jdk-19!/jdk.internal.le"/>
+      <include name="../jdk-19!/jdk.internal.opt"/>
+      <include name="../jdk-19!/jdk.internal.vm.ci"/>
+      <include name="../jdk-19!/jdk.internal.vm.compiler"/>
+      <include name="../jdk-19!/jdk.internal.vm.compiler.management"/>
+      <include name="../jdk-19!/jdk.jartool"/>
+      <include name="../jdk-19!/jdk.javadoc"/>
+      <include name="../jdk-19!/jdk.jcmd"/>
+      <include name="../jdk-19!/jdk.jconsole"/>
+      <include name="../jdk-19!/jdk.jdeps"/>
+      <include name="../jdk-19!/jdk.jdi"/>
+      <include name="../jdk-19!/jdk.jdwp.agent"/>
+      <include name="../jdk-19!/jdk.jfr"/>
+      <include name="../jdk-19!/jdk.jlink"/>
+      <include name="../jdk-19!/jdk.jpackage"/>
+      <include name="../jdk-19!/jdk.jshell"/>
+      <include name="../jdk-19!/jdk.jsobject"/>
+      <include name="../jdk-19!/jdk.jstatd"/>
+      <include name="../jdk-19!/jdk.localedata"/>
+      <include name="../jdk-19!/jdk.management"/>
+      <include name="../jdk-19!/jdk.management.agent"/>
+      <include name="../jdk-19!/jdk.management.jfr"/>
+      <include name="../jdk-19!/jdk.naming.dns"/>
+      <include name="../jdk-19!/jdk.naming.rmi"/>
+      <include name="../jdk-19!/jdk.net"/>
+      <include name="../jdk-19!/jdk.nio.mapmode"/>
+      <include name="../jdk-19!/jdk.random"/>
+      <include name="../jdk-19!/jdk.sctp"/>
+      <include name="../jdk-19!/jdk.security.auth"/>
+      <include name="../jdk-19!/jdk.security.jgss"/>
+      <include name="../jdk-19!/jdk.unsupported"/>
+      <include name="../jdk-19!/jdk.unsupported.desktop"/>
+      <include name="../jdk-19!/jdk.xml.dom"/>
+      <include name="../jdk-19!/jdk.zipfs"/>
+    </fileset>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home.19}"/>
+  <property name="project.jdk.bin" value="${jdk.bin.19}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath.19"/>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module TwoPhase -->
+  
+  <dirname property="module.twophase.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.twophase" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.twophase" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.twophase" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.twophase" value="-encoding UTF-8 -source 16 -target 16 ${compiler.args}"/>
+  
+  <property name="twophase.output.dir" value="${module.twophase.basedir}/impl/out/production/TwoPhase"/>
+  <property name="twophase.testoutput.dir" value="${module.twophase.basedir}/impl/out/test/TwoPhase"/>
+  
+  <path id="twophase.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="twophase.module.production.classpath">
+    <path refid="${module.jdk.classpath.twophase}"/>
+    <pathelement location="${basedir}/../../../../opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar"/>
+  </path>
+  
+  <path id="twophase.runtime.production.module.classpath">
+    <pathelement location="${twophase.output.dir}"/>
+    <pathelement location="${basedir}/../../../../opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar"/>
+  </path>
+  
+  <path id="twophase.module.classpath">
+    <path refid="${module.jdk.classpath.twophase}"/>
+    <pathelement location="${twophase.output.dir}"/>
+    <pathelement location="${basedir}/../../../../opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar"/>
+  </path>
+  
+  <path id="twophase.runtime.module.classpath">
+    <pathelement location="${twophase.testoutput.dir}"/>
+    <pathelement location="${twophase.output.dir}"/>
+    <pathelement location="${basedir}/../../../../opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.twophase">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.twophase">
+    <patternset refid="excluded.from.module.twophase"/>
+  </patternset>
+  
+  <path id="twophase.module.sourcepath">
+    <dirset dir="${module.twophase.basedir}">
+      <include name="impl/src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.twophase" depends="compile.module.twophase.production,compile.module.twophase.tests" description="Compile module TwoPhase"/>
+  
+  <target name="compile.module.twophase.production" description="Compile module TwoPhase; production classes">
+    <mkdir dir="${twophase.output.dir}"/>
+    <javac destdir="${twophase.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.twophase}/javac">
+      <compilerarg line="${compiler.args.twophase}"/>
+      <bootclasspath refid="twophase.module.bootclasspath"/>
+      <classpath refid="twophase.module.production.classpath"/>
+      <src refid="twophase.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.twophase"/>
+    </javac>
+    
+    <copy todir="${twophase.output.dir}">
+      <fileset dir="${module.twophase.basedir}/impl/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.twophase.tests" depends="compile.module.twophase.production" description="compile module TwoPhase; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.twophase" description="cleanup module">
+    <delete dir="${twophase.output.dir}"/>
+    <delete dir="${twophase.testoutput.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.twophase" description="cleanup all"/>
+  
+  <target name="build.modules" depends="init, clean, compile.module.twophase" description="build all modules"/>
+  
+  <target name="all" depends="build.modules" description="build all"/>
+</project>
