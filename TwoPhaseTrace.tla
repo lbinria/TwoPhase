@@ -8,7 +8,7 @@ EXTENDS TLC, Sequences, Naturals, FiniteSets
 (* Matches the configuration of the app. *)
 (* This can be generated via templating *)
 (* Need configuration to be fixed *)
-RM == {"rm1", "rm2"}
+CONSTANTS RM
 
 
 (* Handmade simple valid trace. *)
@@ -73,7 +73,8 @@ VARIABLES
 vars == <<rmState, tmState, tmPrepared, msgs, i>>
 
 TP == INSTANCE TwoPhase
-  
+
+(* Can be generated *)
 TPInit == 
   /\ i = 1
   /\ TP!TPInit
@@ -114,6 +115,8 @@ term == /\ i > Len(Trace)
        
 TPNext ==
   \/
+    (* UNCHANGED to accept some arbitrary log between interresting log *)
+    (* but UNCHANGED can lead to accept deadlock ? *)
     /\ (TP!TPNext \/ UNCHANGED <<tmState, rmState, msgs, tmPrepared>>)
     /\ ReadNext
   \/
