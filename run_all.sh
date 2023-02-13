@@ -1,0 +1,1 @@
+echo -e "#1 Run implementation\n\n" && sh twophase.sh && echo -e "#2 Run event printer\n\n" && sh jfr_print.sh && echo -e "#3 Run log serializer" && sh serialize.sh && echo -e "#4 Run trace validation\n\n" && sh twophase_trace_validation.sh
