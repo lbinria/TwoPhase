@@ -122,6 +122,8 @@ TPNext ==
   \/
     /\ term
 
+
+
 TPTraceBehavior == TPInit /\ [][TPNext]_vars /\ WF_vars(TPNext)
 
 Complete == <>[](i = Len(Trace) + 1)
