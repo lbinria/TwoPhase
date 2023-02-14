@@ -58,7 +58,24 @@ Trace_valid_abort == <<
 
 >>
 
-\* Trace == Trace_valid_abort
+(* Handmade simple valid trace. Doesn't work *)
+Trace_valid_abort_2 == <<
+    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm2" ] >>,
+    (* Trace rm1 was prepared *)
+    <<
+        [ op |-> "w", sender |-> "rm1", key |-> "rmState", val |-> "prepared"],
+        [ op |-> "a", sender |-> "rm1", key |-> "msgs", val |-> "Prepared" ]
+    >>,
+    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm1" ] >>,
+
+    <<
+        [ op |-> "a", sender |-> "TM", key |-> "msgs", val |-> "Abort" ],
+        [ op |-> "a", sender |-> "TM", key |-> "tmState", val |-> "done" ]
+    >>
+
+>>
+
+\* Trace == Trace_valid_abort_2
 
 INSTANCE IOUtils
 Trace == IODeserialize("Trace.bin", TRUE)
@@ -87,6 +104,10 @@ LogMap(t) ==
         /\ msgs' = msgs \cup {[type |-> t[2].val, rm |-> t[2].sender]}
         /\ UNCHANGED <<tmState, tmPrepared>>
 
+    ELSE IF Len(t) = 1 /\ t[1].key = "rmState" THEN
+        /\ rmState' = [rmState EXCEPT ![t[1].sender] = t[1].val]
+        /\ UNCHANGED <<tmState, tmPrepared, msgs>>
+
     ELSE IF Len(t) = 1 /\ t[1].key = "tmState" THEN
         /\ tmState' = t[1].val
         /\ UNCHANGED <<rmState, tmPrepared, msgs>>
@@ -112,7 +133,8 @@ ReadNext ==
 (* Infinite stuttering... *)
 term == /\ i > Len(Trace)
         /\ UNCHANGED vars
-       
+
+
 TPNext ==
   \/
     (* UNCHANGED to accept some arbitrary log between interresting log *)
@@ -122,8 +144,25 @@ TPNext ==
   \/
     /\ term
 
-
-
+(*
+TPNext ==
+    \/
+        (* Log and system are TRUE case *)
+        /\ TP!TPNext
+        /\ ReadNext
+    \/
+        (* Skip log case *)
+        /\ ReadNext
+        /\ UNCHANGED <<tmState, rmState, msgs, tmPrepared>>
+    (*
+    \/
+        /\ TP!TPNext
+        /\ UNCHANGED <<i>>
+    *)
+    \/
+        (* All trace processed case *)
+        /\ term
+*)
 TPTraceBehavior == TPInit /\ [][TPNext]_vars /\ WF_vars(TPNext)
 
 Complete == <>[](i = Len(Trace) + 1)
