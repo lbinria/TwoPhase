@@ -58,7 +58,7 @@ Trace_valid_abort == <<
 
 >>
 
-(* Handmade simple valid trace. Doesn't work *)
+(* Handmade simple valid trace. But doesn't work because the trace doesn't start after init state *)
 Trace_valid_abort_2 == <<
     << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm2" ] >>,
     (* Trace rm1 was prepared *)
@@ -134,7 +134,7 @@ ReadNext ==
 term == /\ i > Len(Trace)
         /\ UNCHANGED vars
 
-
+(*
 TPNext ==
   \/
     (* UNCHANGED to accept some arbitrary log between interresting log *)
@@ -143,8 +143,8 @@ TPNext ==
     /\ ReadNext
   \/
     /\ term
+*)
 
-(*
 TPNext ==
     \/
         (* Log and system are TRUE case *)
@@ -162,7 +162,7 @@ TPNext ==
     \/
         (* All trace processed case *)
         /\ term
-*)
+
 TPTraceBehavior == TPInit /\ [][TPNext]_vars /\ WF_vars(TPNext)
 
 Complete == <>[](i = Len(Trace) + 1)

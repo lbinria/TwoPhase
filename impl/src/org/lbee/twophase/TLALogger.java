@@ -40,4 +40,8 @@ public class TLALogger {
         action.run();
     }
 
+    public void trigger() {
+        clock++;
+    }
+
 }

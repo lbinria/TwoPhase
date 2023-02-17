@@ -1,11 +1,22 @@
 package org.lbee.twophase;
 
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 /**
  * Simulate a resource manager node (as a process)
  */
-public class ResourceManager implements Callable<Void>, TLANamedProcess {
+public class ResourceManager implements Callable<Void>, TLANamedProcess, NetworkProcess {
+
+
+    private final NetworkMock networkMock;
+
+    enum ResourceManagerState {
+        WORKING,
+        PREPARED,
+        COMMITTED,
+        ABORTED
+    }
 
     // Logger
     private final TLALogger logger;
@@ -16,11 +27,14 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
     // Configuration of manager
     private final ResourceManagerConfiguration config;
 
+    //private long clock;
+    private final LogicalClock logicalClock;
+
     // TLA variables
 
     // Current state
     @TLAVariable(name="rmState")
-    private String state = "working";
+    private ResourceManagerState state = ResourceManagerState.WORKING;
 
     // Last message sent
     @TLAVariable(name = "msgs")
@@ -32,29 +46,52 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
      * @param transactionManager Transaction manager to send message
      * @param config Manager configuration
      */
-    public ResourceManager(String name, TransactionManager transactionManager, ResourceManagerConfiguration config) {
+    public ResourceManager(NetworkMock networkMock, String name, TransactionManager transactionManager, ResourceManagerConfiguration config) {
         this.name = name;
         this.transactionManager = transactionManager;
         this.config = config;
         this.logger = new TLALogger();
+        this.networkMock = networkMock;
+        this.logicalClock = new LogicalClock();
     }
 
     @Override
     public Void call() throws Exception {
 
         System.out.printf("Task duration of %s: %s.\n", this.name, this.config.taskDuration);
+
         /* Task fail eventually */
         if (this.config.shouldFail)
             throw new Exception();
-        else
-            /* Simulate some task */
-            Thread.sleep(this.config.taskDuration);
 
-        /* Resource manager is prepared to commit */
-        if (this.getState().equals("working") || this.config.prepareAnyway)
-            this.prepare();
+
+        // Block threads until resource manager was committed or aborted
+        while (!(isCommitted() || isAborted())) {
+
+            /* Resource manager is prepared to commit */
+            if (isWorking() && Helper.next(10000) == 1) {
+                // Simulate task before resource manager is prepared
+                //Thread.sleep(config.taskDuration);
+                this.prepare();
+            }
+
+            // Receive messages
+            this.receive();
+        }
 
         return null;
+    }
+
+    private boolean isWorking() {
+        return this.getState() == ResourceManagerState.WORKING;
+    }
+
+    private boolean isCommitted() {
+        return this.getState() == ResourceManagerState.COMMITTED;
+    }
+
+    private boolean isAborted() {
+        return this.getState() == ResourceManagerState.ABORTED;
     }
 
     /**
@@ -62,23 +99,19 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
      */
     protected void prepare()
     {
-        //clock++;
-        // Just one action take one unit of local logical time
-        logger.sync(() -> {
-            this.setState("prepared");
-            this.send("Prepared");
-        });
+        this.setState(ResourceManagerState.PREPARED);
+        this.send(new Message(this.name, TwoPhaseMessage.PREPARED.toString(), this.logicalClock.getValue()));
     }
 
     /**
      * @TLA-action RMRcvCommitMsg(r)
      */
-    protected void commit()
-    {
-        //clock++;
-        logger.sync(() -> {
-            this.setState("committed");
-        });
+    protected void commit() {
+        // Simulate some task that take some time
+        long d = 150 + Helper.next(2000);
+        //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
+        try {Thread.sleep(d); } catch (InterruptedException ex) {}
+        this.setState(ResourceManagerState.COMMITTED);
     }
 
     /**
@@ -86,32 +119,41 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
      */
     protected void abort()
     {
-        //clock++;
-        logger.sync(() -> {
-            this.setState("aborted");
-        });
+        // Simulate some task that take some time
+        long d = 150 + Helper.next(2000);
+        //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
+        try {Thread.sleep(d); } catch (InterruptedException ex) {}
+        this.setState(ResourceManagerState.ABORTED);
     }
 
     /**
      * Send message to transaction manager
      * @param message Message to send
      */
-    protected void send(String message) {
-        // Log message sent
-        //new App2TLA.TLAEvent(this.name, "msgs", message, clock).commit();
-        this.setLastMessage(message);
+    @Override
+    public void send(Message message) {
+        System.out.printf("%s - %s send message: `%s`...\n", this.logicalClock, this.getName(), message.content());
+        // Simulate delay to send
+        try { Thread.sleep(Helper.next(200)); } catch (InterruptedException ex) {}
         // Send message
-        this.transactionManager.receive(this, message);
+        this.networkMock.put(transactionManager.getName(), message);
     }
 
     /**
      * Receive message from transaction manager
-     * @param message Received message
      */
-    protected void receive(String message)
-    {
+    @Override
+    public void receive() throws InterruptedException {
+        Message message = this.networkMock.take(this.getName());
+        if (message == null)
+            return;
+
+        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.content());
+        // Sync process clock
+        this.logicalClock.sync(message.senderClock());
+
         // Redirect message to method to execute
-        switch (message) {
+        switch (message.content()) {
             case "Commit" -> this.commit();
             case "Abort" -> this.abort();
             /* Nothing to do */
@@ -120,6 +162,11 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
 
     }
 
+
+    /**
+     * Get process name
+     * @return Process name
+     */
     public String getName() { return this.name; }
 
     /**
@@ -134,24 +181,17 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess {
      * Set state of manager
      * @param state New manager state
      */
-    private void setState(String state) {
+    private void setState(ResourceManagerState state) {
+        System.out.printf("%s - %s.state = %s.\n", this.logicalClock, this.getName(), state.toString());
         this.state = state;
-        logger.notify(this, "state", state);
-        // Log state change
-        //new App2TLA.TLAEvent(this.name, "rmState", state, clock).commit();
     }
 
     /**
      * Get state of manager
      * @return Current state of manager
      */
-    public String getState() {
+    public ResourceManagerState getState() {
         return this.state;
-    }
-
-    private void setLastMessage(String message) {
-        this.lastMessage = message;
-        logger.notify(this, "lastMessage", message);
     }
 
     @Override
