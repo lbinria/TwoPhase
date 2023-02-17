@@ -2,6 +2,7 @@ package org.lbee.twophase;
 
 public enum TwoPhaseMessage {
     // using the constructor defined below
+    REGISTER("Register"),
     PREPARED("Prepared"),
     COMMIT("Commit"),
     ABORT("Abort");

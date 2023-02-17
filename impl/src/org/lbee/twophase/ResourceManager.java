@@ -58,7 +58,6 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess, Network
     @Override
     public Void call() throws Exception {
 
-        System.out.printf("Task duration of %s: %s.\n", this.name, this.config.taskDuration);
 
         /* Task fail eventually */
         if (this.config.shouldFail)
@@ -100,7 +99,7 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess, Network
     protected void prepare()
     {
         this.setState(ResourceManagerState.PREPARED);
-        this.send(new Message(this.name, TwoPhaseMessage.PREPARED.toString(), this.logicalClock.getValue()));
+        this.send(new Message(this.name, "", TwoPhaseMessage.PREPARED.toString(), this.logicalClock.getValue()));
     }
 
     /**
@@ -132,11 +131,11 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess, Network
      */
     @Override
     public void send(Message message) {
-        System.out.printf("%s - %s send message: `%s`...\n", this.logicalClock, this.getName(), message.content());
+        System.out.printf("%s - %s send message: `%s`...\n", this.logicalClock, this.getName(), message.getContent());
         // Simulate delay to send
         try { Thread.sleep(Helper.next(200)); } catch (InterruptedException ex) {}
         // Send message
-        this.networkMock.put(transactionManager.getName(), message);
+        this.networkMock.put(message);
     }
 
     /**
@@ -148,12 +147,12 @@ public class ResourceManager implements Callable<Void>, TLANamedProcess, Network
         if (message == null)
             return;
 
-        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.content());
+        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.getContent());
         // Sync process clock
-        this.logicalClock.sync(message.senderClock());
+        this.logicalClock.sync(message.getSenderClock());
 
         // Redirect message to method to execute
-        switch (message.content()) {
+        switch (message.getContent()) {
             case "Commit" -> this.commit();
             case "Abort" -> this.abort();
             /* Nothing to do */

@@ -74,7 +74,7 @@ public class TransactionManager implements Callable<Void>, TLANamedProcess, Netw
      * @TLA-action TMCommit
      */
     private void commit() {
-        this.send(new Message(this.getName(), TwoPhaseMessage.COMMIT.toString(), this.logicalClock.getValue()));
+        this.send(new Message(this.getName(), "", TwoPhaseMessage.COMMIT.toString(), this.logicalClock.getValue()));
     }
 
     /**
@@ -82,7 +82,7 @@ public class TransactionManager implements Callable<Void>, TLANamedProcess, Netw
      */
     public void abort() {
         System.out.printf("%s timeout reach.\n", this.getName());
-        this.send(new Message(this.getName(), TwoPhaseMessage.ABORT.toString(), this.logicalClock.getValue()));
+        this.send(new Message(this.getName(), "", TwoPhaseMessage.ABORT.toString(), this.logicalClock.getValue()));
     }
 
     /**
@@ -107,10 +107,11 @@ public class TransactionManager implements Callable<Void>, TLANamedProcess, Netw
         // System.out.printf("%s - %s send message: `%s`...\n", this.clock, this.getName(), message.content());
         // Send message to all resource managers
         for (ResourceManager rm : this.resourceManagers) {
-            System.out.printf("%s - %s send message: `%s` to %s...\n", this.logicalClock, this.getName(), message.content(), rm.getName());
+            System.out.printf("%s - %s send message: `%s` to %s...\n", this.logicalClock, this.getName(), message.getContent(), rm.getName());
             // Simulate a delay to send from 0 to 200 ms
             try { Thread.sleep(Helper.next(200)); } catch (InterruptedException ex) {}
-            networkMock.put(rm.getName(), message);
+
+            networkMock.put(message);
         }
     }
 
@@ -122,11 +123,11 @@ public class TransactionManager implements Callable<Void>, TLANamedProcess, Netw
             return;
 
         // Sync process clock
-        this.logicalClock.sync(message.senderClock());
+        this.logicalClock.sync(message.getSenderClock());
 
-        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.content());
-        switch (message.content()) {
-            case "Prepared" -> this.receivePrepared(message.sender());
+        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.getContent());
+        switch (message.getContent()) {
+            case "Prepared" -> this.receivePrepared(message.getFrom());
             /* Nothing to do */
             default -> {}
         }

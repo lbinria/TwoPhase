@@ -15,16 +15,18 @@ public class NetworkMock {
     }
 
     public void addProcess(TLANamedProcess process) {
-        this.messageQueues.put(process.getName(), new ArrayBlockingQueue<>(10));
+        this.messageQueues.put(process.getName(), new ArrayBlockingQueue<Message>(Integer.MAX_VALUE));
     }
 
     /**
      * Send a message to another process
-     * @param to Receiver process name
      * @param message Message to send
      */
-    public void put(String to, Message message) {
-        this.messageQueues.get(to).add(message);
+    public void put(Message message) {
+        if (!this.messageQueues.containsKey(message.getTo()))
+            this.messageQueues.put(message.getTo(), new ArrayBlockingQueue<Message>(Integer.MAX_VALUE));
+
+        this.messageQueues.get(message.getTo()).add(message);
     }
 
     /**
@@ -35,6 +37,9 @@ public class NetworkMock {
      */
     public Message take(String processName) throws InterruptedException {
         ArrayBlockingQueue<Message> messageQueue = this.messageQueues.get(processName);
+        if (messageQueue == null)
+            return null;
+
         return messageQueue.isEmpty() ? null : this.messageQueues.get(processName).take();
     }
 
