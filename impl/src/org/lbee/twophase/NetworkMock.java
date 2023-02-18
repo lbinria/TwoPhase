@@ -1,21 +1,26 @@
 package org.lbee.twophase;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Network mock, simulate network
  */
 public class NetworkMock {
 
-    private final HashMap<String, ArrayBlockingQueue<Message>> messageQueues;
+//    private final HashMap<String, ArrayBlockingQueue<Message>> messageQueues;
+    private final HashMap<String, ConcurrentLinkedQueue<Message>> messageQueues;
 
     public NetworkMock() {
         this.messageQueues = new HashMap<>();
     }
 
     public void addProcess(TLANamedProcess process) {
-        this.messageQueues.put(process.getName(), new ArrayBlockingQueue<Message>(Integer.MAX_VALUE));
+        this.messageQueues.put(process.getName(), new ConcurrentLinkedQueue<>());
     }
 
     /**
@@ -24,7 +29,7 @@ public class NetworkMock {
      */
     public void put(Message message) {
         if (!this.messageQueues.containsKey(message.getTo()))
-            this.messageQueues.put(message.getTo(), new ArrayBlockingQueue<Message>(Integer.MAX_VALUE));
+            this.messageQueues.put(message.getTo(), new ConcurrentLinkedQueue<>());
 
         this.messageQueues.get(message.getTo()).add(message);
     }
@@ -36,11 +41,11 @@ public class NetworkMock {
      * @throws InterruptedException
      */
     public Message take(String processName) throws InterruptedException {
-        ArrayBlockingQueue<Message> messageQueue = this.messageQueues.get(processName);
+        ConcurrentLinkedQueue<Message> messageQueue = this.messageQueues.get(processName);
         if (messageQueue == null)
             return null;
 
-        return messageQueue.isEmpty() ? null : this.messageQueues.get(processName).take();
+        return messageQueue.isEmpty() ? null : this.messageQueues.get(processName).poll();
     }
 
 }
