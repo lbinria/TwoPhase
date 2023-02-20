@@ -14,8 +14,6 @@ public class ResourceManager2 extends NetworkProcess2 {
         ABORTED
     }
 
-    // Logger
-    private final TLALogger logger;
     // Config
     private final ResourceManagerConfiguration config;
     // Transaction manager (to send message)
@@ -49,7 +47,6 @@ public class ResourceManager2 extends NetworkProcess2 {
     public ResourceManager2(Socket socket, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
         super(socket);
         this.config = config;
-        this.logger = new TLALogger();
         this.transactionManagerName = transactionManagerName;
         this.name = name;
     }
@@ -114,9 +111,6 @@ public class ResourceManager2 extends NetworkProcess2 {
     protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.logicalClock.getValue()));
-        // Log event (hard-coded for now)
-        logger.log(this, "msgs", "Prepared");
-        logger.commit();
     }
 
     /**

@@ -1,17 +1,14 @@
 package org.lbee.twophase;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TransactionManager2 extends NetworkProcess2 {
 
-    // Logger
-    private final TLALogger logger;
     // Config
     private final TransactionManager2.TransactionManagerConfiguration config;
 
@@ -32,7 +29,6 @@ public class TransactionManager2 extends NetworkProcess2 {
 
         resourceManagers = new HashSet<>();
         preparedResourceManagers = new HashSet<>();
-        logger = new TLALogger();
         this.config = config;
     }
 
@@ -98,6 +94,7 @@ public class TransactionManager2 extends NetworkProcess2 {
         System.out.println(TwoPhaseMessage.COMMIT + ".");
         // Log event (hard-coded for now)
         logger.log(this, "msgs", TwoPhaseMessage.COMMIT.toString());
+        logger.log(this, "tmState", "done");
         logger.commit();
 
         this.shutdown();

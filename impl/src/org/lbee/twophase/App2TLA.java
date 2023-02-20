@@ -15,10 +15,8 @@ public class App2TLA {
     @StackTrace(false)
     static class TLAEvent extends jdk.jfr.Event {
 
-        @Label("localClock")
-        long localClock;
-        @Label("eventClock")
-        long eventClock;
+        @Label("clock")
+        long clock;
         @Label("sender")
         String sender;
         @Label("key")
@@ -26,13 +24,16 @@ public class App2TLA {
         @Label("val")
         String val;
 
-        public TLAEvent(String sender, String key, Object val, long localClock, long eventClock) {
-            this.localClock = localClock;
-            this.eventClock = eventClock;
+        public TLAEvent(String sender, String key, Object val, long clock) {
+            this.clock = clock;
             this.sender = sender;
             this.key = key;
             this.val = val.toString();
             System.out.printf("Log event %s.%s = %s.\n", sender, key, val.toString());
+        }
+
+        public void setClock(long clock) {
+            this.clock = clock;
         }
 
     }

@@ -25,7 +25,7 @@ public abstract class NetworkProcess2 implements TLANamedProcess {
         this.writer = new PrintWriter(outputStream, true);
         logicalClock = new LogicalClock();
         this.shutdown = false;
-        logger = new TLALogger();
+        logger = new TLALogger(this.getClock());
     }
 
     public abstract String getName();
@@ -65,6 +65,9 @@ public abstract class NetworkProcess2 implements TLANamedProcess {
     }
 
     protected boolean send(Message message) throws IOException {
+        // Log event (hard-coded for now)
+        logger.log(this, "msgs", message.getContent());
+        logger.commit();
         // Send message to server
         writer.println("s:" + message.toString());
         // Read response

@@ -59,21 +59,21 @@ public class JFRSerializer {
             @Override
             public int compare(RecordedEvent o1, RecordedEvent o2) {
                 //return o1.getStartTime().compareTo(o2.getStartTime());
-                return Long.compare(o1.getLong("localClock"), o2.getLong("localClock"));
+                return Long.compare(o1.getLong("clock"), o2.getLong("clock"));
             }
         });
 
 
 
         // Group log by clock and process name
-        final Map<Tuple, List<RecordedEvent>> tlaEventsGrouped = tlaEvents.collect(Collectors.groupingBy(e -> new Tuple(e.getString(senderName), e.getLong("eventClock"))));
+        final Map<Tuple, List<RecordedEvent>> tlaEventsGrouped = tlaEvents.collect(Collectors.groupingBy(e -> new Tuple(e.getString(senderName), e.getLong("clock"))));
         // Get groups as list of lists of events
         final List<List<RecordedEvent>> tlaEventsList = new ArrayList<>(tlaEventsGrouped.values().stream().toList());
 
         // Sort group by min date
         tlaEventsList.sort((a, b) -> {
-            long minTimeA = Collections.min(a.stream().map(e -> e.getLong("localClock")).toList());
-            long minTimeB = Collections.min(b.stream().map(e -> e.getLong("localClock")).toList());
+            long minTimeA = Collections.min(a.stream().map(e -> e.getLong("clock")).toList());
+            long minTimeB = Collections.min(b.stream().map(e -> e.getLong("clock")).toList());
             return Long.compare(minTimeA, minTimeB);
         });
 
@@ -104,7 +104,7 @@ public class JFRSerializer {
                 final RecordValue r = new RecordValue(names, values, false);
                 records.add(r);
 
-                System.out.printf("%s - %s - %s - %s.%s = %s.\n", event.getStartTime(), event.getLong("localClock"), event.getLong("eventClock"), event.getString(senderName), event.getString(keyName), event.getString(valName));
+                System.out.printf("%s - %s - %s.%s = %s.\n", event.getStartTime(), event.getLong("clock"), event.getString(senderName), event.getString(keyName), event.getString(valName));
             }
 
             // Put records in tuple

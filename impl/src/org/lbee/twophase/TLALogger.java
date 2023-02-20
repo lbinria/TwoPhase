@@ -7,12 +7,12 @@ import java.util.List;
 public class TLALogger {
 
     // Local logical clock
-    private long clock;
-
+    private LogicalClock clock;
     private final List<App2TLA.TLAEvent> events;
 
-    public TLALogger() {
+    public TLALogger(LogicalClock clock) {
         events = new ArrayList<>();
+        this.clock = clock;
     }
 
     /**
@@ -32,7 +32,7 @@ public class TLALogger {
             TLAVariable annot = field.getAnnotation(TLAVariable.class);
             // Log event
             // TODO make an abstract log layer
-            events.add(new App2TLA.TLAEvent(obj.getName(), annot.name(), value, obj.getClock().getValue(), clock));
+            events.add(new App2TLA.TLAEvent(obj.getName(), annot.name(), value, this.clock.getValue()));
         } catch (NoSuchFieldException e) {
             // Do nothing (bad practice just for avoid throws exception on top and top and top...)
             System.out.println("ERROR: NoSuchFieldException");
@@ -40,7 +40,7 @@ public class TLALogger {
     }
 
     public <T extends TLANamedProcess, VType> void log(T obj, String key, String value) {
-        events.add(new App2TLA.TLAEvent(obj.getName(), key, value, obj.getClock().getValue(), clock));
+        events.add(new App2TLA.TLAEvent(obj.getName(), key, value, this.clock.getValue()));
     }
 
     /**
@@ -57,11 +57,14 @@ public class TLALogger {
      * Commit logs
      */
     public void commit() {
+        // All events are committed at the same logical time (sync)
+        long clock = this.clock.getValue();
+
         for (App2TLA.TLAEvent event : events) {
+            event.setClock(clock);
             event.commit();
         }
         events.clear();
-        clock++;
     }
 
 }
