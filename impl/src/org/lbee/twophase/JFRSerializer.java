@@ -94,7 +94,7 @@ public class JFRSerializer {
                     continue;
 
                 // Get field values
-                Value[] values = {
+                final Value[] values = {
                         new StringValue(event.getString(senderName)),
                         new StringValue(event.getString(keyName)),
                         new StringValue(event.getString(valName))

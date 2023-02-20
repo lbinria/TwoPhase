@@ -6,9 +6,9 @@ import java.net.Socket;
 public class ServerThread extends Thread {
 
     private final Socket socket;
-    private final NetworkMock networkMock;
+    private final MessageBucket networkMock;
 
-    public ServerThread(Socket socket, NetworkMock networkMock) {
+    public ServerThread(Socket socket, MessageBucket networkMock) {
         this.socket = socket;
         this.networkMock = networkMock;
     }

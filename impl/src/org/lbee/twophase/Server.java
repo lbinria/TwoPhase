@@ -16,7 +16,7 @@ public class Server {
 
             System.out.println("Server is listening on port " + port);
 
-            NetworkMock networkMock = new NetworkMock();
+            MessageBucket networkMock = new MessageBucket();
 
             while (true) {
                 Socket socket = serverSocket.accept();

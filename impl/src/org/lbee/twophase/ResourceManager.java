@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.Locale;
 import java.util.Random;
 
-public class ResourceManager2 extends NetworkProcess2 {
+public class ResourceManager extends NetworkProcess implements TLANamedProcess {
 
     enum ResourceManagerState {
         WORKING,
@@ -44,7 +44,7 @@ public class ResourceManager2 extends NetworkProcess2 {
         return this.state;
     }
 
-    public ResourceManager2(Socket socket, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
+    public ResourceManager(Socket socket, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
         super(socket);
         this.config = config;
         this.transactionManagerName = transactionManagerName;

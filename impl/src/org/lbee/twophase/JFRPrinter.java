@@ -28,12 +28,10 @@ public class JFRPrinter {
 
         //final List<RecordedEvent> events = RecordingFile.readAllEvents(Path.of(path));
 
-        // Order events chronologically based on the system's clock (that hopefully has
-        // sufficient precision).
-        // TODO: Logical clock instead of real/global clock.
-        ArrayList<RecordedEvent> tlaEvents =
+        // Order events chronologically based on the logical clock
+        final ArrayList<RecordedEvent> tlaEvents =
             events.stream().filter(e -> e.getEventType().getName().equals("app.TLAEvent") || e.getEventType().getName().equals("app.NestedTLAEvent"))
-            .sorted((o1, o2) -> o1.getStartTime().compareTo(o2.getStartTime()))
+            .sorted(Comparator.comparingLong(o -> o.getLong("clock")))
             .collect(Collectors.toCollection(ArrayList::new));
 
         System.out.printf("Get %s events.\n", tlaEvents.size());

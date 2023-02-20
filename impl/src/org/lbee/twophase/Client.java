@@ -3,7 +3,6 @@ package org.lbee.twophase;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Map;
 import java.util.UUID;
 
 public class Client {
@@ -26,13 +25,13 @@ public class Client {
 
         try (Socket socket = new Socket(hostname, port)) {
 
-            NetworkProcess2 manager;
+            NetworkProcess manager;
             switch (type) {
                 case "tm" :
-                    manager = new TransactionManager2(socket, config.transactionManagerConfig);
+                    manager = new TransactionManager(socket, config.transactionManagerConfig);
                     break;
                 case "rm" :
-                    ResourceManager2 resourceManager = new ResourceManager2(socket, UUID.randomUUID().toString(), "TM", config.resourceManagerConfig);
+                    ResourceManager resourceManager = new ResourceManager(socket, UUID.randomUUID().toString(), "TM", config.resourceManagerConfig);
                     resourceManager.register();
                     manager = resourceManager;
                     break;
@@ -69,12 +68,12 @@ public class Client {
     private static class Configuration {
 
         public int nResourceManager = 2;
-        public TransactionManager2.TransactionManagerConfiguration transactionManagerConfig;
-        public ResourceManager2.ResourceManagerConfiguration resourceManagerConfig;
+        public TransactionManager.TransactionManagerConfiguration transactionManagerConfig;
+        public ResourceManager.ResourceManagerConfiguration resourceManagerConfig;
 
         public Configuration(final String[] args) {
-            this.transactionManagerConfig = new TransactionManager2.TransactionManagerConfiguration(nResourceManager, Integer.MAX_VALUE, false);
-            this.resourceManagerConfig = new ResourceManager2.ResourceManagerConfiguration(false, -1, false);
+            this.transactionManagerConfig = new TransactionManager.TransactionManagerConfiguration(nResourceManager, Integer.MAX_VALUE, false);
+            this.resourceManagerConfig = new ResourceManager.ResourceManagerConfiguration(false, -1, false);
         }
 
         @Override

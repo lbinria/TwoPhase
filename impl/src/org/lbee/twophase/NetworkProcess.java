@@ -3,7 +3,7 @@ package org.lbee.twophase;
 import java.io.*;
 import java.net.Socket;
 
-public abstract class NetworkProcess2 implements TLANamedProcess {
+public abstract class NetworkProcess implements TLANamedProcess {
 
     private final Socket socket;
     private final InputStream inputStream;
@@ -18,7 +18,7 @@ public abstract class NetworkProcess2 implements TLANamedProcess {
     public boolean isShutdown() { return shutdown; }
     protected void shutdown() { shutdown = true; }
 
-    public NetworkProcess2(Socket socket) throws IOException {
+    public NetworkProcess(Socket socket) throws IOException {
         this.socket = socket;
         this.inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
@@ -27,8 +27,6 @@ public abstract class NetworkProcess2 implements TLANamedProcess {
         this.shutdown = false;
         logger = new TLALogger(this.getClock());
     }
-
-    public abstract String getName();
 
     public LogicalClock getClock() {
         return this.logicalClock;

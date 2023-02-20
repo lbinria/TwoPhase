@@ -7,11 +7,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class TransactionManager2 extends NetworkProcess2 {
+public class TransactionManager extends NetworkProcess implements TLANamedProcess {
 
     // Config
-    private final TransactionManager2.TransactionManagerConfiguration config;
-
+    private final TransactionManager.TransactionManagerConfiguration config;
     // Resource manager linked to TM
     private final HashSet<String> resourceManagers;
     // Resource manager prepared to commit
@@ -24,7 +23,7 @@ public class TransactionManager2 extends NetworkProcess2 {
         return "TM";
     }
 
-    public TransactionManager2(Socket socket, TransactionManagerConfiguration config) throws IOException {
+    public TransactionManager(Socket socket, TransactionManagerConfiguration config) throws IOException {
         super(socket);
 
         resourceManagers = new HashSet<>();
