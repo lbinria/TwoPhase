@@ -1,11 +1,19 @@
 package org.lbee.twophase;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TLALogger {
 
     // Local logical clock
     private long clock;
+
+    private final List<App2TLA.TLAEvent> events;
+
+    public TLALogger() {
+        events = new ArrayList<>();
+    }
 
     /**
      * Notify change of TLA variable
@@ -24,23 +32,35 @@ public class TLALogger {
             TLAVariable annot = field.getAnnotation(TLAVariable.class);
             // Log event
             // TODO make an abstract log layer
-            new App2TLA.TLAEvent(obj.getName(), annot.name(), value, clock).commit();
+            events.add(new App2TLA.TLAEvent(obj.getName(), annot.name(), value, obj.getClock().getValue(), clock));
         } catch (NoSuchFieldException e) {
             // Do nothing (bad practice just for avoid throws exception on top and top and top...)
             System.out.println("ERROR: NoSuchFieldException");
         }
     }
 
+    public <T extends TLANamedProcess, VType> void log(T obj, String key, String value) {
+        events.add(new App2TLA.TLAEvent(obj.getName(), key, value, obj.getClock().getValue(), clock));
+    }
+
     /**
      * Sync log to an action
      * @param action
      */
-    public void sync(Runnable action) {
-        clock++;
+    public void syncCommit(Runnable action) {
         action.run();
+        commit();
     }
 
-    public void trigger() {
+
+    /**
+     * Commit logs
+     */
+    public void commit() {
+        for (App2TLA.TLAEvent event : events) {
+            event.commit();
+        }
+        events.clear();
         clock++;
     }
 

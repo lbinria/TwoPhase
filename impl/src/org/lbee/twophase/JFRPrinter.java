@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,12 +18,15 @@ public class JFRPrinter {
 
     public static void main(String[] args) throws InterruptedException, IOException {
 
-        String path = args[0];
+        // Read JFR events from files
+        final List<RecordedEvent> events = new ArrayList<>();
+        for (String path : args) {
+            events.addAll(RecordingFile.readAllEvents(Path.of(path)));
+        }
 
-        System.out.printf("Start printing events at '%s'...\n", path);
+        System.out.printf("Start printing events at '%s'...\n", String.join(",", args));
 
-        // Read JFR events from file
-        final List<RecordedEvent> events = RecordingFile.readAllEvents(Path.of(path));
+        //final List<RecordedEvent> events = RecordingFile.readAllEvents(Path.of(path));
 
         // Order events chronologically based on the system's clock (that hopefully has
         // sufficient precision).

@@ -23,24 +23,21 @@ public class JFRSerializer {
     record Tuple(String name, long clock) { }
 
     public static void main(final String[] args) throws IOException {
-        String strPath = args.length > 0 ? args[0] : "app.jfr";
+        //String strPath = args.length > 0 ? args[0] : "app.jfr";
 
-        System.out.printf("Start serializing at '%s'...\n", strPath);
+        System.out.printf("Start serializing from '%s'...\n", String.join(", ", args));
 
-        final List<RecordedEvent> recordedEvents = RecordingFile
-                .readAllEvents(Paths.get(args.length > 0 ? args[0] : "app.jfr"));
+//        final List<RecordedEvent> recordedEvents = RecordingFile
+//                .readAllEvents(Paths.get(args.length > 0 ? args[0] : "app.jfr"));
 
-        // Order events chronologically based on the system's clock (that hopefully has
-        // sufficient precision).
-        // TODO: Logical clock instead of real/global clock.
-        recordedEvents.sort(new Comparator<RecordedEvent>() {
-            @Override
-            public int compare(RecordedEvent o1, RecordedEvent o2) {
-                return o1.getStartTime().compareTo(o2.getStartTime());
-            }
-        });
+        // Read JFR events from files
+        final List<RecordedEvent> recordedEvents = new ArrayList<>();
+        for (String path : args) {
+            recordedEvents.addAll(RecordingFile.readAllEvents(Path.of(path)));
+        }
 
-        serializeTrace(recordedEvents, Paths.get(args.length > 1 ? args[1] : "Trace.bin"));
+        // TODO set out with last arg
+        serializeTrace(recordedEvents, Paths.get("Trace.bin"));
     }
 
     private static void serializeTrace(final List<RecordedEvent> events, final Path out) throws IOException {
@@ -57,17 +54,27 @@ public class JFRSerializer {
         };
 
         // Filter TLA events only
-        final Stream<RecordedEvent> tlaEvents = events.stream().filter(e -> e.getEventType().getName().equals("app.TLAEvent"));
+        // and order events chronologically
+        final Stream<RecordedEvent> tlaEvents = events.stream().filter(e -> e.getEventType().getName().equals("app.TLAEvent")).sorted(new Comparator<RecordedEvent>() {
+            @Override
+            public int compare(RecordedEvent o1, RecordedEvent o2) {
+                //return o1.getStartTime().compareTo(o2.getStartTime());
+                return Long.compare(o1.getLong("localClock"), o2.getLong("localClock"));
+            }
+        });
+
+
+
         // Group log by clock and process name
-        final Map<Tuple, List<RecordedEvent>> tlaEventsGrouped = tlaEvents.collect(Collectors.groupingBy(e -> new Tuple(e.getString(senderName), e.getLong("clock"))));
+        final Map<Tuple, List<RecordedEvent>> tlaEventsGrouped = tlaEvents.collect(Collectors.groupingBy(e -> new Tuple(e.getString(senderName), e.getLong("eventClock"))));
         // Get groups as list of lists of events
         final List<List<RecordedEvent>> tlaEventsList = new ArrayList<>(tlaEventsGrouped.values().stream().toList());
 
         // Sort group by min date
         tlaEventsList.sort((a, b) -> {
-            Instant minTimeA = Collections.min(a.stream().map(RecordedEvent::getStartTime).toList());
-            Instant minTimeB = Collections.min(b.stream().map(RecordedEvent::getStartTime).toList());
-            return minTimeA.compareTo(minTimeB);
+            long minTimeA = Collections.min(a.stream().map(e -> e.getLong("localClock")).toList());
+            long minTimeB = Collections.min(b.stream().map(e -> e.getLong("localClock")).toList());
+            return Long.compare(minTimeA, minTimeB);
         });
 
         System.out.printf("Parsing %s TLA sync events to %s.\n", tlaEventsList.size(), out);
@@ -83,20 +90,21 @@ public class JFRSerializer {
             System.out.printf("\n---- Sync event %s ----\n", i++);
 
             for (RecordedEvent event : clockEvents) {
-                if (event.getEventType().getName().equals("app.TLAEvent")) {
-                    // Get field values
-                    Value[] values = {
-                            new StringValue(event.getString(senderName)),
-                            new StringValue(event.getString(keyName)),
-                            new StringValue(event.getString(valName))
-                    };
+                if (!event.getEventType().getName().equals("app.TLAEvent"))
+                    continue;
 
-                    // Create record
-                    final RecordValue r = new RecordValue(names, values, false);
-                    records.add(r);
+                // Get field values
+                Value[] values = {
+                        new StringValue(event.getString(senderName)),
+                        new StringValue(event.getString(keyName)),
+                        new StringValue(event.getString(valName))
+                };
 
-                    System.out.printf("%s - %s - %s.%s = %s.\n", event.getStartTime(), event.getLong("clock"), event.getString(senderName), event.getString(keyName), event.getString(valName));
-                }
+                // Create record
+                final RecordValue r = new RecordValue(names, values, false);
+                records.add(r);
+
+                System.out.printf("%s - %s - %s - %s.%s = %s.\n", event.getStartTime(), event.getLong("localClock"), event.getLong("eventClock"), event.getString(senderName), event.getString(keyName), event.getString(valName));
             }
 
             // Put records in tuple

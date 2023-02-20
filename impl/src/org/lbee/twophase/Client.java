@@ -3,6 +3,7 @@ package org.lbee.twophase;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Map;
 import java.util.UUID;
 
 public class Client {
@@ -21,6 +22,7 @@ public class Client {
         final Configuration config = new Configuration(args);
         // Some printing
         System.out.println(config);
+
 
         try (Socket socket = new Socket(hostname, port)) {
 
@@ -50,6 +52,8 @@ public class Client {
 
             // Print end of process
             System.out.println("shutdown.");
+
+            // TM -> done
 
         } catch (UnknownHostException ex) {
 

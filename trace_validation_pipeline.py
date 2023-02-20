@@ -6,6 +6,8 @@ from subprocess import Popen
 
 print("# Start pipeline.")
 
+print("# Start implementation.")
+
 print("--- Run server ---")
 server_process = Popen([
     "/usr/lib/jvm/jdk-19/bin/java", 
@@ -15,7 +17,8 @@ server_process = Popen([
     "org.lbee.twophase.Server",
     "6869"])
 
-# Wait the server run
+# Wait the server run, if comment this line, maye some manager running before the server, leading to error
+# This behavior might be interesting for trace validation
 time.sleep(5)
 
 print("--- Run TM client ---")
@@ -55,4 +58,42 @@ for rm_process in rm_processes:
 
 # Kill server
 os.kill(server_process.pid, signal.SIGINT)
+
+print("# Start printing events.")
+
+print_event_process = Popen([
+    "/usr/lib/jvm/jdk-19/bin/java",
+    "-cp",
+    "impl/out/production/TwoPhase",
+    "org.lbee.twophase.JFRPrinter",
+    "app-tm.jfr", "app-rm-0.jfr", "app-rm-1.jfr"])
+
+print_event_process.wait()
+
+print("# Start serializing events.")
+
+# /usr/lib/jvm/jdk-19/bin/java -cp impl/out/production/TwoPhase org.lbee.twophase.JFRSerializer app-tm.jfr app-rm-0.jfr app-rm-1.jfr
+
+serializer_event_process = Popen([
+    "/usr/lib/jvm/jdk-19/bin/java",
+    "-cp",
+    "/opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:impl/out/production/TwoPhase",
+    "org.lbee.twophase.JFRSerializer",
+    "app-tm.jfr", "app-rm-0.jfr", "app-rm-1.jfr"])
+
+serializer_event_process.wait()
+
+print("# Start TLA+ trace spec.")
+
+# java -cp /opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:CommunityModules.jar tlc2.TLC TwoPhaseTrace -deadlock
+
+tla_trace_validation_process = Popen([
+    "/usr/lib/jvm/jdk-19/bin/java",
+    "-cp",
+    "/opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:CommunityModules.jar",
+    "tlc2.TLC",
+    "TwoPhaseTrace", "-deadlock"])
+
+tla_trace_validation_process.wait()
+
 print("End pipeline.")

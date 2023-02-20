@@ -5,7 +5,6 @@ import jdk.jfr.Label;
 import jdk.jfr.Name;
 import jdk.jfr.StackTrace;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class App2TLA {
@@ -16,8 +15,10 @@ public class App2TLA {
     @StackTrace(false)
     static class TLAEvent extends jdk.jfr.Event {
 
-        @Label("clock")
-        long clock;
+        @Label("localClock")
+        long localClock;
+        @Label("eventClock")
+        long eventClock;
         @Label("sender")
         String sender;
         @Label("key")
@@ -25,30 +26,13 @@ public class App2TLA {
         @Label("val")
         String val;
 
-        public TLAEvent(String sender, String key, Object val, long clock) {
-            this.clock = clock;
+        public TLAEvent(String sender, String key, Object val, long localClock, long eventClock) {
+            this.localClock = localClock;
+            this.eventClock = eventClock;
             this.sender = sender;
             this.key = key;
             this.val = val.toString();
-            System.out.printf("Broadcast event %s.%s = %s.\n", sender, key, val.toString());
-        }
-
-    }
-
-    @Label("NestedTLAEvent")
-    @Name("app.NestedTLAEvent")
-    @Category("TwoPhase")
-    @StackTrace(false)
-    static class NestedTLAEvent extends jdk.jfr.Event {
-
-        @Label("events")
-        List<TLAEvent> events;
-        @Label("events2")
-        TLAEvent[] events2;
-
-        public NestedTLAEvent(List<TLAEvent> events) {
-            this.events = events;
-            this.events2 = events.toArray(new TLAEvent[0]);
+            System.out.printf("Log event %s.%s = %s.\n", sender, key, val.toString());
         }
 
     }

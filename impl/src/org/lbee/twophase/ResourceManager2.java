@@ -2,6 +2,7 @@ package org.lbee.twophase;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Locale;
 import java.util.Random;
 
 public class ResourceManager2 extends NetworkProcess2 {
@@ -23,23 +24,25 @@ public class ResourceManager2 extends NetworkProcess2 {
     private final String name;
 
     // Current state
-    @TLAVariable(name="rmState")
-    private ResourceManager.ResourceManagerState state = ResourceManager.ResourceManagerState.WORKING;
+    //@TLAVariable(name="rmState")
+    private ResourceManagerState state = ResourceManagerState.WORKING;
 
     /**
      * Set state of manager
      * @param state New manager state
      */
-    private void setState(ResourceManager.ResourceManagerState state) {
+    private void setState(ResourceManagerState state) {
         System.out.printf("%s - %s.state = %s.\n", this.logicalClock, this.getName(), state.toString());
         this.state = state;
+        // Log event (hard-coded for now)
+        logger.log(this, "rmState", state.toString().toLowerCase(Locale.ROOT));
     }
 
     /**
      * Get state of manager
      * @return Current state of manager
      */
-    public ResourceManager.ResourceManagerState getState() {
+    public ResourceManagerState getState() {
         return this.state;
     }
 
@@ -52,17 +55,17 @@ public class ResourceManager2 extends NetworkProcess2 {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return this.name;
     }
 
     @Override
     public void run() throws IOException {
         // Check eventual received message
-        checkMessage();
+        super.run();
 
         // If working simulate task, and then prepare
-        if (this.getState() == ResourceManager.ResourceManagerState.WORKING) {
+        if (this.getState() == ResourceManagerState.WORKING) {
             try {
                 Thread.sleep(config.taskDuration);
             } catch (InterruptedException ex) {
@@ -76,16 +79,8 @@ public class ResourceManager2 extends NetworkProcess2 {
             throw new IOException();
     }
 
-    protected void checkMessage() throws IOException {
-        Message message = receive();
-
-        if (message == null)
-            return;
-
-        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.getContent());
-        // Sync process clock
-        this.logicalClock.sync(message.getSenderClock());
-
+    @Override
+    protected void receive(Message message) throws IOException {
         // Redirect message to method to execute
         switch (message.getContent()) {
             case "Commit" -> this.commit();
@@ -96,15 +91,15 @@ public class ResourceManager2 extends NetworkProcess2 {
     }
 
     private boolean isWorking() {
-        return this.getState() == ResourceManager.ResourceManagerState.WORKING;
+        return this.getState() == ResourceManagerState.WORKING;
     }
 
     private boolean isCommitted() {
-        return this.getState() == ResourceManager.ResourceManagerState.COMMITTED;
+        return this.getState() == ResourceManagerState.COMMITTED;
     }
 
     private boolean isAborted() {
-        return this.getState() == ResourceManager.ResourceManagerState.ABORTED;
+        return this.getState() == ResourceManagerState.ABORTED;
     }
 
 
@@ -117,8 +112,11 @@ public class ResourceManager2 extends NetworkProcess2 {
      * @TLA-action RMPrepare(r)
      */
     protected void prepare() throws IOException {
-        this.setState(ResourceManager.ResourceManagerState.PREPARED);
+        this.setState(ResourceManagerState.PREPARED);
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.logicalClock.getValue()));
+        // Log event (hard-coded for now)
+        logger.log(this, "msgs", "Prepared");
+        logger.commit();
     }
 
     /**
@@ -129,7 +127,9 @@ public class ResourceManager2 extends NetworkProcess2 {
         long d = 150 + Helper.next(2000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
-        this.setState(ResourceManager.ResourceManagerState.COMMITTED);
+        this.setState(ResourceManagerState.COMMITTED);
+        // Commit events
+        logger.commit();
         // Shutdown process
         this.shutdown();
     }
@@ -143,7 +143,9 @@ public class ResourceManager2 extends NetworkProcess2 {
         long d = 150 + Helper.next(2000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
-        this.setState(ResourceManager.ResourceManagerState.ABORTED);
+        this.setState(ResourceManagerState.ABORTED);
+        // Commit events
+        logger.commit();
         // Shutdown process
         this.shutdown();
     }

@@ -3,7 +3,10 @@ package org.lbee.twophase;
 import java.io.*;
 import java.net.Socket;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TransactionManager2 extends NetworkProcess2 {
 
@@ -35,16 +38,22 @@ public class TransactionManager2 extends NetworkProcess2 {
 
     @Override
     public void run() throws IOException {
-
         // Check eventual received message
-        checkMessage();
+        super.run();
 
         // Waiting for all resource manager registered
         if (resourceManagers.size() < config.nResourceManager)
             return;
 
+        // Do just once
         if (!isAllRegistered) {
             System.out.println("All expected resource managers are registered.");
+            // TODO do that with configuration file of the system
+            String strResourceManagers = this.resourceManagers.stream().map(r -> "\"" + r + "\"").collect(Collectors.joining(", "));
+            String rmValue = "{" + strResourceManagers + "}";
+            TLAConfigTemplate TLAconfigTemplate = new TLAConfigTemplate(Map.of("RM", rmValue));
+            // TODO modify hard-coded path
+            TLAconfigTemplate.generate("TwoPhaseTrace.template.cfg");
             isAllRegistered = true;
         }
 
@@ -57,16 +66,7 @@ public class TransactionManager2 extends NetworkProcess2 {
 
     }
 
-    protected void checkMessage() throws IOException {
-        Message message = receive();
-
-        if (message == null)
-            return;
-
-        // Sync process clock
-        this.logicalClock.sync(message.getSenderClock());
-
-        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.getContent());
+    protected void receive(Message message) throws IOException {
         switch (message.getContent()) {
             case "Register" -> this.receivedRegister(message.getFrom());
             case "Prepared" -> this.receivePrepared(message.getFrom());
@@ -95,7 +95,11 @@ public class TransactionManager2 extends NetworkProcess2 {
         for (String rmName : resourceManagers)
             this.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), this.logicalClock.getValue()));
 
-        System.out.println("Commit.");
+        System.out.println(TwoPhaseMessage.COMMIT + ".");
+        // Log event (hard-coded for now)
+        logger.log(this, "msgs", TwoPhaseMessage.COMMIT.toString());
+        logger.commit();
+
         this.shutdown();
     }
 
@@ -110,8 +114,13 @@ public class TransactionManager2 extends NetworkProcess2 {
             this.send(m);
         }
 
-        System.out.println("Abort.");
+        System.out.println(TwoPhaseMessage.ABORT + ".");
+        // Log event (hard-coded for now)
+        logger.log(this, "msgs", TwoPhaseMessage.ABORT.toString());
+        logger.commit();
+
         this.shutdown();
+
     }
 
     /**
@@ -126,6 +135,10 @@ public class TransactionManager2 extends NetworkProcess2 {
 
         /* Add prepared resource manager to prepared set */
         preparedResourceManagers.add(optionalResourceManager.get());
+
+        // Log event (hard-coded for now)
+        logger.log(this, "tmPrepared", sender);
+        logger.commit();
     }
 
     /**

@@ -2,16 +2,16 @@ package org.lbee.twophase;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashSet;
 
-public abstract class NetworkProcess2 {
+public abstract class NetworkProcess2 implements TLANamedProcess {
 
     private final Socket socket;
     private final InputStream inputStream;
-    private final OutputStream outputStream;
     private final PrintWriter writer;
 
     protected final LogicalClock logicalClock;
+
+    protected final TLALogger logger;
 
     private boolean shutdown;
 
@@ -21,16 +21,35 @@ public abstract class NetworkProcess2 {
     public NetworkProcess2(Socket socket) throws IOException {
         this.socket = socket;
         this.inputStream = socket.getInputStream();
-        this.outputStream = socket.getOutputStream();
+        OutputStream outputStream = socket.getOutputStream();
         this.writer = new PrintWriter(outputStream, true);
         logicalClock = new LogicalClock();
         this.shutdown = false;
+        logger = new TLALogger();
     }
 
-    abstract String getName();
-    abstract void run() throws IOException;
+    public abstract String getName();
 
+    public LogicalClock getClock() {
+        return this.logicalClock;
+    }
+    //abstract void run() throws IOException;
 
+    protected void run() throws IOException {
+        Message message = receive();
+
+        if (message == null)
+            return;
+
+        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.getContent());
+        // Sync process clock
+        this.logicalClock.sync(message.getSenderClock());
+
+        // Call receive with received message
+        receive(message);
+    }
+
+    abstract void receive(Message message) throws IOException;
 
     protected Message receive() throws IOException {
         // Request for message destined to me
