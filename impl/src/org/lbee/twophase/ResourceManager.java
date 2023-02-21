@@ -110,7 +110,10 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
      */
     protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
+        this.logger.log(this, "msgs", "Prepared");
+        this.logger.commit();
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.logicalClock.getValue()));
+
     }
 
     /**

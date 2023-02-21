@@ -64,8 +64,8 @@ public abstract class NetworkProcess implements TLANamedProcess {
 
     protected boolean send(Message message) throws IOException {
         // Log event (hard-coded for now)
-        logger.log(this, "msgs", message.getContent());
-        logger.commit();
+        //logger.log(this, "msgs", message.getContent());
+        //logger.commit();
         // Send message to server
         writer.println("s:" + message.toString());
         // Read response

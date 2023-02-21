@@ -1,8 +1,13 @@
 package org.lbee.twophase;
 
+/**
+ * Logical clock
+ */
 public class LogicalClock {
 
+    // Start time of logical clock
     private long start;
+    // Allows to synchronize clock
     private long syncVal;
 
     public LogicalClock() {
@@ -15,6 +20,10 @@ public class LogicalClock {
         start -= maxClock - this.getValue();
     }
 
+    /**
+     * Get elapsed time of clock between now and the moment it was created
+     * @return Elapsed time in ms
+     */
     public long getValue() {
         return System.currentTimeMillis() - this.start;
     }

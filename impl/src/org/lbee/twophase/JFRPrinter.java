@@ -26,8 +26,6 @@ public class JFRPrinter {
 
         System.out.printf("Start printing events at '%s'...\n", String.join(",", args));
 
-        //final List<RecordedEvent> events = RecordingFile.readAllEvents(Path.of(path));
-
         // Order events chronologically based on the logical clock
         final ArrayList<RecordedEvent> tlaEvents =
             events.stream().filter(e -> e.getEventType().getName().equals("app.TLAEvent") || e.getEventType().getName().equals("app.NestedTLAEvent"))

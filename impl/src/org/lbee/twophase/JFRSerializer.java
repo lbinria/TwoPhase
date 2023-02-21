@@ -12,9 +12,7 @@ import util.UniqueString;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,9 +24,6 @@ public class JFRSerializer {
         //String strPath = args.length > 0 ? args[0] : "app.jfr";
 
         System.out.printf("Start serializing from '%s'...\n", String.join(", ", args));
-
-//        final List<RecordedEvent> recordedEvents = RecordingFile
-//                .readAllEvents(Paths.get(args.length > 0 ? args[0] : "app.jfr"));
 
         // Read JFR events from files
         final List<RecordedEvent> recordedEvents = new ArrayList<>();

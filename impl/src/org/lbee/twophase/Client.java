@@ -5,6 +5,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.UUID;
 
+/**
+ * Client manager (transaction manager or resource manager)
+ */
 public class Client {
 
     public static void main(String[] args) {
@@ -14,6 +17,7 @@ public class Client {
             return;
         }
 
+        // Get hostname, port and type of manager
         String hostname = args[0];
         int port = Integer.parseInt(args[1]);
         String type = args[2];
@@ -42,6 +46,7 @@ public class Client {
             }
 
             do {
+                // Execute manager
                 manager.run();
             }
             while (!manager.isShutdown());
@@ -52,19 +57,15 @@ public class Client {
             // Print end of process
             System.out.println("shutdown.");
 
-            // TM -> done
+            // TODO TM -> done
 
         } catch (UnknownHostException ex) {
-
             System.out.println("Server not found: " + ex.getMessage());
-
         } catch (IOException ex) {
-
             System.out.println("I/O error: " + ex.getMessage());
         }
     }
 
-    /* Stolen from lemmy */
     private static class Configuration {
 
         public int nResourceManager = 2;

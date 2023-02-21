@@ -1,5 +1,8 @@
 package org.lbee.twophase;
 
+/**
+ * Message
+ */
 public class Message {
 
     private final String from;
@@ -19,6 +22,10 @@ public class Message {
         this.senderClock = senderClock;
     }
 
+    /**
+     * Create message from 4 strings (doesn't check length, so it can throw an out of bound exception)
+     * @param components Strings used to construct the message
+     */
     public Message(String[] components) {
         this.from = components[0];
         this.to = components[1];
