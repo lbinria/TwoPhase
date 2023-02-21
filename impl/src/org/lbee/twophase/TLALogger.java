@@ -64,6 +64,7 @@ public class TLALogger {
             event.setClock(clock);
             event.commit();
         }
+        this.clock.sync(clock);
         events.clear();
     }
 
