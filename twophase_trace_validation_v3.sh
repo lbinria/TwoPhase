@@ -1,0 +1,1 @@
+java -cp /opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:CommunityModules.jar tlc2.TLC TwoPhaseTrace_v3 -deadlock
