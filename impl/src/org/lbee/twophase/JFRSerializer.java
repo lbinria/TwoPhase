@@ -2,14 +2,20 @@ package org.lbee.twophase;
 
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
+import tlc2.tool.impl.SpecProcessor;
 import tlc2.value.ValueOutputStream;
 import tlc2.value.impl.RecordValue;
 import tlc2.value.impl.StringValue;
 import tlc2.value.impl.TupleValue;
 import tlc2.value.impl.Value;
+import tlc2.model.Assignment;
+import tlc2.value.impl.CallableValue;
+import tlc2.value.impl.MethodValue;
+import tlc2.input.MCParser;
 import util.UniqueString;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -114,7 +120,12 @@ public class JFRSerializer {
         final ValueOutputStream vos = new ValueOutputStream(out.toFile(), true);
         // Do not normalize TupleValue because normalization depends on the actual
         // UniqueString#internTable.
+
+        //final Assignment a = new Assignment("Bob", new String[]{"x"}, "x");
+
+
         eventTuple.write(vos);
+
         vos.close();
 
         System.out.printf("Successfully serialized to %s.\n", out);

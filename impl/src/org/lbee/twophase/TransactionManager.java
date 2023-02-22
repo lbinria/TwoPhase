@@ -80,7 +80,7 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
     }
 
     protected boolean checkTimeout() {
-        return this.logicalClock.getValue() >= this.config.timeout;
+        return this.instrumentation.getClock().getValue() >= this.config.timeout;
     }
 
     /**
@@ -88,13 +88,13 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
      */
     private void commit() throws IOException {
         for (String rmName : resourceManagers)
-            this.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), this.logicalClock.getValue()));
+            this.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), this.instrumentation.getClock().getValue()));
 
         System.out.println(TwoPhaseMessage.COMMIT + ".");
         // Log event (hard-coded for now)
-        logger.log(this, "msgs", TwoPhaseMessage.COMMIT.toString());
-        logger.log(this, "tmState", "done");
-        logger.commit();
+        instrumentation.log("msgs", TwoPhaseMessage.COMMIT.toString());
+        instrumentation.log("tmState", "done");
+        instrumentation.commit();
 
         this.shutdown();
     }
@@ -106,14 +106,14 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
         System.out.printf("%s timeout reach.\n", this.getName());
 
         for (String rmName : resourceManagers) {
-            Message m = new Message(this.getName(), rmName, TwoPhaseMessage.ABORT.toString(), this.logicalClock.getValue());
+            Message m = new Message(this.getName(), rmName, TwoPhaseMessage.ABORT.toString(), this.instrumentation.getClock().getValue());
             this.send(m);
         }
 
         System.out.println(TwoPhaseMessage.ABORT + ".");
         // Log event (hard-coded for now)
-        logger.log(this, "msgs", TwoPhaseMessage.ABORT.toString());
-        logger.commit();
+        instrumentation.log("msgs", TwoPhaseMessage.ABORT.toString());
+        instrumentation.commit();
 
         this.shutdown();
 
@@ -133,8 +133,8 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
         preparedResourceManagers.add(optionalResourceManager.get());
 
         // Log event (hard-coded for now)
-        logger.log(this, "tmPrepared", sender);
-        logger.commit();
+        instrumentation.log("tmPrepared", sender);
+        instrumentation.commit();
     }
 
     /**

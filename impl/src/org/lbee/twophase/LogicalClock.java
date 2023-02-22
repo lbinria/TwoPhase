@@ -3,7 +3,7 @@ package org.lbee.twophase;
 /**
  * Logical clock
  */
-public class LogicalClock {
+public class LogicalClock implements InstrumentationClock {
 
     // Current value of logical clock
     private long value;

@@ -9,9 +9,7 @@ public abstract class NetworkProcess implements TLANamedProcess {
     private final InputStream inputStream;
     private final PrintWriter writer;
 
-    protected final LogicalClock logicalClock;
-
-    protected final TLALogger logger;
+    protected final FormalInstrumentation instrumentation;
 
     private boolean shutdown;
 
@@ -23,14 +21,10 @@ public abstract class NetworkProcess implements TLANamedProcess {
         this.inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
         this.writer = new PrintWriter(outputStream, true);
-        logicalClock = new LogicalClock();
         this.shutdown = false;
-        logger = new TLALogger(this.getClock());
+        instrumentation = new FormalInstrumentation<App2TLA.TLAEvent>(true);
     }
 
-    public LogicalClock getClock() {
-        return this.logicalClock;
-    }
     //abstract void run() throws IOException;
 
     protected void run() throws IOException {
@@ -39,9 +33,9 @@ public abstract class NetworkProcess implements TLANamedProcess {
         if (message == null)
             return;
 
-        System.out.printf("%s - %s receive message: `%s`...\n", this.logicalClock, this.getName(), message.getContent());
+        System.out.printf("%s - %s receive message: `%s`...\n", this.instrumentation.getClock(), this.getName(), message.getContent());
         // Sync process clock
-        this.logicalClock.sync(message.getSenderClock());
+        this.instrumentation.getClock().sync(message.getSenderClock());
 
         // Call receive with received message
         receive(message);

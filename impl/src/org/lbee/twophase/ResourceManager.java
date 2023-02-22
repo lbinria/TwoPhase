@@ -7,6 +7,8 @@ import java.util.Random;
 
 public class ResourceManager extends NetworkProcess implements TLANamedProcess {
 
+    private final TLARecordValue instrumentedState;
+
     enum ResourceManagerState {
         WORKING,
         PREPARED,
@@ -25,15 +27,17 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
     //@TLAVariable(name="rmState")
     private ResourceManagerState state = ResourceManagerState.WORKING;
 
+
     /**
      * Set state of manager
      * @param state New manager state
      */
     private void setState(ResourceManagerState state) {
-        System.out.printf("%s - %s.state = %s.\n", this.logicalClock, this.getName(), state.toString());
+        System.out.printf("%s - %s.state = %s.\n", this.instrumentation.getClock(), this.getName(), state.toString());
         this.state = state;
         // Log event (hard-coded for now)
-        logger.log(this, "rmState", state.toString().toLowerCase(Locale.ROOT));
+        instrumentation.log("rmState", state.toString().toLowerCase(Locale.ROOT));
+        instrumentedState.set(state.toString().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -49,6 +53,7 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
         this.config = config;
         this.transactionManagerName = transactionManagerName;
         this.name = name;
+        this.instrumentedState = (TLARecordValue) super.instrumentation.add("rmState", TLARecordValue::new);
     }
 
     @Override
@@ -102,7 +107,7 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
 
     protected void register() throws IOException {
         System.out.println("Registering...");
-        this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.REGISTER.toString(), this.logicalClock.getValue()));
+        this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.REGISTER.toString(), this.instrumentation.getClock().getValue()));
     }
 
     /**
@@ -110,9 +115,9 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
      */
     protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
-        this.logger.log(this, "msgs", "Prepared");
-        this.logger.commit();
-        this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.logicalClock.getValue()));
+        this.instrumentation.log("msgs", "Prepared");
+        this.instrumentation.commit();
+        this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
 
     }
 
@@ -126,7 +131,7 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.COMMITTED);
         // Commit events
-        logger.commit();
+        instrumentation.commit();
         // Shutdown process
         this.shutdown();
     }
@@ -142,7 +147,7 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.ABORTED);
         // Commit events
-        logger.commit();
+        instrumentation.commit();
         // Shutdown process
         this.shutdown();
     }

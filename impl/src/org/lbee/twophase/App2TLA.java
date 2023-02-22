@@ -13,23 +13,20 @@ public class App2TLA {
     @Name("app.TLAEvent")
     @Category("TwoPhase")
     @StackTrace(false)
-    static class TLAEvent extends jdk.jfr.Event {
+    static class TLAEvent extends jdk.jfr.Event implements CommitEvent {
 
         @Label("clock")
         long clock;
-        @Label("sender")
-        String sender;
         @Label("key")
         String key;
         @Label("val")
         String val;
 
-        public TLAEvent(String sender, String key, Object val, long clock) {
+        public TLAEvent(String key, Object val, long clock) {
             this.clock = clock;
-            this.sender = sender;
             this.key = key;
             this.val = val.toString();
-            System.out.printf("Log event %s.%s = %s.\n", sender, key, val.toString());
+            System.out.printf("Log event %s = %s.\n", key, val.toString());
         }
 
         public void setClock(long clock) {
