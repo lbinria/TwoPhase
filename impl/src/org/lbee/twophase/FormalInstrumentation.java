@@ -3,15 +3,21 @@ package org.lbee.twophase;
 import java.util.*;
 import java.util.function.Supplier;
 
-public class FormalInstrumentation<TOut extends CommitEvent> {
+public class FormalInstrumentation<TProducer extends TraceProducer> {
 
-    // Local logical clock
+    // Local clock
     private final InstrumentationClock clock;
+    //
     private final List<App2TLA.TLAEvent> events;
-    private final HashMap<String, IFormalValue<TOut>> instrumentedValues;
+    // Instrumented values
+    private final HashMap<String, FormalValue<TProducer>> instrumentedValues;
 
     public InstrumentationClock getClock() {
         return this.clock;
+    }
+
+    public void sync(long clock) {
+        this.clock.sync(clock);
     }
 
     public FormalInstrumentation(boolean logicClock) {
@@ -20,21 +26,23 @@ public class FormalInstrumentation<TOut extends CommitEvent> {
         this.events = new ArrayList<>();
     }
 
-    public IFormalValue<TOut> add(String name, Supplier<? extends IFormalValue<TOut>> ctor) {
+    public FormalValue<TProducer> add(String name, Supplier<? extends FormalValue<TProducer>> ctor) {
         // Construct object from type parameter
-        IFormalValue<TOut> instrumentedValue = Objects.requireNonNull(ctor).get();
+        FormalValue<TProducer> instrumentedValue = Objects.requireNonNull(ctor).get();
+        // Set name of the variable linked to the instrumented value
         instrumentedValue.setName(name);
         // Add to instrumented values
         this.instrumentedValues.put(name, instrumentedValue);
         return instrumentedValue;
     }
 
-
+    /*
     public <T extends TLANamedProcess, VType> void log(String key, String value) {
         events.add(new App2TLA.TLAEvent(key, value, this.clock.getValue()));
     }
+    */
 
-    public IFormalValue<TOut> get(String name) {
+    public FormalValue<TProducer> get(String name) {
         return this.instrumentedValues.get(name);
     }
 
@@ -44,13 +52,14 @@ public class FormalInstrumentation<TOut extends CommitEvent> {
      */
     public void syncCommit(Runnable action) {
         action.run();
-        commit();
+        this.commit2();
     }
 
 
     /**
      * Commit logs
      */
+    /*
     public void commit() {
         // All events are committed at the same logical time (sync)
         long clock = this.clock.getValue();
@@ -62,12 +71,13 @@ public class FormalInstrumentation<TOut extends CommitEvent> {
         this.clock.sync(clock);
         events.clear();
     }
+    */
 
     public void commit2() {
         // All events are committed at the same logical time (sync)
         long clock = this.clock.getValue();
 
-        for (Map.Entry<String, IFormalValue<TOut>> entry : this.instrumentedValues.entrySet()) {
+        for (Map.Entry<String, FormalValue<TProducer>> entry : this.instrumentedValues.entrySet()) {
             entry.getValue().commit(clock);
         }
 

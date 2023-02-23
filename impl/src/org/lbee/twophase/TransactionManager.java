@@ -9,6 +9,13 @@ import java.util.stream.Collectors;
 
 public class TransactionManager extends NetworkProcess implements TLANamedProcess {
 
+    // Instrumentation
+    //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
+    // Instrumented values
+    private final TLAStringValue instrumentedState;
+    private final TLASetValue<String> instrumentedMsgs;
+    private final TLASetValue<String> instrumentedPreparedResourceManagers;
+
     // Config
     private final TransactionManager.TransactionManagerConfiguration config;
     // Resource manager linked to TM
@@ -29,6 +36,12 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
         resourceManagers = new HashSet<>();
         preparedResourceManagers = new HashSet<>();
         this.config = config;
+
+        // TODO Here can be read from a configuration file
+        //this.instrumentation = new FormalInstrumentation<>(true);
+        this.instrumentedState = (TLAStringValue) this.instrumentation.add("tmState", TLAStringValue::new);
+        this.instrumentedMsgs = (TLASetValue<String>) this.instrumentation.add("msgs", TLASetValue::new);
+        this.instrumentedPreparedResourceManagers = (TLASetValue<String>) this.instrumentation.add("tmPrepared", TLASetValue::new);
     }
 
     @Override
@@ -92,9 +105,11 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
 
         System.out.println(TwoPhaseMessage.COMMIT + ".");
         // Log event (hard-coded for now)
-        instrumentation.log("msgs", TwoPhaseMessage.COMMIT.toString());
-        instrumentation.log("tmState", "done");
-        instrumentation.commit();
+        //instrumentation.log("msgs", TwoPhaseMessage.COMMIT.toString());
+        //instrumentation.log("tmState", "done");
+        instrumentedMsgs.add(TwoPhaseMessage.COMMIT.toString());
+        instrumentedState.set("done");
+        instrumentation.commit2();
 
         this.shutdown();
     }
@@ -112,8 +127,9 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
 
         System.out.println(TwoPhaseMessage.ABORT + ".");
         // Log event (hard-coded for now)
-        instrumentation.log("msgs", TwoPhaseMessage.ABORT.toString());
-        instrumentation.commit();
+        //instrumentation.log("msgs", TwoPhaseMessage.ABORT.toString());
+        instrumentedMsgs.add(TwoPhaseMessage.ABORT.toString());
+        instrumentation.commit2();
 
         this.shutdown();
 
@@ -133,8 +149,9 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
         preparedResourceManagers.add(optionalResourceManager.get());
 
         // Log event (hard-coded for now)
-        instrumentation.log("tmPrepared", sender);
-        instrumentation.commit();
+        //instrumentation.log("tmPrepared", sender);
+        this.instrumentedPreparedResourceManagers.add(sender);
+        instrumentation.commit2();
     }
 
     /**

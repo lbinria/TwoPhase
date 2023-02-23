@@ -3,11 +3,16 @@ package org.lbee.twophase;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 public class ResourceManager extends NetworkProcess implements TLANamedProcess {
 
+    // Instrumentation
+    //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
+    // Instrumented values
     private final TLARecordValue instrumentedState;
+    private final TLASetValue<String> instrumentedMsgs;
 
     enum ResourceManagerState {
         WORKING,
@@ -36,8 +41,8 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
         System.out.printf("%s - %s.state = %s.\n", this.instrumentation.getClock(), this.getName(), state.toString());
         this.state = state;
         // Log event (hard-coded for now)
-        instrumentation.log("rmState", state.toString().toLowerCase(Locale.ROOT));
-        instrumentedState.set(state.toString().toLowerCase(Locale.ROOT));
+        //instrumentation.log("rmState", state.toString().toLowerCase(Locale.ROOT));
+        instrumentedState.set(this.getName(), state.toString().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -53,7 +58,11 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
         this.config = config;
         this.transactionManagerName = transactionManagerName;
         this.name = name;
-        this.instrumentedState = (TLARecordValue) super.instrumentation.add("rmState", TLARecordValue::new);
+
+        // Here can be hold by configuration file
+        //this.instrumentation = new FormalInstrumentation<>(true);
+        this.instrumentedState = (TLARecordValue) this.instrumentation.add("rmState", TLARecordValue::new);
+        this.instrumentedMsgs = (TLASetValue<String>) this.instrumentation.add("msgs", TLASetValue::new);
     }
 
     @Override
@@ -115,8 +124,9 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
      */
     protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
-        this.instrumentation.log("msgs", "Prepared");
-        this.instrumentation.commit();
+        //this.instrumentation.log("msgs", "Prepared");
+        this.instrumentedMsgs.add("Prepared");
+        this.instrumentation.commit2();
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
 
     }
@@ -131,7 +141,7 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.COMMITTED);
         // Commit events
-        instrumentation.commit();
+        instrumentation.commit2();
         // Shutdown process
         this.shutdown();
     }
@@ -147,7 +157,7 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.ABORTED);
         // Commit events
-        instrumentation.commit();
+        instrumentation.commit2();
         // Shutdown process
         this.shutdown();
     }

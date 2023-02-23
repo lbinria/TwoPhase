@@ -5,28 +5,28 @@ import jdk.jfr.Label;
 import jdk.jfr.Name;
 import jdk.jfr.StackTrace;
 
-import java.util.List;
-
 public class App2TLA {
 
     @Label("TLAEvent")
     @Name("app.TLAEvent")
     @Category("TwoPhase")
     @StackTrace(false)
-    static class TLAEvent extends jdk.jfr.Event implements CommitEvent {
+    static class TLAEvent extends jdk.jfr.Event implements TraceEvent {
 
         @Label("clock")
         long clock;
         @Label("key")
         String key;
+        @Label("op")
+        String op;
         @Label("val")
         String val;
 
-        public TLAEvent(String key, Object val, long clock) {
-            this.clock = clock;
+        public TLAEvent(String operator, String key, Object val, long clock) {
+            this.op = operator;
             this.key = key;
             this.val = val.toString();
-            System.out.printf("Log event %s = %s.\n", key, val.toString());
+            this.clock = clock;
         }
 
         public void setClock(long clock) {

@@ -1,0 +1,22 @@
+{
+  "producer": "JFR",
+  "map":
+  [
+    {
+      "name": "rmState",
+      "type": "record"
+    },
+    {
+      "name": "tmState",
+      "type": "string"
+    },
+    {
+      "name": "tmPrepared",
+      "type": "set"
+    },
+    {
+      "name": "msgs",
+      "type": "set"
+    }
+  ]
+}

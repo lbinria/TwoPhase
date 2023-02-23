@@ -3,13 +3,15 @@ package org.lbee.twophase;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TLAValue implements IFormalValue<App2TLA.TLAEvent> {
+public class TLAValue implements FormalValue<JFRTraceProducer> {
 
     private String name;
-    private final List<App2TLA.TLAEvent> changes;
+    private final List<TraceEvent> traces;
+    private final JFRTraceProducer traceProducer;
 
     public TLAValue() {
-        this.changes = new ArrayList<>();
+        this.traces = new ArrayList<>();
+        this.traceProducer = new JFRTraceProducer();
     }
 
     @Override
@@ -19,19 +21,19 @@ public class TLAValue implements IFormalValue<App2TLA.TLAEvent> {
 
     @Override
     public void apply(String operator, Object value) {
-        // TODO add operator, clock or not
-        this.changes.add(new App2TLA.TLAEvent(this.name, value.toString(), 0));
+        TraceEvent trace = traceProducer.produce(operator, this.name, value.toString(), 0);
+        this.traces.add(trace);
     }
 
     @Override
     public void commit(long clock) {
 
-        for (App2TLA.TLAEvent change : this.changes) {
-            change.setClock(clock);
-            change.commit();
+        for (TraceEvent trace : this.traces) {
+            trace.setClock(clock);
+            trace.commit();
         }
 
-        this.changes.clear();
+        this.traces.clear();
     }
 
 }

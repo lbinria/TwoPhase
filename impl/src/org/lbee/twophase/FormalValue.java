@@ -1,8 +1,6 @@
 package org.lbee.twophase;
 
-import java.util.List;
-
-public interface IFormalValue<T extends CommitEvent> {
+public interface FormalValue<TProducer extends TraceProducer> {
 
     void setName(String name);
     void apply(String operator, Object value);

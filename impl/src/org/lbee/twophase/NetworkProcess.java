@@ -9,7 +9,7 @@ public abstract class NetworkProcess implements TLANamedProcess {
     private final InputStream inputStream;
     private final PrintWriter writer;
 
-    protected final FormalInstrumentation instrumentation;
+    protected final FormalInstrumentation<JFRTraceProducer> instrumentation;
 
     private boolean shutdown;
 
@@ -22,7 +22,7 @@ public abstract class NetworkProcess implements TLANamedProcess {
         OutputStream outputStream = socket.getOutputStream();
         this.writer = new PrintWriter(outputStream, true);
         this.shutdown = false;
-        instrumentation = new FormalInstrumentation<App2TLA.TLAEvent>(true);
+        instrumentation = new FormalInstrumentation<>(true);
     }
 
     //abstract void run() throws IOException;
