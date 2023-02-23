@@ -1,6 +1,6 @@
 {
   "trace_producer": "JFR",
-  "logicClock": true,
+  "logicalClock": true,
   "variables":
   [
     {

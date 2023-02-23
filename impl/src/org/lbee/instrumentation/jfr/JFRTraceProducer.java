@@ -7,6 +7,7 @@ import org.lbee.instrumentation.TraceProducer;
 import java.util.ArrayList;
 import java.util.List;
 
+// @TraceProducer(name="JFR")
 public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
 
     private FormalInstrumentation<?> instrumentation;

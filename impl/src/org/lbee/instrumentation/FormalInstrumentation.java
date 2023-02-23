@@ -56,6 +56,11 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
         return trackedVariable;
     }
 
+    /**
+     * Get a tracked variable by name
+     * @param name Tracked variable name
+     * @return A tracked variable
+     */
     public TrackedVariable get(String name) {
         return this.instrumentedValues.get(name);
     }
@@ -69,16 +74,15 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
         this.commit();
     }
 
-
     /**
      * Commit logs
      */
     public void commit() {
         // All events are committed at the same logical time (sync)
         final long clock = this.clock.getValue();
-
+        // Commit all previously produced traces
         this.traceProducer.commit(clock);
-
+        // Resync clock
         this.clock.sync(clock);
     }
 

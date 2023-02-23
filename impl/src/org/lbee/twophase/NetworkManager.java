@@ -27,7 +27,7 @@ public abstract class NetworkManager implements NamedClient {
         OutputStream outputStream = socket.getOutputStream();
         this.writer = new PrintWriter(outputStream, true);
         this.shutdown = false;
-        instrumentation = new FormalInstrumentation<>(new FormalInstrumentationConfig(true), new JFRTraceProducer());
+        instrumentation = new FormalInstrumentation<>(new FormalInstrumentationConfig("JFR", true), new JFRTraceProducer());
     }
 
     //abstract void run() throws IOException;
