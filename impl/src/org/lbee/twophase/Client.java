@@ -29,7 +29,7 @@ public class Client {
 
         try (Socket socket = new Socket(hostname, port)) {
 
-            NetworkProcess manager;
+            NetworkManager manager;
             switch (type) {
                 case "tm" :
                     manager = new TransactionManager(socket, config.transactionManagerConfig);

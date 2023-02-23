@@ -1,4 +1,4 @@
-package org.lbee.twophase;
+package org.lbee.twophase.models;
 
 public enum TwoPhaseMessage {
     // using the constructor defined below

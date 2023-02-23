@@ -1,9 +1,13 @@
 package org.lbee.twophase;
 
+import org.lbee.instrumentation.FormalInstrumentation;
+import org.lbee.instrumentation.jfr.JFRTraceProducer;
+import org.lbee.twophase.models.Message;
+
 import java.io.*;
 import java.net.Socket;
 
-public abstract class NetworkProcess implements TLANamedProcess {
+public abstract class NetworkManager implements NamedClient {
 
     private final Socket socket;
     private final InputStream inputStream;
@@ -16,7 +20,7 @@ public abstract class NetworkProcess implements TLANamedProcess {
     public boolean isShutdown() { return shutdown; }
     protected void shutdown() { shutdown = true; }
 
-    public NetworkProcess(Socket socket) throws IOException {
+    public NetworkManager(Socket socket) throws IOException {
         this.socket = socket;
         this.inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();

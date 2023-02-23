@@ -1,4 +1,6 @@
-package org.lbee.twophase;
+package org.lbee.instrumentation.tla;
+
+import org.lbee.instrumentation.FormalValue;
 
 import java.util.Map;
 

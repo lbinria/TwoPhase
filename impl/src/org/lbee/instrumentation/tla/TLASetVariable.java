@@ -1,4 +1,6 @@
-package org.lbee.twophase;
+package org.lbee.instrumentation.tla;
+
+import org.lbee.instrumentation.FormalValue;
 
 public class TLASetVariable<TFormalValue extends FormalValue<?>> extends TLAVariable {
 

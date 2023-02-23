@@ -65,20 +65,20 @@ print_event_process = Popen([
     "/usr/lib/jvm/jdk-19/bin/java",
     "-cp",
     "impl/out/production/TwoPhase",
-    "org.lbee.twophase.JFRPrinter",
+    "org.lbee.tools.JFRPrinter",
     "app-tm.jfr", "app-rm-0.jfr", "app-rm-1.jfr"])
 
 print_event_process.wait()
 
 print("# Start serializing events.")
 
-# /usr/lib/jvm/jdk-19/bin/java -cp impl/out/production/TwoPhase org.lbee.twophase.JFRSerializer app-tm.jfr app-rm-0.jfr app-rm-1.jfr
+# /usr/lib/jvm/jdk-19/bin/java -cp impl/out/production/TwoPhase org.lbee.tools.JFRSerializer app-tm.jfr app-rm-0.jfr app-rm-1.jfr
 
 serializer_event_process = Popen([
     "/usr/lib/jvm/jdk-19/bin/java",
     "-cp",
     "/opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:impl/out/production/TwoPhase",
-    "org.lbee.twophase.JFRSerializer",
+    "org.lbee.tools.JFRSerializer",
     "app-tm.jfr", "app-rm-0.jfr", "app-rm-1.jfr"])
 
 serializer_event_process.wait()

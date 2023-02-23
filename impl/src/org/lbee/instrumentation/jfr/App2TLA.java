@@ -1,9 +1,10 @@
-package org.lbee.twophase;
+package org.lbee.instrumentation.jfr;
 
 import jdk.jfr.Category;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
 import jdk.jfr.StackTrace;
+import org.lbee.instrumentation.TraceEvent;
 
 public class App2TLA {
 

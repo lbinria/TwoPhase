@@ -1,5 +1,7 @@
 package org.lbee.twophase;
 
+import org.lbee.twophase.models.Message;
+
 import java.io.*;
 import java.net.Socket;
 

@@ -1,6 +1,6 @@
 package org.lbee.twophase;
 
-public interface TLANamedProcess {
+public interface NamedClient {
 
     String getName();
 }

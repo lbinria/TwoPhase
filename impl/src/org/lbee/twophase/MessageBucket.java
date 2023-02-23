@@ -1,5 +1,7 @@
 package org.lbee.twophase;
 
+import org.lbee.twophase.models.Message;
+
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

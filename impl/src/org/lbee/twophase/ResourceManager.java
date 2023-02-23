@@ -1,12 +1,19 @@
 package org.lbee.twophase;
 
+import org.lbee.instrumentation.tla.TLARecordValue;
+import org.lbee.instrumentation.tla.TLARecordVariable;
+import org.lbee.instrumentation.tla.TLASetVariable;
+import org.lbee.instrumentation.tla.TLAStringValue;
+import org.lbee.twophase.models.Message;
+import org.lbee.twophase.models.TwoPhaseMessage;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-public class ResourceManager extends NetworkProcess implements TLANamedProcess {
+public class ResourceManager extends NetworkManager implements NamedClient {
 
     // Instrumentation
     //private final FormalInstrumentation<JFRTraceProducer> instrumentation;

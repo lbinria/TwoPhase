@@ -1,4 +1,6 @@
-package org.lbee.twophase;
+package org.lbee.instrumentation;
+
+import org.lbee.instrumentation.jfr.App2TLA;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -10,8 +12,6 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
 
     // Local clock
     private final InstrumentationClock clock;
-    //
-    private final List<App2TLA.TLAEvent> events;
     // Instrumented values
     private final HashMap<String, FormalVariable<TProducer>> instrumentedValues;
 
@@ -27,7 +27,6 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
         this.guid = UUID.randomUUID().toString();
         this.instrumentedValues = new HashMap<>();
         this.clock = logicClock ? new LogicalClock() : new RealTimeClock();
-        this.events = new ArrayList<>();
     }
 
     public FormalVariable<TProducer> add(String name, Supplier<? extends FormalVariable<TProducer>> ctor) {

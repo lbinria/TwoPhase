@@ -1,4 +1,4 @@
-package org.lbee.twophase;
+package org.lbee.instrumentation.tla;
 
 public class TLAStringVariable extends TLAVariable {
 

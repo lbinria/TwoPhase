@@ -1,5 +1,12 @@
 package org.lbee.twophase;
 
+import org.lbee.instrumentation.tla.TLARecordValue;
+import org.lbee.instrumentation.tla.TLASetVariable;
+import org.lbee.instrumentation.tla.TLAStringValue;
+import org.lbee.instrumentation.tla.TLAStringVariable;
+import org.lbee.twophase.models.Message;
+import org.lbee.twophase.models.TwoPhaseMessage;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashSet;
@@ -7,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class TransactionManager extends NetworkProcess implements TLANamedProcess {
+public class TransactionManager extends NetworkManager implements NamedClient {
 
     // Instrumentation
     //private final FormalInstrumentation<JFRTraceProducer> instrumentation;

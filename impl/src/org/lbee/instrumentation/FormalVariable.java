@@ -1,4 +1,4 @@
-package org.lbee.twophase;
+package org.lbee.instrumentation;
 
 public interface FormalVariable<TProducer extends TraceProducer> {
 

@@ -1,4 +1,6 @@
-package org.lbee.twophase;
+package org.lbee.instrumentation.jfr;
+
+import org.lbee.instrumentation.TraceProducer;
 
 public class JFRTraceProducer implements TraceProducer<App2TLA.TLAEvent> {
 
