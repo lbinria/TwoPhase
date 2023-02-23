@@ -96,6 +96,11 @@ public class JFRSerializer {
                         new StringValue(event.getString(valName))
                 };
 
+                if (event.getString("type").equals("record")) {
+                    String s = event.getString(valName);
+                    //System.out.printf("YOOOP: %s %s", s.getKey(), s.getValue());
+                }
+
                 // Create record
                 final RecordValue r = new RecordValue(names, values, false);
                 records.add(r);

@@ -19,7 +19,6 @@ public class ResourceManager extends NetworkManager implements NamedClient {
     //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
     // Instrumented values
     private final TLARecordVariable instrumentedState;
-    //private final TLASetValue<TLARecordValue> instrumentedMsgs;
     private final TLASetVariable<TLARecordValue> instrumentedMsgs;
 
     enum ResourceManagerState {
@@ -48,8 +47,8 @@ public class ResourceManager extends NetworkManager implements NamedClient {
     private void setState(ResourceManagerState state) {
         System.out.printf("%s - %s.state = %s.\n", this.instrumentation.getClock(), this.getName(), state.toString());
         this.state = state;
-        // Log event (hard-coded for now)
-        //instrumentation.log("rmState", state.toString().toLowerCase(Locale.ROOT));
+
+        // Set new state value (hard-coded for now)
         instrumentedState.set(this.getName(), state.toString().toLowerCase(Locale.ROOT));
     }
 
@@ -68,7 +67,6 @@ public class ResourceManager extends NetworkManager implements NamedClient {
         this.name = name;
 
         // Here can be hold by configuration file
-        //this.instrumentation = new FormalInstrumentation<>(true);
         this.instrumentedState = (TLARecordVariable) this.instrumentation.add("rmState", TLARecordVariable::new);
         this.instrumentedMsgs = (TLASetVariable<TLARecordValue>) this.instrumentation.add("msgs", TLASetVariable::new);
     }
@@ -91,7 +89,6 @@ public class ResourceManager extends NetworkManager implements NamedClient {
             }
             this.prepare();
         }
-        //System.out.printf("Task duration of %s: %s.\n", this.getName(), this.config.taskDuration);
 
         /* Task fail eventually */
         if (this.config.shouldFail)
@@ -132,10 +129,11 @@ public class ResourceManager extends NetworkManager implements NamedClient {
      */
     protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
+
+        // Send message
         TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue("Prepared"), "rm", new TLAStringValue(this.getName())));
         this.instrumentedMsgs.add(value);
-
-        this.instrumentation.commit2();
+        this.instrumentation.commit();
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
 
     }
@@ -150,7 +148,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.COMMITTED);
         // Commit events
-        instrumentation.commit2();
+        instrumentation.commit();
         // Shutdown process
         this.shutdown();
     }
@@ -166,7 +164,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.ABORTED);
         // Commit events
-        instrumentation.commit2();
+        instrumentation.commit();
         // Shutdown process
         this.shutdown();
     }

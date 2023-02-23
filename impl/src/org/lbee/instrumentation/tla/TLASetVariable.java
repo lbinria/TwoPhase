@@ -13,4 +13,11 @@ public class TLASetVariable<TFormalValue extends FormalValue<?>> extends TLAVari
         this.apply("AddElement", "");
     }
 
+    @Override
+    public void set(FormalValue value) {
+        this.apply("Replace", value);
+    }
+
+    @Override
+    public String getType() { return "set"; }
 }

@@ -1,7 +1,9 @@
 package org.lbee.instrumentation.tla;
 
 import org.lbee.instrumentation.FormalValue;
+import org.lbee.instrumentation.FormalValueType;
 
+@FormalValueType(type="string")
 public class TLAStringValue implements FormalValue<String> {
 
     private final String value;
@@ -19,4 +21,5 @@ public class TLAStringValue implements FormalValue<String> {
     public String getValue() {
         return this.value;
     }
+
 }

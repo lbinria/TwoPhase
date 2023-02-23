@@ -1,9 +1,11 @@
 package org.lbee.instrumentation.tla;
 
 import org.lbee.instrumentation.FormalValue;
+import org.lbee.instrumentation.FormalValueType;
 
 import java.util.Map;
 
+@FormalValueType(type="record")
 public class TLARecordValue implements FormalValue<Map<String, FormalValue<?>>> {
 
     private final Map<String, FormalValue<?>> value;
@@ -21,4 +23,5 @@ public class TLARecordValue implements FormalValue<Map<String, FormalValue<?>>> 
     public Map<String, FormalValue<?>> getValue() {
         return this.value;
     }
+
 }

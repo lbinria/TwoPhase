@@ -1,9 +1,10 @@
 package org.lbee.instrumentation;
 
-public interface FormalVariable<TProducer extends TraceProducer> {
+public interface TrackedVariable {
 
+    String getType();
     void setName(String name);
+    void setTraceProducer(TraceProducer<?> traceProducer);
     void apply(String operator, Object value);
-    void commit(String sender, long clock);
 
 }

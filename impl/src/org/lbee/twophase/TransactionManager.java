@@ -112,12 +112,10 @@ public class TransactionManager extends NetworkManager implements NamedClient {
 
         System.out.println(TwoPhaseMessage.COMMIT + ".");
         // Log event (hard-coded for now)
-        //instrumentation.log("msgs", TwoPhaseMessage.COMMIT.toString());
-        //instrumentation.log("tmState", "done");
         TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue(TwoPhaseMessage.COMMIT.toString())));
         this.instrumentedMsgs.add(value);
         instrumentedState.set(new TLAStringValue("done"));
-        instrumentation.commit2();
+        instrumentation.commit();
 
         this.shutdown();
     }
@@ -135,11 +133,10 @@ public class TransactionManager extends NetworkManager implements NamedClient {
 
         System.out.println(TwoPhaseMessage.ABORT + ".");
         // Log event (hard-coded for now)
-        //instrumentation.log("msgs", TwoPhaseMessage.ABORT.toString());
         TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue(TwoPhaseMessage.ABORT.toString())));
         this.instrumentedMsgs.add(value);
 
-        instrumentation.commit2();
+        instrumentation.commit();
 
         this.shutdown();
 
@@ -159,9 +156,8 @@ public class TransactionManager extends NetworkManager implements NamedClient {
         preparedResourceManagers.add(optionalResourceManager.get());
 
         // Log event (hard-coded for now)
-        //instrumentation.log("tmPrepared", sender);
         this.instrumentedPreparedResourceManagers.add(new TLAStringValue(sender));
-        instrumentation.commit2();
+        instrumentation.commit();
     }
 
     /**

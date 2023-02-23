@@ -1,46 +1,62 @@
 package org.lbee.instrumentation;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class FormalInstrumentation<TProducer extends TraceProducer> {
+public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
 
     // Instrumentation guid
     private final String guid;
-
+    // Configuration
+    private final FormalInstrumentationConfig configuration;
     // Local clock
     private final InstrumentationClock clock;
     // Instrumented values
-    private final HashMap<String, FormalVariable<TProducer>> instrumentedValues;
+    private final HashMap<String, TrackedVariable> instrumentedValues;
+    // Trace producer
+    private final TProducer traceProducer;
 
     public InstrumentationClock getClock() {
         return this.clock;
     }
 
+    public String getGuid() { return this.guid; }
+
     public void sync(long clock) {
         this.clock.sync(clock);
     }
 
-    public FormalInstrumentation(boolean logicClock) {
+    public FormalInstrumentation(FormalInstrumentationConfig configuration, TProducer traceProducer) {
         this.guid = UUID.randomUUID().toString();
+        this.configuration = configuration;
         this.instrumentedValues = new HashMap<>();
-        this.clock = logicClock ? new LogicalClock() : new RealTimeClock();
+        this.clock = configuration.isLogicClock() ? new LogicalClock() : new RealTimeClock();
+
+        // TODO construct from configuration
+        this.traceProducer = traceProducer;
+        this.traceProducer.setIntrumentation(this);
     }
 
-    public FormalVariable<TProducer> add(String name, Supplier<? extends FormalVariable<TProducer>> ctor) {
+    /**
+     * Create
+     * @param name
+     * @param ctor
+     * @return
+     */
+    public TrackedVariable add(String name, Supplier<? extends TrackedVariable> ctor) {
         // Construct object from type parameter
-        final FormalVariable<TProducer> instrumentedValue = Objects.requireNonNull(ctor).get();
+        final TrackedVariable trackedVariable = Objects.requireNonNull(ctor).get();
         // Set name of the variable linked to the instrumented value
-        instrumentedValue.setName(name);
+        trackedVariable.setName(name);
+        trackedVariable.setTraceProducer(this.traceProducer);
         // Add to instrumented values
-        this.instrumentedValues.put(name, instrumentedValue);
-        return instrumentedValue;
+        this.instrumentedValues.put(name, trackedVariable);
+        return trackedVariable;
     }
 
-    public FormalVariable<TProducer> get(String name) {
+    public TrackedVariable get(String name) {
         return this.instrumentedValues.get(name);
     }
 
@@ -50,22 +66,23 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
      */
     public void syncCommit(Runnable action) {
         action.run();
-        this.commit2();
+        this.commit();
     }
 
 
     /**
      * Commit logs
      */
-    public void commit2() {
+    public void commit() {
         // All events are committed at the same logical time (sync)
         final long clock = this.clock.getValue();
 
-        for (Map.Entry<String, FormalVariable<TProducer>> entry : this.instrumentedValues.entrySet()) {
-            entry.getValue().commit(this.guid, clock);
-        }
+        this.traceProducer.commit(clock);
 
         this.clock.sync(clock);
     }
 
+    public TProducer getTraceProducer() {
+        return this.traceProducer;
+    }
 }

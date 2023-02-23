@@ -1,6 +1,7 @@
 package org.lbee.twophase;
 
 import org.lbee.instrumentation.FormalInstrumentation;
+import org.lbee.instrumentation.FormalInstrumentationConfig;
 import org.lbee.instrumentation.jfr.JFRTraceProducer;
 import org.lbee.twophase.models.Message;
 
@@ -26,7 +27,7 @@ public abstract class NetworkManager implements NamedClient {
         OutputStream outputStream = socket.getOutputStream();
         this.writer = new PrintWriter(outputStream, true);
         this.shutdown = false;
-        instrumentation = new FormalInstrumentation<>(true);
+        instrumentation = new FormalInstrumentation<>(new FormalInstrumentationConfig(true), new JFRTraceProducer());
     }
 
     //abstract void run() throws IOException;

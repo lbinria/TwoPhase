@@ -1,22 +1,29 @@
 package org.lbee.instrumentation.tla;
 
-import org.lbee.instrumentation.FormalVariable;
-import org.lbee.instrumentation.jfr.JFRTraceProducer;
-import org.lbee.instrumentation.TraceEvent;
+import org.lbee.instrumentation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class TLAVariable implements FormalVariable<JFRTraceProducer> {
+public abstract class TLAVariable<TValue extends FormalValue<?>> implements TrackedVariable {
 
     private String name;
-    private final List<TraceEvent> traces;
-    private final JFRTraceProducer traceProducer;
+    private TraceProducer<?> traceProducer;
+    private final String type;
+
 
     public TLAVariable() {
-        this.traces = new ArrayList<>();
-        this.traceProducer = new JFRTraceProducer();
+        // Get annotation of formal value linked to variable
+        FormalValueType valueTypeAnnot = FormalValue.class.getAnnotation(FormalValueType.class);
+        //this.type = valueTypeAnnot.type();
+        this.type = "";
     }
+
+    @Override
+    public abstract String getType();
+    /*
+    public String getType() {
+        return this.type;
+    }
+    */
+
 
     @Override
     public void setName(String name) {
@@ -24,21 +31,17 @@ public class TLAVariable implements FormalVariable<JFRTraceProducer> {
     }
 
     @Override
-    public void apply(String operator, Object value) {
-        TraceEvent trace = traceProducer.produce(operator, this.name, value.toString(), 0);
-        this.traces.add(trace);
+    public void setTraceProducer(TraceProducer<?> traceProducer) {
+        this.traceProducer = traceProducer;
     }
 
     @Override
-    public void commit(String sender, long clock) {
-
-        for (TraceEvent trace : this.traces) {
-            trace.setSender(sender);
-            trace.setClock(clock);
-            trace.commit();
-        }
-
-        this.traces.clear();
+    public void apply(String operator, Object value) {
+        this.traceProducer.produce(operator, this.name, value.toString(), this.getType(), 0);
     }
+
+    public abstract void set(TValue value);
+
+
 
 }

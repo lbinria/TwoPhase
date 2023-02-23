@@ -1,22 +1,39 @@
 {
-  "producer": "JFR",
-  "map":
+  "trace_producer": "JFR",
+  "logicClock": true,
+  "variables":
   [
     {
       "name": "rmState",
-      "type": "record"
+      "type": "record",
+      "operators":
+      [
+        {"method": "set", "target_operator": "ExceptAt"}
+      ]
     },
     {
       "name": "tmState",
-      "type": "string"
+      "type": "string",
+      "operators":
+      [
+        {"method": "set", "target_operator": "Replace"}
+      ]
     },
     {
       "name": "tmPrepared",
-      "type": "set"
+      "type": "set(string)",
+      "operators":
+      [
+        {"method": "add", "target_operator": "AddElement"}
+      ]
     },
     {
       "name": "msgs",
-      "type": "set"
+      "type": "set(record)",
+      "operators":
+      [
+        {"method": "add", "target_operator": "AddElement"}
+      ]
     }
   ]
 }
