@@ -28,7 +28,7 @@ public class JFRPrinter {
 
         // Order events chronologically based on the logical clock
         final ArrayList<RecordedEvent> tlaEvents =
-            events.stream().filter(e -> e.getEventType().getName().equals("app.TLAEvent") || e.getEventType().getName().equals("app.NestedTLAEvent"))
+            events.stream().filter(e -> e.getEventType().getName().equals("app.JFRTraceEvent"))
             .sorted(Comparator.comparingLong(o -> o.getLong("clock")))
             .collect(Collectors.toCollection(ArrayList::new));
 

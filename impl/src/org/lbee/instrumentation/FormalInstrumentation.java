@@ -1,8 +1,9 @@
 package org.lbee.instrumentation;
 
-import org.lbee.instrumentation.jfr.App2TLA;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class FormalInstrumentation<TProducer extends TraceProducer> {
@@ -31,7 +32,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
 
     public FormalVariable<TProducer> add(String name, Supplier<? extends FormalVariable<TProducer>> ctor) {
         // Construct object from type parameter
-        FormalVariable<TProducer> instrumentedValue = Objects.requireNonNull(ctor).get();
+        final FormalVariable<TProducer> instrumentedValue = Objects.requireNonNull(ctor).get();
         // Set name of the variable linked to the instrumented value
         instrumentedValue.setName(name);
         // Add to instrumented values
@@ -58,7 +59,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
      */
     public void commit2() {
         // All events are committed at the same logical time (sync)
-        long clock = this.clock.getValue();
+        final long clock = this.clock.getValue();
 
         for (Map.Entry<String, FormalVariable<TProducer>> entry : this.instrumentedValues.entrySet()) {
             entry.getValue().commit(this.guid, clock);

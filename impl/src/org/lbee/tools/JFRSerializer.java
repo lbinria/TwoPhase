@@ -2,20 +2,14 @@ package org.lbee.tools;
 
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
-import tlc2.tool.impl.SpecProcessor;
 import tlc2.value.ValueOutputStream;
 import tlc2.value.impl.RecordValue;
 import tlc2.value.impl.StringValue;
 import tlc2.value.impl.TupleValue;
 import tlc2.value.impl.Value;
-import tlc2.model.Assignment;
-import tlc2.value.impl.CallableValue;
-import tlc2.value.impl.MethodValue;
-import tlc2.input.MCParser;
 import util.UniqueString;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -46,6 +40,7 @@ public class JFRSerializer {
         final String senderName = "sender";
         final String keyName = "key";
         final String valName = "val";
+        final String clockName = "clock";
 
         // Prepare "record" names
         final UniqueString[] names = {
@@ -56,25 +51,25 @@ public class JFRSerializer {
 
         // Filter TLA events only
         // and order events chronologically
-        final Stream<RecordedEvent> tlaEvents = events.stream().filter(e -> e.getEventType().getName().equals("app.TLAEvent")).sorted(new Comparator<RecordedEvent>() {
+        final Stream<RecordedEvent> tlaEvents = events.stream().filter(e -> e.getEventType().getName().equals("app.JFRTraceEvent")).sorted(new Comparator<RecordedEvent>() {
             @Override
             public int compare(RecordedEvent o1, RecordedEvent o2) {
                 //return o1.getStartTime().compareTo(o2.getStartTime());
-                return Long.compare(o1.getLong("clock"), o2.getLong("clock"));
+                return Long.compare(o1.getLong(clockName), o2.getLong(clockName));
             }
         });
 
 
 
         // Group log by clock and process name
-        final Map<Tuple, List<RecordedEvent>> tlaEventsGrouped = tlaEvents.collect(Collectors.groupingBy(e -> new Tuple(e.getString(senderName), e.getLong("clock"))));
+        final Map<Tuple, List<RecordedEvent>> tlaEventsGrouped = tlaEvents.collect(Collectors.groupingBy(e -> new Tuple(e.getString(senderName), e.getLong(clockName))));
         // Get groups as list of lists of events
         final List<List<RecordedEvent>> tlaEventsList = new ArrayList<>(tlaEventsGrouped.values().stream().toList());
 
         // Sort group by min date
         tlaEventsList.sort((a, b) -> {
-            long minTimeA = Collections.min(a.stream().map(e -> e.getLong("clock")).toList());
-            long minTimeB = Collections.min(b.stream().map(e -> e.getLong("clock")).toList());
+            long minTimeA = Collections.min(a.stream().map(e -> e.getLong(clockName)).toList());
+            long minTimeB = Collections.min(b.stream().map(e -> e.getLong(clockName)).toList());
             return Long.compare(minTimeA, minTimeB);
         });
 
@@ -91,7 +86,7 @@ public class JFRSerializer {
             System.out.printf("\n---- Sync event %s ----\n", i++);
 
             for (RecordedEvent event : clockEvents) {
-                if (!event.getEventType().getName().equals("app.TLAEvent"))
+                if (!event.getEventType().getName().equals("app.JFRTraceEvent"))
                     continue;
 
                 // Get field values
@@ -105,7 +100,7 @@ public class JFRSerializer {
                 final RecordValue r = new RecordValue(names, values, false);
                 records.add(r);
 
-                System.out.printf("%s - %s - %s.%s = %s.\n", event.getStartTime(), event.getLong("clock"), event.getString(senderName), event.getString(keyName), event.getString(valName));
+                System.out.printf("%s - %s - %s.%s = %s.\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(keyName), event.getString(valName));
             }
 
             // Put records in tuple
