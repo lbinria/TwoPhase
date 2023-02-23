@@ -1,6 +1,6 @@
 package org.lbee.twophase;
 
-public class TLAStringValue implements FormalValue {
+public class TLAStringValue implements FormalValue<String> {
 
     private final String value;
 
@@ -10,6 +10,11 @@ public class TLAStringValue implements FormalValue {
 
     @Override
     public String toString() {
+        return this.value;
+    }
+
+    @Override
+    public String getValue() {
         return this.value;
     }
 }

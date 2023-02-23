@@ -109,7 +109,7 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
         //instrumentation.log("tmState", "done");
         TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue(TwoPhaseMessage.COMMIT.toString())));
         this.instrumentedMsgs.add(value);
-        instrumentedState.set("done");
+        instrumentedState.set(new TLAStringValue("done"));
         instrumentation.commit2();
 
         this.shutdown();

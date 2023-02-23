@@ -1,5 +1,7 @@
 package org.lbee.twophase;
 
-public interface FormalValue {
+public interface FormalValue<T> {
+
+    T getValue();
 
 }

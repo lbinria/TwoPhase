@@ -1,9 +1,9 @@
 package org.lbee.twophase;
 
-public class TLASetVariable<TFormalValue extends FormalValue> extends TLAVariable {
+public class TLASetVariable<TFormalValue extends FormalValue<?>> extends TLAVariable {
 
     public void add(TFormalValue value) {
-        this.apply("AddElement", value.toString());
+        this.apply("AddElement", value);
     }
 
     public void add(TFormalValue[] value) {
