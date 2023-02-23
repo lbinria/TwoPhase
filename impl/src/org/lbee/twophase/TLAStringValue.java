@@ -1,9 +1,15 @@
 package org.lbee.twophase;
 
-public class TLAStringValue extends TLAValue {
+public class TLAStringValue implements FormalValue {
 
-    public void set(String value) {
-        this.apply("Replace", value);
+    private final String value;
+
+    public TLAStringValue(String value) {
+        this.value = value;
     }
 
+    @Override
+    public String toString() {
+        return this.value;
+    }
 }

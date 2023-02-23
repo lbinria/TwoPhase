@@ -11,8 +11,9 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
     // Instrumentation
     //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
     // Instrumented values
-    private final TLARecordValue instrumentedState;
-    private final TLASetValue<String> instrumentedMsgs;
+    private final TLARecordVariable instrumentedState;
+    //private final TLASetValue<TLARecordValue> instrumentedMsgs;
+    private final TLASetVariable<TLARecordValue> instrumentedMsgs;
 
     enum ResourceManagerState {
         WORKING,
@@ -61,8 +62,8 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
 
         // Here can be hold by configuration file
         //this.instrumentation = new FormalInstrumentation<>(true);
-        this.instrumentedState = (TLARecordValue) this.instrumentation.add("rmState", TLARecordValue::new);
-        this.instrumentedMsgs = (TLASetValue<String>) this.instrumentation.add("msgs", TLASetValue::new);
+        this.instrumentedState = (TLARecordVariable) this.instrumentation.add("rmState", TLARecordVariable::new);
+        this.instrumentedMsgs = (TLASetVariable<TLARecordValue>) this.instrumentation.add("msgs", TLASetVariable::new);
     }
 
     @Override
@@ -124,8 +125,9 @@ public class ResourceManager extends NetworkProcess implements TLANamedProcess {
      */
     protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
-        //this.instrumentation.log("msgs", "Prepared");
-        this.instrumentedMsgs.add("Prepared");
+        TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue("Prepared"), "rm", new TLAStringValue(this.getName())));
+        this.instrumentedMsgs.add(value);
+
         this.instrumentation.commit2();
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
 

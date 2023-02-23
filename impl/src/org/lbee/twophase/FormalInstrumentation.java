@@ -10,7 +10,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
     //
     private final List<App2TLA.TLAEvent> events;
     // Instrumented values
-    private final HashMap<String, FormalValue<TProducer>> instrumentedValues;
+    private final HashMap<String, FormalVariable<TProducer>> instrumentedValues;
 
     public InstrumentationClock getClock() {
         return this.clock;
@@ -26,9 +26,9 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
         this.events = new ArrayList<>();
     }
 
-    public FormalValue<TProducer> add(String name, Supplier<? extends FormalValue<TProducer>> ctor) {
+    public FormalVariable<TProducer> add(String name, Supplier<? extends FormalVariable<TProducer>> ctor) {
         // Construct object from type parameter
-        FormalValue<TProducer> instrumentedValue = Objects.requireNonNull(ctor).get();
+        FormalVariable<TProducer> instrumentedValue = Objects.requireNonNull(ctor).get();
         // Set name of the variable linked to the instrumented value
         instrumentedValue.setName(name);
         // Add to instrumented values
@@ -36,13 +36,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
         return instrumentedValue;
     }
 
-    /*
-    public <T extends TLANamedProcess, VType> void log(String key, String value) {
-        events.add(new App2TLA.TLAEvent(key, value, this.clock.getValue()));
-    }
-    */
-
-    public FormalValue<TProducer> get(String name) {
+    public FormalVariable<TProducer> get(String name) {
         return this.instrumentedValues.get(name);
     }
 
@@ -59,25 +53,11 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
     /**
      * Commit logs
      */
-    /*
-    public void commit() {
-        // All events are committed at the same logical time (sync)
-        long clock = this.clock.getValue();
-
-        for (App2TLA.TLAEvent event : events) {
-            event.setClock(clock);
-            event.commit();
-        }
-        this.clock.sync(clock);
-        events.clear();
-    }
-    */
-
     public void commit2() {
         // All events are committed at the same logical time (sync)
         long clock = this.clock.getValue();
 
-        for (Map.Entry<String, FormalValue<TProducer>> entry : this.instrumentedValues.entrySet()) {
+        for (Map.Entry<String, FormalVariable<TProducer>> entry : this.instrumentedValues.entrySet()) {
             entry.getValue().commit(clock);
         }
 

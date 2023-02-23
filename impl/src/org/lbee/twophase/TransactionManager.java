@@ -12,9 +12,9 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
     // Instrumentation
     //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
     // Instrumented values
-    private final TLAStringValue instrumentedState;
-    private final TLASetValue<String> instrumentedMsgs;
-    private final TLASetValue<String> instrumentedPreparedResourceManagers;
+    private final TLAStringVariable instrumentedState;
+    private final TLASetVariable<TLARecordValue> instrumentedMsgs;
+    private final TLASetVariable<TLAStringValue> instrumentedPreparedResourceManagers;
 
     // Config
     private final TransactionManager.TransactionManagerConfiguration config;
@@ -39,9 +39,9 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
 
         // TODO Here can be read from a configuration file
         //this.instrumentation = new FormalInstrumentation<>(true);
-        this.instrumentedState = (TLAStringValue) this.instrumentation.add("tmState", TLAStringValue::new);
-        this.instrumentedMsgs = (TLASetValue<String>) this.instrumentation.add("msgs", TLASetValue::new);
-        this.instrumentedPreparedResourceManagers = (TLASetValue<String>) this.instrumentation.add("tmPrepared", TLASetValue::new);
+        this.instrumentedState = (TLAStringVariable) this.instrumentation.add("tmState", TLAStringVariable::new);
+        this.instrumentedMsgs = (TLASetVariable<TLARecordValue>) this.instrumentation.add("msgs", TLASetVariable::new);
+        this.instrumentedPreparedResourceManagers = (TLASetVariable<TLAStringValue>) this.instrumentation.add("tmPrepared", TLASetVariable::new);
     }
 
     @Override
@@ -107,7 +107,8 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
         // Log event (hard-coded for now)
         //instrumentation.log("msgs", TwoPhaseMessage.COMMIT.toString());
         //instrumentation.log("tmState", "done");
-        instrumentedMsgs.add(TwoPhaseMessage.COMMIT.toString());
+        TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue(TwoPhaseMessage.COMMIT.toString())));
+        this.instrumentedMsgs.add(value);
         instrumentedState.set("done");
         instrumentation.commit2();
 
@@ -128,7 +129,9 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
         System.out.println(TwoPhaseMessage.ABORT + ".");
         // Log event (hard-coded for now)
         //instrumentation.log("msgs", TwoPhaseMessage.ABORT.toString());
-        instrumentedMsgs.add(TwoPhaseMessage.ABORT.toString());
+        TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue(TwoPhaseMessage.ABORT.toString())));
+        this.instrumentedMsgs.add(value);
+
         instrumentation.commit2();
 
         this.shutdown();
@@ -150,7 +153,7 @@ public class TransactionManager extends NetworkProcess implements TLANamedProces
 
         // Log event (hard-coded for now)
         //instrumentation.log("tmPrepared", sender);
-        this.instrumentedPreparedResourceManagers.add(sender);
+        this.instrumentedPreparedResourceManagers.add(new TLAStringValue(sender));
         instrumentation.commit2();
     }
 

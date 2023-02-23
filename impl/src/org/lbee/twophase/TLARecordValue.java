@@ -2,12 +2,16 @@ package org.lbee.twophase;
 
 import java.util.Map;
 
-public class TLARecordValue extends TLAValue {
+public class TLARecordValue implements FormalValue {
 
-    public void set(String key, String value) {
-        Map.Entry<?, ?> entry = Map.entry(key, value);
-        this.apply("ExceptAt", entry);
+    private final Map<String, FormalValue> value;
+
+    public TLARecordValue(Map<String, FormalValue> value) {
+        this.value = value;
     }
 
+    @Override
+    public String toString() {
+        return this.value.toString();
+    }
 }
-
