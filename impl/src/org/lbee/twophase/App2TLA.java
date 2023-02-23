@@ -13,14 +13,16 @@ public class App2TLA {
     @StackTrace(false)
     static class TLAEvent extends jdk.jfr.Event implements TraceEvent {
 
-        @Label("clock")
-        long clock;
+        @Label("sender")
+        String sender;
         @Label("key")
         String key;
         @Label("op")
         String op;
         @Label("val")
         String val;
+        @Label("clock")
+        long clock;
 
         public TLAEvent(String operator, String key, Object val, long clock) {
             this.op = operator;
@@ -31,6 +33,10 @@ public class App2TLA {
 
         public void setClock(long clock) {
             this.clock = clock;
+        }
+
+        public void setSender(String sender) {
+            this.sender = sender;
         }
 
     }

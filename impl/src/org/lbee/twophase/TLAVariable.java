@@ -26,9 +26,10 @@ public class TLAVariable implements FormalVariable<JFRTraceProducer> {
     }
 
     @Override
-    public void commit(long clock) {
+    public void commit(String sender, long clock) {
 
         for (TraceEvent trace : this.traces) {
+            trace.setSender(sender);
             trace.setClock(clock);
             trace.commit();
         }

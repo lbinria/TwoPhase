@@ -5,6 +5,9 @@ import java.util.function.Supplier;
 
 public class FormalInstrumentation<TProducer extends TraceProducer> {
 
+    // Instrumentation guid
+    private final String guid;
+
     // Local clock
     private final InstrumentationClock clock;
     //
@@ -21,6 +24,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
     }
 
     public FormalInstrumentation(boolean logicClock) {
+        this.guid = UUID.randomUUID().toString();
         this.instrumentedValues = new HashMap<>();
         this.clock = logicClock ? new LogicalClock() : new RealTimeClock();
         this.events = new ArrayList<>();
@@ -58,7 +62,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer> {
         long clock = this.clock.getValue();
 
         for (Map.Entry<String, FormalVariable<TProducer>> entry : this.instrumentedValues.entrySet()) {
-            entry.getValue().commit(clock);
+            entry.getValue().commit(this.guid, clock);
         }
 
         this.clock.sync(clock);
