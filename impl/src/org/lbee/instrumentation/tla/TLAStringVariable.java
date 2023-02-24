@@ -1,6 +1,8 @@
 package org.lbee.instrumentation.tla;
 
-public class TLAStringVariable extends TLAVariable<TLAStringValue> {
+import org.lbee.instrumentation.TrackedVariable;
+
+public class TLAStringVariable extends TrackedVariable<TLAStringValue> {
 
     /**
      * @TraceUpdateMethod("set")

@@ -1,16 +1,16 @@
 package org.lbee.instrumentation.tla;
 
-import org.lbee.instrumentation.FormalValue;
+import org.lbee.instrumentation.TrackableValue;
 import org.lbee.instrumentation.FormalValueType;
 
 import java.util.Map;
 
 @FormalValueType(type="record")
-public class TLARecordValue implements FormalValue<Map<String, FormalValue<?>>> {
+public class TLARecordValue implements TrackableValue<Map<String, TrackableValue<?>>> {
 
-    private final Map<String, FormalValue<?>> value;
+    private final Map<String, TrackableValue<?>> value;
 
-    public TLARecordValue(Map<String, FormalValue<?>> value) {
+    public TLARecordValue(Map<String, TrackableValue<?>> value) {
         this.value = value;
     }
 
@@ -20,8 +20,13 @@ public class TLARecordValue implements FormalValue<Map<String, FormalValue<?>>> 
     }
 
     @Override
-    public Map<String, FormalValue<?>> getValue() {
+    public Map<String, TrackableValue<?>> getValue() {
         return this.value;
+    }
+
+    @Override
+    public String getType() {
+        return "record";
     }
 
 }

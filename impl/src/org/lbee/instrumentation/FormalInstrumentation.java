@@ -1,5 +1,9 @@
 package org.lbee.instrumentation;
 
+import org.lbee.instrumentation.clock.InstrumentationClock;
+import org.lbee.instrumentation.clock.LogicalClock;
+import org.lbee.instrumentation.clock.RealTimeClock;
+
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -14,7 +18,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
     // Local clock
     private final InstrumentationClock clock;
     // Instrumented values
-    private final HashMap<String, TrackedVariable> instrumentedValues;
+    private final HashMap<String, TrackableVariable> instrumentedValues;
     // Trace producer
     private final TProducer traceProducer;
 
@@ -45,9 +49,9 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
      * @param ctor
      * @return
      */
-    public TrackedVariable add(String name, Supplier<? extends TrackedVariable> ctor) {
+    public TrackableVariable add(String name, Supplier<? extends TrackableVariable> ctor) {
         // Construct object from type parameter
-        final TrackedVariable trackedVariable = Objects.requireNonNull(ctor).get();
+        final TrackableVariable trackedVariable = Objects.requireNonNull(ctor).get();
         // Set name of the variable linked to the instrumented value
         trackedVariable.setName(name);
         trackedVariable.setTraceProducer(this.traceProducer);
@@ -61,7 +65,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
      * @param name Tracked variable name
      * @return A tracked variable
      */
-    public TrackedVariable get(String name) {
+    public TrackableVariable get(String name) {
         return this.instrumentedValues.get(name);
     }
 
@@ -86,7 +90,4 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
         this.clock.sync(clock);
     }
 
-    public TProducer getTraceProducer() {
-        return this.traceProducer;
-    }
 }

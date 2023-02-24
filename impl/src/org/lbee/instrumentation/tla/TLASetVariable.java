@@ -1,8 +1,9 @@
 package org.lbee.instrumentation.tla;
 
-import org.lbee.instrumentation.FormalValue;
+import org.lbee.instrumentation.TrackableValue;
+import org.lbee.instrumentation.TrackedVariable;
 
-public class TLASetVariable<TFormalValue extends FormalValue<?>> extends TLAVariable {
+public class TLASetVariable<TFormalValue extends TrackableValue<?>> extends TrackedVariable {
 
     public void add(TFormalValue value) {
         this.apply("AddElement", value);
@@ -14,7 +15,7 @@ public class TLASetVariable<TFormalValue extends FormalValue<?>> extends TLAVari
     }
 
     @Override
-    public void set(FormalValue value) {
+    public void set(TrackableValue value) {
         this.apply("Replace", value);
     }
 

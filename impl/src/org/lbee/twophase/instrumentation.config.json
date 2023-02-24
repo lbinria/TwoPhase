@@ -5,34 +5,30 @@
   [
     {
       "name": "rmState",
-      "type": "record",
       "operators":
       [
-        {"method": "set", "target_operator": "ExceptAt"}
+        { "method": "set", "target_operator": "ExceptAt", "args": [{"type": "string"}, {"type": "string"}]}
       ]
     },
     {
       "name": "tmState",
-      "type": "string",
       "operators":
       [
-        {"method": "set", "target_operator": "Replace"}
+        {"method": "set", "target_operator": "Replace", "args": [{"type": "string"}] }
       ]
     },
     {
       "name": "tmPrepared",
-      "type": "set(string)",
       "operators":
       [
-        {"method": "add", "target_operator": "AddElement"}
+        {"method": "add", "target_operator": "AddElement", "args": [{"type": "string"}] }
       ]
     },
     {
       "name": "msgs",
-      "type": "set(record)",
       "operators":
       [
-        {"method": "add", "target_operator": "AddElement"}
+        {"method": "add", "target_operator": "AddElement", "args": [{"type": "record", "keys": ["type", "rm"]}]}
       ]
     }
   ]
