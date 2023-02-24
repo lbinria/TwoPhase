@@ -1,10 +1,8 @@
 package org.lbee.instrumentation.tla;
 
-import org.lbee.instrumentation.TrackableValue;
-import org.lbee.instrumentation.FormalValueType;
+import org.lbee.instrumentation.TrackedValue;
 
-@FormalValueType(type="string")
-public class TLAStringValue implements TrackableValue<String> {
+public class TLAStringValue extends TrackedValue<String> {
 
     private final String value;
 
@@ -13,16 +11,11 @@ public class TLAStringValue implements TrackableValue<String> {
     }
 
     @Override
-    public String toString() {
-        return this.value;
-    }
-
-    @Override
     public String getValue() {
         return this.value;
     }
 
     @Override
-    public String getType() {return "string";}
+    public String getType() {return "string"; }
 
 }

@@ -5,8 +5,6 @@ public interface TrackableValue<T> {
     T getValue();
     String getType();
 
-    static TrackableValue<?> defaultValue() {
-        return null;
-    }
+    // TODO add default value
 
 }

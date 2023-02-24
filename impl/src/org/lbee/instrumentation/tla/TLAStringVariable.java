@@ -13,6 +13,4 @@ public class TLAStringVariable extends TrackedVariable<TLAStringValue> {
         this.apply("Replace", value);
     }
 
-    @Override
-    public String getType() { return "string"; }
 }

@@ -11,7 +11,7 @@ public class TLASetVariable<TFormalValue extends TrackableValue<?>> extends Trac
 
     public void add(TFormalValue[] value) {
         // TODO implement
-        this.apply("AddElement", "");
+        this.apply("AddElement", new TLAStringValue(""));
     }
 
     @Override
@@ -19,6 +19,4 @@ public class TLASetVariable<TFormalValue extends TrackableValue<?>> extends Trac
         this.apply("Replace", value);
     }
 
-    @Override
-    public String getType() { return "set"; }
 }

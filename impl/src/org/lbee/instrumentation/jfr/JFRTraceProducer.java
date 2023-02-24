@@ -33,9 +33,9 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
     }
 
     @Override
-    public JFRTraceEvent produce(String operator, String name, Object value, String type, long clock) {
-        System.out.printf("%s - Trace event: `%s %s (%s)`.\n", clock, operator, name, value.toString());
-        JFRTraceEvent trace = new JFRTraceEvent(this.instrumentation.getGuid(), operator, name, value.toString(), type, clock);
+    public JFRTraceEvent produce(String operator, String name, String value, long clock) {
+        System.out.printf("%s - Trace event: `%s %s (%s)`.\n", clock, operator, name, value);
+        JFRTraceEvent trace = new JFRTraceEvent(this.instrumentation.getGuid(), operator, name, value, clock);
         this.traces.add(trace);
         return trace;
     }

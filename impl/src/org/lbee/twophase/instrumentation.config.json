@@ -28,7 +28,7 @@
       "name": "msgs",
       "operators":
       [
-        {"method": "add", "target_operator": "AddElement", "args": [{"type": "record", "keys": ["type", "rm"]}]}
+        {"method": "add", "target_operator": "AddElement", "args": [{"type": "record", "args": [{"name": "type", "type": "string"}, {"name": "rm", "type": "string"}]}]}
       ]
     }
   ]

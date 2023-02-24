@@ -41,6 +41,7 @@ public class JFRSerializer {
         final String keyName = "key";
         final String valName = "val";
         final String clockName = "clock";
+        final String opName = "op";
 
         // Prepare "record" names
         final UniqueString[] names = {
@@ -96,16 +97,11 @@ public class JFRSerializer {
                         new StringValue(event.getString(valName))
                 };
 
-                if (event.getString("type").equals("record")) {
-                    String s = event.getString(valName);
-                    //System.out.printf("YOOOP: %s %s", s.getKey(), s.getValue());
-                }
-
                 // Create record
                 final RecordValue r = new RecordValue(names, values, false);
                 records.add(r);
 
-                System.out.printf("%s - %s - %s.%s = %s.\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(keyName), event.getString(valName));
+                System.out.printf("%s - %s - %s -> %s %s (%s).\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(opName), event.getString(keyName), event.getString(valName));
             }
 
             // Put records in tuple
