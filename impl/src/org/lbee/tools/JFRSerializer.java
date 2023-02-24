@@ -35,6 +35,10 @@ public class JFRSerializer {
         serializeTrace(recordedEvents, Paths.get("Trace.bin"));
     }
 
+    private static Value jsonToValue(String json) {
+        return new StringValue("");
+    }
+
     private static void serializeTrace(final List<RecordedEvent> events, final Path out) throws IOException {
 
         final String senderName = "sender";
@@ -45,8 +49,8 @@ public class JFRSerializer {
 
         // Prepare "record" names
         final UniqueString[] names = {
-                UniqueString.uniqueStringOf(senderName),
                 UniqueString.uniqueStringOf(keyName),
+                UniqueString.uniqueStringOf(opName),
                 UniqueString.uniqueStringOf(valName)
         };
 
@@ -90,11 +94,15 @@ public class JFRSerializer {
                 if (!event.getEventType().getName().equals("app.JFRTraceEvent"))
                     continue;
 
+                // Convert args
+                String json = event.getString(valName);
+                final Value args = jsonToValue(json);
+
                 // Get field values
                 final Value[] values = {
-                        new StringValue(event.getString(senderName)),
                         new StringValue(event.getString(keyName)),
-                        new StringValue(event.getString(valName))
+                        new StringValue(event.getString(opName)),
+                        args
                 };
 
                 // Create record

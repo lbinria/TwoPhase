@@ -18,7 +18,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
     // Local clock
     private final InstrumentationClock clock;
     // Instrumented values
-    private final HashMap<String, TrackableVariable> instrumentedValues;
+    private final HashMap<String, TrackableVariable<?>> instrumentedValues;
     // Trace producer
     private final TProducer traceProducer;
 

@@ -1,6 +1,17 @@
 {
   "trace_producer": "JFR",
   "logicalClock": true,
+  "type_aliases":
+  [
+    {
+      "name": "string",
+      "structure": {"type": "string"}
+    },
+    {
+      "name": "message_record",
+      "structure": {"type": "record", "args": [{"name": "type", "type": "string"}, {"name": "rm", "type": "string"}]}
+    }
+  ],
   "variables":
   [
     {

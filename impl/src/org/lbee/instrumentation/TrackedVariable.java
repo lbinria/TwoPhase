@@ -1,6 +1,7 @@
 package org.lbee.instrumentation;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,7 @@ public abstract class TrackedVariable<TValue extends TrackableValue<?>> implemen
 
     public TrackedVariable() {
         this.type = "";
-        this.operators = Map.of();
+        this.operators = new HashMap<>();
     }
 
     @Override
@@ -30,7 +31,7 @@ public abstract class TrackedVariable<TValue extends TrackableValue<?>> implemen
     public void apply(String operator, TValue... args) {
         // TODO check operator existence
         //Operator op = this.operators.get(operator);
-        String strValues = "[" + Arrays.stream(args).map(arg -> "{\"value\":"+ arg.getValue().toString() + ", \"type\":\"" + arg.getType() + "\"}").collect(Collectors.joining(",")) + "]";
+        String strValues = "[" + Arrays.stream(args).map(Object::toString).collect(Collectors.joining(",")) + "]";
         this.traceProducer.produce(operator, this.name, strValues, 0);
     }
 

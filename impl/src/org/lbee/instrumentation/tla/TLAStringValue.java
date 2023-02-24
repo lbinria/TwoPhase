@@ -4,18 +4,12 @@ import org.lbee.instrumentation.TrackedValue;
 
 public class TLAStringValue extends TrackedValue<String> {
 
-    private final String value;
-
     public TLAStringValue(String value) {
-        this.value = value;
+        super(value, "string");
     }
 
     @Override
-    public String getValue() {
-        return this.value;
+    public String toString() {
+        return "{\"type\":\"" + this.getType() + "\",\"value\":\"" + this.getValue() + "\"}";
     }
-
-    @Override
-    public String getType() {return "string"; }
-
 }
