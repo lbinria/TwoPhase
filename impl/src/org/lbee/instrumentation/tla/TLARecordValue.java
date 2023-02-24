@@ -13,9 +13,4 @@ public class TLARecordValue extends TrackedValue<Map<String, TrackableValue<?>>>
         super(value, "record");
     }
 
-    @Override
-    public String toString() {
-        String strValue = this.getValue().entrySet().stream().map(e -> "{\"" + e.getKey() + "\":" + e.getValue().toString() + "}").collect(Collectors.joining(","));
-        return "{\"type\":\"" + this.getType() + "\",\"value\":" + strValue + "}";
-    }
 }

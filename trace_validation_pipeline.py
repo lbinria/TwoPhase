@@ -26,7 +26,7 @@ tm_process = Popen([
     "/usr/lib/jvm/jdk-19/bin/java",
     "-XX:StartFlightRecording=disk=true,dumponexit=true,maxsize=20M,filename=app-tm.jfr",
     "-cp",
-    "impl/out/production/TwoPhase",
+    "/home/me/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar:impl/out/production/TwoPhase",
     "org.lbee.twophase.Client",
     "localhost", "6869", "tm"])
 
@@ -38,7 +38,7 @@ for i in range(2):
         "/usr/lib/jvm/jdk-19/bin/java",
         f"-XX:StartFlightRecording=disk=true,dumponexit=true,maxsize=20M,filename=app-rm-{i}.jfr",
         "-cp",
-        "impl/out/production/TwoPhase",
+        "/home/me/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar:impl/out/production/TwoPhase",
         "org.lbee.twophase.Client",
         "localhost", "6869", "rm"])
 
@@ -77,7 +77,7 @@ print("# Start serializing events.")
 serializer_event_process = Popen([
     "/usr/lib/jvm/jdk-19/bin/java",
     "-cp",
-    "/opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:impl/out/production/TwoPhase",
+    "/opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:/home/me/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar:impl/out/production/TwoPhase",
     "org.lbee.tools.JFRSerializer",
     "app-tm.jfr", "app-rm-0.jfr", "app-rm-1.jfr"])
 

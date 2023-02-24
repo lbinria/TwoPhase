@@ -1,12 +1,12 @@
 package org.lbee.tools;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
 import tlc2.value.ValueOutputStream;
-import tlc2.value.impl.RecordValue;
-import tlc2.value.impl.StringValue;
-import tlc2.value.impl.TupleValue;
-import tlc2.value.impl.Value;
+import tlc2.value.impl.*;
 import util.UniqueString;
 
 import java.io.IOException;
@@ -36,8 +36,34 @@ public class JFRSerializer {
     }
 
     private static Value jsonToValue(String json) {
-        return new StringValue("");
+        // Read json
+        JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+        // Convert all args
+        Value[] values = jsonObject.getAsJsonArray().asList().stream().map(jsonElement -> convertJsonObject(jsonElement.getAsJsonObject())).toArray(Value[]::new);
+        // Return as tuple
+        return new TupleValue(values);
     }
+
+    private static Value convertJsonObject(JsonObject jsonObject) {
+        String type = jsonObject.get("type").getAsString();
+        JsonElement jsonElement = jsonObject.get("value");
+
+        return
+        switch (type) {
+            case "string" -> new StringValue(jsonElement.getAsString());
+            case "record" -> recordFromJsonObject(jsonElement.getAsJsonObject());
+            case "bool" -> new BoolValue(jsonElement.getAsBoolean());
+            case "int" -> IntValue.gen(jsonElement.getAsInt());
+            default -> new StringValue(""); // TODO raise exception here !
+        };
+    }
+
+    private static Value recordFromJsonObject(JsonObject jsonObject) {
+        UniqueString[] names = jsonObject.keySet().stream().map(UniqueString::uniqueStringOf).toArray(UniqueString[]::new);
+        Value[] values = jsonObject.entrySet().stream().map(e -> convertJsonObject(e.getValue().getAsJsonObject())).toArray(Value[]::new);
+        return new RecordValue(names, values, false);
+    }
+
 
     private static void serializeTrace(final List<RecordedEvent> events, final Path out) throws IOException {
 

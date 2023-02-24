@@ -23,16 +23,16 @@ public abstract class TrackedVariable<TValue extends TrackableValue<?>> implemen
     }
 
     @Override
+    public String getName() { return this.name; }
+
+    @Override
     public void setTraceProducer(TraceProducer<?> traceProducer) {
         this.traceProducer = traceProducer;
     }
 
     @Override
     public void apply(String operator, TValue... args) {
-        // TODO check operator existence
-        //Operator op = this.operators.get(operator);
-        String strValues = "[" + Arrays.stream(args).map(Object::toString).collect(Collectors.joining(",")) + "]";
-        this.traceProducer.produce(operator, this.name, strValues, 0);
+        this.traceProducer.produce(operator, this.name, args, 0);
     }
 
     public void applyFromMethod(String methodName, TValue... args) {
@@ -42,11 +42,5 @@ public abstract class TrackedVariable<TValue extends TrackableValue<?>> implemen
     }
 
     public abstract void set(TValue value);
-
-    // TODO remove TEST
-    public void settt(TValue... args) {
-        this.applyFromMethod("set", args);
-    }
-
 
 }

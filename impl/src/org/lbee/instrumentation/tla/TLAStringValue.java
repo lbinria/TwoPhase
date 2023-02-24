@@ -8,8 +8,4 @@ public class TLAStringValue extends TrackedValue<String> {
         super(value, "string");
     }
 
-    @Override
-    public String toString() {
-        return "{\"type\":\"" + this.getType() + "\",\"value\":\"" + this.getValue() + "\"}";
-    }
 }
