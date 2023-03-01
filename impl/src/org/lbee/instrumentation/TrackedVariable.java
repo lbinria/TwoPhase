@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class TrackedVariable<TValue extends TrackableValue<?>> implements TrackableVariable<TValue> {
+public abstract class TrackedVariable<TValue extends TrackableValue> implements TrackableVariable<TValue> {
 
     private String name;
     private TraceProducer<?> traceProducer;
@@ -31,16 +31,16 @@ public abstract class TrackedVariable<TValue extends TrackableValue<?>> implemen
     }
 
     @Override
-    public void apply(String operator, TValue... args) {
+    public void apply(String operator, TValue... args) throws TraceProducerException {
         this.traceProducer.produce(operator, this.name, args, 0);
     }
 
-    public void applyFromMethod(String methodName, TValue... args) {
+    public void applyFromMethod(String methodName, TValue... args) throws TraceProducerException {
         Operator op = this.operators.get(methodName);
         // TODO Check consistency between op and value type
         this.apply(op.targetOperator(), args);
     }
 
-    public abstract void set(TValue value);
+    public abstract void set(TValue value) throws TraceProducerException;
 
 }

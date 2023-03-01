@@ -2,6 +2,7 @@ package org.lbee.twophase;
 
 import org.lbee.instrumentation.FormalInstrumentation;
 import org.lbee.instrumentation.FormalInstrumentationConfig;
+import org.lbee.instrumentation.TraceProducerException;
 import org.lbee.instrumentation.jfr.JFRTraceProducer;
 import org.lbee.twophase.models.Message;
 
@@ -32,7 +33,7 @@ public abstract class NetworkManager implements NamedClient {
 
     //abstract void run() throws IOException;
 
-    protected void run() throws IOException {
+    protected void run() throws IOException, TraceProducerException {
         Message message = receive();
 
         if (message == null)
@@ -46,7 +47,7 @@ public abstract class NetworkManager implements NamedClient {
         receive(message);
     }
 
-    abstract void receive(Message message) throws IOException;
+    abstract void receive(Message message) throws IOException, TraceProducerException;
 
     protected Message receive() throws IOException {
         // Request for message destined to me

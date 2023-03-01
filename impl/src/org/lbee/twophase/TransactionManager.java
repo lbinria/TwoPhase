@@ -1,5 +1,6 @@
 package org.lbee.twophase;
 
+import org.lbee.instrumentation.TraceProducerException;
 import org.lbee.instrumentation.tla.TLARecordValue;
 import org.lbee.instrumentation.tla.TLASetVariable;
 import org.lbee.instrumentation.tla.TLAStringValue;
@@ -52,7 +53,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
     }
 
     @Override
-    public void run() throws IOException {
+    public void run() throws IOException, TraceProducerException {
         // Check eventual received message
         super.run();
 
@@ -81,7 +82,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
 
     }
 
-    protected void receive(Message message) throws IOException {
+    protected void receive(Message message) throws IOException, TraceProducerException {
         switch (message.getContent()) {
             case "Register" -> this.receivedRegister(message.getFrom());
             case "Prepared" -> this.receivePrepared(message.getFrom());
@@ -106,13 +107,13 @@ public class TransactionManager extends NetworkManager implements NamedClient {
     /**
      * @TLAAction TMCommit
      */
-    private void commit() throws IOException {
+    private void commit() throws IOException, TraceProducerException {
         for (String rmName : resourceManagers)
             this.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), this.instrumentation.getClock().getValue()));
 
         System.out.println(TwoPhaseMessage.COMMIT + ".");
         // Log event (hard-coded for now)
-        TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue(TwoPhaseMessage.COMMIT.toString())));
+        TLAMsgs value = new TLAMsgs(new TLAStringValue(TwoPhaseMessage.COMMIT.toString()));
         this.instrumentedMsgs.add(value);
         instrumentedState.set(new TLAStringValue("done"));
         instrumentation.commit();
@@ -123,7 +124,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
     /**
      * @TLAAction TMAbort
      */
-    public void abort() throws IOException {
+    public void abort() throws IOException, TraceProducerException {
         System.out.printf("%s timeout reach.\n", this.getName());
 
         for (String rmName : resourceManagers) {
@@ -133,7 +134,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
 
         System.out.println(TwoPhaseMessage.ABORT + ".");
         // Log event (hard-coded for now)
-        TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue(TwoPhaseMessage.ABORT.toString())));
+        TLAMsgs value = new TLAMsgs(new TLAStringValue(TwoPhaseMessage.ABORT.toString()));
         this.instrumentedMsgs.add(value);
 
         instrumentation.commit();
@@ -145,7 +146,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
     /**
      * @TLAAction TMRcvPrepared(r)
      */
-    public void receivePrepared(String sender) {
+    public void receivePrepared(String sender) throws TraceProducerException {
         /* Search receive prepared resource manager in resource manager set */
         Optional<String> optionalResourceManager = resourceManagers.stream().filter(rmName -> rmName.equals(sender)).findFirst();
         /* If it doesn't exist do nothing */

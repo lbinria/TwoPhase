@@ -1,11 +1,17 @@
 package org.lbee.instrumentation.tla;
 
+import org.lbee.instrumentation.TracedValue;
+import org.lbee.instrumentation.TracedValueProperty;
 import org.lbee.instrumentation.TrackedValue;
 
-public class TLAStringValue extends TrackedValue<String> {
+@TracedValue(type = "string")
+public class TLAStringValue extends TrackedValue {
+
+    @TracedValueProperty(name="value")
+    public String value;
 
     public TLAStringValue(String value) {
-        super(value, "string");
+        this.value = value;
     }
 
 }

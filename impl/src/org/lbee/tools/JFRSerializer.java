@@ -1,5 +1,6 @@
 package org.lbee.tools;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -37,23 +38,23 @@ public class JFRSerializer {
 
     private static Value jsonToValue(String json) {
         // Read json
-        JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+        JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
         // Convert all args
-        Value[] values = jsonObject.getAsJsonArray().asList().stream().map(jsonElement -> convertJsonObject(jsonElement.getAsJsonObject())).toArray(Value[]::new);
+        Value[] values = jsonArray.asList().stream().map(jsonElement -> convertJsonObject(jsonElement.getAsJsonObject())).toArray(Value[]::new);
         // Return as tuple
         return new TupleValue(values);
     }
 
     private static Value convertJsonObject(JsonObject jsonObject) {
-        String type = jsonObject.get("type").getAsString();
-        JsonElement jsonElement = jsonObject.get("value");
+        final String type = jsonObject.get("type").getAsString();
+        final JsonElement jsonElement = jsonObject.get("value");
 
         return
         switch (type) {
             case "string" -> new StringValue(jsonElement.getAsString());
-            case "record" -> recordFromJsonObject(jsonElement.getAsJsonObject());
             case "bool" -> new BoolValue(jsonElement.getAsBoolean());
             case "int" -> IntValue.gen(jsonElement.getAsInt());
+            case "record" -> recordFromJsonObject(jsonElement.getAsJsonObject());
             default -> new StringValue(""); // TODO raise exception here !
         };
     }

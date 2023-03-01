@@ -1,5 +1,7 @@
 package org.lbee.twophase;
 
+import org.lbee.instrumentation.TraceProducerException;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -63,6 +65,8 @@ public class Client {
             System.out.println("Server not found: " + ex.getMessage());
         } catch (IOException ex) {
             System.out.println("I/O error: " + ex.getMessage());
+        } catch (TraceProducerException ex) {
+            // TODO do something
         }
     }
 

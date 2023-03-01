@@ -1,10 +1,11 @@
 package org.lbee.instrumentation;
 
-public interface TrackableValue<T> {
+import java.util.Map;
 
-    T getValue();
+public interface TrackableValue {
+
     String getType();
-
+    Map<String, String> getProperties();
     // TODO add default value
 
 }

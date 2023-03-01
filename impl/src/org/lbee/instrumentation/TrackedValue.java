@@ -1,28 +1,27 @@
 package org.lbee.instrumentation;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@TracedValue(type = "unknown")
 // TODO rename
-public class TrackedValue<T> implements TrackableValue<T> {
+public class TrackedValue implements TrackableValue {
 
-    private final T value;
     private final String type;
+    private final Map<String, String> properties;
 
-    public TrackedValue(T value, String type) {
-        this.value = value;
-        this.type = type;
-    }
 
     @Override
-    public String toString() {
-        return format(this.getType(), this.getValue());
-    }
+    public Map<String, String> getProperties() { return this.properties; }
 
-    protected String format(String type, T value) {
-        return "{\"type\":\"" + type + "\",\"value\":" + value.toString() + "}";
-    }
-
-    @Override
-    public T getValue() {
-        return this.value;
+    public TrackedValue() {
+        // Get type of value from annotation
+        TracedValue tracedValue = this.getClass().getAnnotation(TracedValue.class);
+        this.type = tracedValue.type();
+        // Get fields annotations
+        this.properties = Arrays.stream(this.getClass().getFields()).collect(Collectors.toMap(Field::getName, vm -> vm.getAnnotation(TracedValueProperty.class).name()));
     }
 
     @Override

@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface TLAVariableAnnot {
+public @interface TracedValueProperty {
     String name();
 }

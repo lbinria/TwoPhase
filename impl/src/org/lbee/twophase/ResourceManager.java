@@ -1,5 +1,6 @@
 package org.lbee.twophase;
 
+import org.lbee.instrumentation.TraceProducerException;
 import org.lbee.instrumentation.tla.TLARecordValue;
 import org.lbee.instrumentation.tla.TLARecordVariable;
 import org.lbee.instrumentation.tla.TLASetVariable;
@@ -77,7 +78,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
     }
 
     @Override
-    public void run() throws IOException {
+    public void run() throws IOException, TraceProducerException {
         // Check eventual received message
         super.run();
 
@@ -127,11 +128,12 @@ public class ResourceManager extends NetworkManager implements NamedClient {
     /**
      * @TLA-action RMPrepare(r)
      */
-    protected void prepare() throws IOException {
+    protected void prepare() throws IOException, TraceProducerException {
         this.setState(ResourceManagerState.PREPARED);
 
         // Send message
-        TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue("Prepared"), "rm", new TLAStringValue(this.getName())));
+        //TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue("Prepared"), "rm", new TLAStringValue(this.getName())));
+        TLAMsgs value = new TLAMsgs(new TLAStringValue("Prepared"), new TLAStringValue(this.getName()));
         this.instrumentedMsgs.add(value);
         this.instrumentation.commit();
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
