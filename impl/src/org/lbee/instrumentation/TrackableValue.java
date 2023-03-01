@@ -6,6 +6,5 @@ public interface TrackableValue {
 
     String getType();
     Map<String, String> getProperties();
-    // TODO add default value
 
 }

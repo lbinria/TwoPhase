@@ -1,9 +1,6 @@
 package org.lbee.tools;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
 import tlc2.value.ValueOutputStream;
@@ -46,7 +43,8 @@ public class JFRSerializer {
     }
 
     private static Value convertJsonObject(JsonObject jsonObject) {
-        final String type = jsonObject.get("type").getAsString();
+
+        final String type = jsonObject.get("_type").getAsString();
         final JsonElement jsonElement = jsonObject.get("value");
 
         return
@@ -54,14 +52,15 @@ public class JFRSerializer {
             case "string" -> new StringValue(jsonElement.getAsString());
             case "bool" -> new BoolValue(jsonElement.getAsBoolean());
             case "int" -> IntValue.gen(jsonElement.getAsInt());
-            case "record" -> recordFromJsonObject(jsonElement.getAsJsonObject());
+            case "record" -> recordFromJsonObject(jsonObject);
             default -> new StringValue(""); // TODO raise exception here !
         };
+
     }
 
     private static Value recordFromJsonObject(JsonObject jsonObject) {
-        UniqueString[] names = jsonObject.keySet().stream().map(UniqueString::uniqueStringOf).toArray(UniqueString[]::new);
-        Value[] values = jsonObject.entrySet().stream().map(e -> convertJsonObject(e.getValue().getAsJsonObject())).toArray(Value[]::new);
+        UniqueString[] names = jsonObject.entrySet().stream().filter(e -> !e.getKey().equals("_type") && e.getValue() != JsonNull.INSTANCE).map(e -> UniqueString.uniqueStringOf(e.getKey())).toArray(UniqueString[]::new);
+        Value[] values = jsonObject.entrySet().stream().filter(e -> !e.getKey().equals("_type") && e.getValue() != JsonNull.INSTANCE).map(e -> convertJsonObject(e.getValue().getAsJsonObject())).toArray(Value[]::new);
         return new RecordValue(names, values, false);
     }
 

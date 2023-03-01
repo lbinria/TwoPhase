@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@TracedValue(type = "unknown")
+@TracedValue(type = "unknown", name = "")
 // TODO rename
 public class TrackedValue implements TrackableValue {
 

@@ -6,7 +6,7 @@ import org.lbee.instrumentation.TrackedValue;
 
 import java.util.Map;
 
-@TracedValue(type = "record")
+@TracedValue(type = "record", name = "record")
 public class TLARecordValue extends TrackedValue {
 
 

@@ -6,7 +6,7 @@ import org.lbee.instrumentation.TrackedValue;
 import org.lbee.instrumentation.tla.TLARecordValue;
 import org.lbee.instrumentation.tla.TLAStringValue;
 
-@TracedValue(type="record")
+@TracedValue(type="record", name = "tla_msg_value")
 public class TLAMsgs extends TLARecordValue {
 
     @TracedValueProperty(name="type")

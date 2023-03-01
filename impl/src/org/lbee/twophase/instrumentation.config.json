@@ -1,45 +1,35 @@
 {
   "trace_producer": "JFR",
   "logicalClock": true,
-  "type_aliases":
-  [
-    {
-      "name": "string",
-      "structure": {"type": "string"}
-    },
-    {
-      "name": "message_record",
-      "structure": {"type": "record", "args": [{"name": "type", "type": "string"}, {"name": "rm", "type": "string"}]}
-    }
-  ],
   "variables":
   [
     {
       "name": "rmState",
       "operators":
       [
-        { "method": "set", "target_operator": "ExceptAt", "args": [{"type": "string"}, {"type": "string"}]}
+        { "method": "set", "target_operator": "ExceptAt", "args": [{"_type": "string", "_class": "string"}, {"_type": "string"}]}
       ]
     },
     {
       "name": "tmState",
       "operators":
       [
-        {"method": "set", "target_operator": "Replace", "args": [{"type": "string"}] }
+        {"method": "set", "target_operator": "Replace", "args": [{"_type": "string"}] }
       ]
     },
     {
       "name": "tmPrepared",
       "operators":
       [
-        {"method": "add", "target_operator": "AddElement", "args": [{"type": "string"}] }
+        {"method": "add", "target_operator": "AddElement", "args": [{"_type": "string"}] }
       ]
     },
     {
       "name": "msgs",
+      "_class": "msg_variable",
       "operators":
       [
-        {"method": "add", "target_operator": "AddElement", "args": [{"type": "record", "args": [{"name": "type", "type": "string"}, {"name": "rm", "type": "string"}]}]}
+        {"method": "add", "target_operator": "AddElement", "args": [{"_type": "record"}, {"_class": "tla_msg_value"}]}
       ]
     }
   ]
