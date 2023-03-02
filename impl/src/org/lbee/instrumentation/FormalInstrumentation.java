@@ -18,7 +18,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
     // Local clock
     private final InstrumentationClock clock;
     // Instrumented values
-    private final HashMap<String, TrackableVariable> instrumentedValues;
+    private final HashMap<String, TrackedVariable> instrumentedValues;
     // Trace producer
     private final TProducer traceProducer;
 
@@ -49,9 +49,9 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
      * @param ctor
      * @return
      */
-    public TrackableVariable add(String name, Supplier<? extends TrackableVariable> ctor) {
+    public TrackedVariable add(String name, Supplier<? extends TrackedVariable> ctor) {
         // Construct object from type parameter
-        final TrackableVariable trackedVariable = Objects.requireNonNull(ctor).get();
+        final TrackedVariable trackedVariable = Objects.requireNonNull(ctor).get();
         // Set name of the variable linked to the instrumented value
         trackedVariable.setName(name);
         trackedVariable.setTraceProducer(this.traceProducer);
@@ -65,7 +65,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
      * @param name Tracked variable name
      * @return A tracked variable
      */
-    public TrackableVariable get(String name) {
+    public TrackedVariable get(String name) {
         return this.instrumentedValues.get(name);
     }
 

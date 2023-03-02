@@ -37,11 +37,11 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
     }
 
     @Override
-    public JFRTraceEvent produce(String operator, String name, TrackableValue[] args, long clock) throws TraceProducerException {
+    public JFRTraceEvent produce(String operator, String variableName, TrackableValue[] args, long clock) throws TraceProducerException {
         try {
             String strArgs = serializeValues(args);
-            System.out.printf("%s - Trace event: `%s %s (%s)`.\n", clock, operator, name, strArgs);
-            JFRTraceEvent trace = new JFRTraceEvent(this.instrumentation.getGuid(), operator, name, strArgs, clock);
+            System.out.printf("%s - Trace event: `%s %s (%s)`.\n", clock, operator, variableName, strArgs);
+            JFRTraceEvent trace = new JFRTraceEvent(this.instrumentation.getGuid(), operator, variableName, strArgs, clock);
             this.traces.add(trace);
             return trace;
         } catch (NoSuchFieldException | IllegalAccessException ex) {

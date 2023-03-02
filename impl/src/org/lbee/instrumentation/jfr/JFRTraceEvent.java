@@ -14,19 +14,19 @@ public class JFRTraceEvent extends jdk.jfr.Event implements TraceEvent {
 
     @Label("sender")
     String sender;
-    @Label("key")
-    String key;
     @Label("op")
     String op;
+    @Label("var")
+    String var;
     @Label("args")
     String args;
     @Label("clock")
     long clock;
 
-    public JFRTraceEvent(String sender, String operator, String key, String args, long clock) {
+    public JFRTraceEvent(String sender, String operator, String variableName, String args, long clock) {
         this.sender = sender;
         this.op = operator;
-        this.key = key;
+        this.var = variableName;
         this.args = args;
         this.clock = clock;
     }

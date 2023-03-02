@@ -68,14 +68,14 @@ public class JFRSerializer {
     private static void serializeTrace(final List<RecordedEvent> events, final Path out) throws IOException {
 
         final String senderName = "sender";
-        final String keyName = "key";
+        final String varName = "var";
         final String argsName = "args";
         final String clockName = "clock";
         final String opName = "op";
 
         // Prepare "record" names
         final UniqueString[] names = {
-                UniqueString.uniqueStringOf(keyName),
+                UniqueString.uniqueStringOf(varName),
                 UniqueString.uniqueStringOf(opName),
                 UniqueString.uniqueStringOf(argsName)
         };
@@ -140,8 +140,8 @@ public class JFRSerializer {
                 // Create record
                 final RecordValue r = new RecordValue(syncEventNames, syncEventValues, false);
                 records.add(r);
-                keyNames.add(UniqueString.uniqueStringOf(event.getString(keyName)));
-                System.out.printf("%s - %s - %s -> %s %s (%s).\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(opName), event.getString(keyName), event.getString(argsName));
+                keyNames.add(UniqueString.uniqueStringOf(event.getString(varName)));
+                System.out.printf("%s - %s - %s -> %s %s (%s).\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(opName), event.getString(varName), event.getString(argsName));
             }
 
             // Put records in record
@@ -158,10 +158,6 @@ public class JFRSerializer {
         final ValueOutputStream vos = new ValueOutputStream(out.toFile(), true);
         // Do not normalize TupleValue because normalization depends on the actual
         // UniqueString#internTable.
-
-        //final Assignment a = new Assignment("Bob", new String[]{"x"}, "x");
-
-
         eventTuple.write(vos);
 
         vos.close();

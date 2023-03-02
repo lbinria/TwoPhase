@@ -8,10 +8,6 @@ import org.lbee.instrumentation.tla.value.TLAStringValue;
 @TrackedVariableInfo(name = "string_variable")
 public class TLAStringVariable extends TrackedVariable {
 
-    /**
-     * @TraceUpdateMethod("set")
-     * @param value
-     */
     public void set(TLAStringValue value) throws TraceProducerException {
         this.apply("Replace", value);
     }

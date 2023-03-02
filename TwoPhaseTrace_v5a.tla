@@ -11,7 +11,7 @@ EXTENDS TLC, Sequences, Naturals, FiniteSets, Bags
 CONSTANTS RM
 
 (* Operators to apply when updating variable *)
-(* signature: [string, string] *)
+(* signature: [string, any] *)
 ExceptAt(var, arg, val) == [var EXCEPT ![arg] = val]
 (* signature: [any] *)
 AddElement(var, val) == var \cup {val}
