@@ -62,6 +62,22 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
         return jsonArgs.toString();
     }
 
+    private JsonElement jsonValue(Object propertyValue) throws NoSuchFieldException, IllegalAccessException {
+        final JsonElement jsonValue;
+        if (propertyValue instanceof TrackableValue)
+            jsonValue = serializeValue((TrackableValue) propertyValue);
+        else if (propertyValue instanceof String)
+            jsonValue = new JsonPrimitive((String) propertyValue);
+        else if (propertyValue instanceof Boolean)
+            jsonValue = new JsonPrimitive((Boolean) propertyValue);
+        else if (propertyValue instanceof Integer)
+            jsonValue = new JsonPrimitive((Number) propertyValue);
+        else
+            jsonValue = null;
+
+        return jsonValue;
+    }
+
     private JsonObject serializeValue(TrackableValue value) throws NoSuchFieldException, IllegalAccessException {
 
         JsonObject jsonObject = new JsonObject();
@@ -70,25 +86,16 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
 
             Field field = value.getClass().getField(property.getKey());
             Object propertyValue = field.get(value);
-            Class<?> propertyType = field.getType();
-
-            final JsonElement jsonValue;
-            if (propertyValue instanceof TrackableValue) {
-                jsonValue = serializeValue((TrackableValue) propertyValue);
-            }
-            else {
-                if (propertyType.equals(String.class))
-                    jsonValue = new JsonPrimitive((String) propertyValue);
-                else if (propertyType.equals(Boolean.class))
-                    jsonValue = new JsonPrimitive((Boolean) propertyValue);
-                else if (propertyType.equals(Integer.class))
-                    jsonValue = new JsonPrimitive((Number) propertyValue);
-                else
-                    jsonValue = null;
-            }
+            //Class<?> propertyType = field.getType();
+            JsonElement jsonValue = jsonValue(propertyValue);
 
             jsonObject.add(property.getValue(), jsonValue);
 
+        }
+
+        for (Map.Entry<String, TrackableValue> property : value.getDynamicProperties().entrySet()) {
+            JsonElement jsonValue = jsonValue(property.getValue());
+            jsonObject.add(property.getKey(), jsonValue);
         }
 
         jsonObject.add("_type", new JsonPrimitive(value.getType()));

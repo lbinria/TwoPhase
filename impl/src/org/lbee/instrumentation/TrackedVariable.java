@@ -1,16 +1,11 @@
 package org.lbee.instrumentation;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public abstract class TrackedVariable<TValue extends TrackableValue> implements TrackableVariable<TValue> {
+public abstract class TrackedVariable implements TrackableVariable {
 
     private String name;
     private TraceProducer<?> traceProducer;
-    private final Map<String, Operator> operators;
 
     public TrackedVariable() {
-        this.operators = new HashMap<>();
     }
 
     @Override
@@ -27,10 +22,8 @@ public abstract class TrackedVariable<TValue extends TrackableValue> implements 
     }
 
     @Override
-    public void apply(String operator, TValue... args) throws TraceProducerException {
+    public void apply(String operator, TrackableValue... args) throws TraceProducerException {
         this.traceProducer.produce(operator, this.name, args, 0);
     }
-
-    public abstract void set(TValue value) throws TraceProducerException;
 
 }

@@ -1,17 +1,16 @@
 package org.lbee.twophase;
 
 import org.lbee.instrumentation.TraceProducerException;
-import org.lbee.instrumentation.tla.TLARecordValue;
-import org.lbee.instrumentation.tla.TLARecordVariable;
-import org.lbee.instrumentation.tla.TLASetVariable;
-import org.lbee.instrumentation.tla.TLAStringValue;
+import org.lbee.instrumentation.tla.value.TLARecordValue;
+import org.lbee.instrumentation.tla.variable.TLARecordVariable;
+import org.lbee.instrumentation.tla.variable.TLASetVariable;
+import org.lbee.instrumentation.tla.value.TLAStringValue;
 import org.lbee.twophase.models.Message;
 import org.lbee.twophase.models.TwoPhaseMessage;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 
 public class ResourceManager extends NetworkManager implements NamedClient {
@@ -45,12 +44,12 @@ public class ResourceManager extends NetworkManager implements NamedClient {
      * Set state of manager
      * @param state New manager state
      */
-    private void setState(ResourceManagerState state) {
+    private void setState(ResourceManagerState state) throws TraceProducerException {
         System.out.printf("%s - %s.state = %s.\n", this.instrumentation.getClock(), this.getName(), state.toString());
         this.state = state;
 
         // Set new state value (hard-coded for now)
-        instrumentedState.set(this.getName(), state.toString().toLowerCase(Locale.ROOT));
+        instrumentedState.set(this.getName(), new TLAStringValue(state.toString().toLowerCase(Locale.ROOT)));
     }
 
     /**
@@ -97,7 +96,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
     }
 
     @Override
-    protected void receive(Message message) throws IOException {
+    protected void receive(Message message) throws IOException, TraceProducerException {
         // Redirect message to method to execute
         switch (message.getContent()) {
             case "Commit" -> this.commit();
@@ -143,7 +142,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
     /**
      * @TLA-action RMRcvCommitMsg(r)
      */
-    protected void commit() {
+    protected void commit() throws TraceProducerException {
         // Simulate some task that take some time
         long d = 150 + Helper.next(2000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
@@ -158,8 +157,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
     /**
      * @TLA-action RMRcvAbortMsg(r)
      */
-    protected void abort()
-    {
+    protected void abort() throws TraceProducerException {
         // Simulate some task that take some time
         long d = 150 + Helper.next(2000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);

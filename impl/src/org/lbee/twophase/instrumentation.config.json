@@ -5,6 +5,7 @@
   [
     {
       "name": "rmState",
+      "type": "record",
       "operators":
       [
         { "method": "set", "target_operator": "ExceptAt", "args": [{"_type": "string", "_class": "string"}, {"_type": "string"}]}
@@ -12,6 +13,7 @@
     },
     {
       "name": "tmState",
+      "type": "string",
       "operators":
       [
         {"method": "set", "target_operator": "Replace", "args": [{"_type": "string"}] }
@@ -19,6 +21,7 @@
     },
     {
       "name": "tmPrepared",
+      "type": "string_set",
       "operators":
       [
         {"method": "add", "target_operator": "AddElement", "args": [{"_type": "string"}] }
@@ -26,7 +29,7 @@
     },
     {
       "name": "msgs",
-      "_class": "msg_variable",
+      "type": "record_set",
       "operators":
       [
         {"method": "add", "target_operator": "AddElement", "args": [{"_type": "record"}, {"_class": "tla_msg_value"}]}

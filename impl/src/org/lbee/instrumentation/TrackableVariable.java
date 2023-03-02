@@ -1,10 +1,10 @@
 package org.lbee.instrumentation;
 
-public interface TrackableVariable<TValue extends TrackableValue> {
+public interface TrackableVariable {
 
     String getName();
     void setName(String name);
     void setTraceProducer(TraceProducer<?> traceProducer);
-    void apply(String operator, TValue... value) throws TraceProducerException;
+    void apply(String operator, TrackableValue... value) throws TraceProducerException;
 
 }

@@ -1,10 +1,10 @@
-package org.lbee.instrumentation.tla;
+package org.lbee.instrumentation.tla.value;
 
 import org.lbee.instrumentation.TracedValue;
 import org.lbee.instrumentation.TracedValueProperty;
 import org.lbee.instrumentation.TrackedValue;
 
-@TracedValue(type = "string", name = "string")
+@TracedValue(type = "string"/*, name = "string"*/)
 public class TLAStringValue extends TrackedValue {
 
     @TracedValueProperty(name="value")

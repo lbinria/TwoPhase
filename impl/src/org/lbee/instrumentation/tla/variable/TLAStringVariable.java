@@ -1,16 +1,17 @@
-package org.lbee.instrumentation.tla;
+package org.lbee.instrumentation.tla.variable;
 
 import org.lbee.instrumentation.TraceProducerException;
-import org.lbee.instrumentation.TracedValueProperty;
 import org.lbee.instrumentation.TrackedVariable;
+import org.lbee.instrumentation.TrackedVariableInfo;
+import org.lbee.instrumentation.tla.value.TLAStringValue;
 
-public class TLAStringVariable extends TrackedVariable<TLAStringValue> {
+@TrackedVariableInfo(name = "string_variable")
+public class TLAStringVariable extends TrackedVariable {
 
     /**
      * @TraceUpdateMethod("set")
      * @param value
      */
-    @Override
     public void set(TLAStringValue value) throws TraceProducerException {
         this.apply("Replace", value);
     }

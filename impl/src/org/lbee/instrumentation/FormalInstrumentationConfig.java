@@ -7,7 +7,7 @@ public class FormalInstrumentationConfig {
 
     private final String producerName;
     private final boolean logicClock;
-    private final Map<String, Map<String, Operator>> variables;
+    private final Map<String, FormalInstrumentationVariableConfig> variables;
 
     public String getProducerName() {
         return producerName;
@@ -17,10 +17,6 @@ public class FormalInstrumentationConfig {
         this.producerName = producerName;
         this.logicClock = logicClock;
         this.variables = new HashMap<>();
-    }
-
-    public void addVariable(String name, Map<String, Operator> operators) {
-        variables.put(name, operators);
     }
 
     public boolean isLogicClock() {

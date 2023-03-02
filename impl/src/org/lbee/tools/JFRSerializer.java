@@ -69,7 +69,7 @@ public class JFRSerializer {
 
         final String senderName = "sender";
         final String keyName = "key";
-        final String valName = "val";
+        final String argsName = "args";
         final String clockName = "clock";
         final String opName = "op";
 
@@ -77,7 +77,13 @@ public class JFRSerializer {
         final UniqueString[] names = {
                 UniqueString.uniqueStringOf(keyName),
                 UniqueString.uniqueStringOf(opName),
-                UniqueString.uniqueStringOf(valName)
+                UniqueString.uniqueStringOf(argsName)
+        };
+
+
+        final UniqueString[] syncEventNames = {
+                UniqueString.uniqueStringOf(opName),
+                UniqueString.uniqueStringOf(argsName)
         };
 
         // Filter TLA events only
@@ -113,6 +119,7 @@ public class JFRSerializer {
         for (List<RecordedEvent> clockEvents : tlaEventsList) {
 
             final ArrayList<RecordValue> records = new ArrayList<>(clockEvents.size());
+            final ArrayList<UniqueString> keyNames = new ArrayList<>(clockEvents.size());
 
             System.out.printf("\n---- Sync event %s ----\n", i++);
 
@@ -121,27 +128,28 @@ public class JFRSerializer {
                     continue;
 
                 // Convert args
-                String json = event.getString(valName);
+                final String json = event.getString(argsName);
                 final Value args = jsonToValue(json);
 
                 // Get field values
-                final Value[] values = {
-                        new StringValue(event.getString(keyName)),
+                final Value[] syncEventValues = {
                         new StringValue(event.getString(opName)),
                         args
                 };
 
                 // Create record
-                final RecordValue r = new RecordValue(names, values, false);
+                final RecordValue r = new RecordValue(syncEventNames, syncEventValues, false);
                 records.add(r);
-
-                System.out.printf("%s - %s - %s -> %s %s (%s).\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(opName), event.getString(keyName), event.getString(valName));
+                keyNames.add(UniqueString.uniqueStringOf(event.getString(keyName)));
+                System.out.printf("%s - %s - %s -> %s %s (%s).\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(opName), event.getString(keyName), event.getString(argsName));
             }
 
-            // Put records in tuple
-            final TupleValue eventClockTuple = new TupleValue(records.toArray(new RecordValue[0]));
+            // Put records in record
+            final UniqueString[] keyNamesArray = keyNames.toArray(UniqueString[]::new);
+            final Value[] recordsArray = records.toArray(Value[]::new);
+            final RecordValue eventRecord = new RecordValue(keyNamesArray, recordsArray, false);
 
-            tuples.add(eventClockTuple);
+            tuples.add(eventRecord);
         }
 
         final Value[] v = tuples.toArray(new Value[0]);

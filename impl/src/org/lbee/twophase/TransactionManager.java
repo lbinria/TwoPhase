@@ -1,10 +1,10 @@
 package org.lbee.twophase;
 
 import org.lbee.instrumentation.TraceProducerException;
-import org.lbee.instrumentation.tla.TLARecordValue;
-import org.lbee.instrumentation.tla.TLASetVariable;
-import org.lbee.instrumentation.tla.TLAStringValue;
-import org.lbee.instrumentation.tla.TLAStringVariable;
+import org.lbee.instrumentation.tla.value.TLARecordValue;
+import org.lbee.instrumentation.tla.variable.TLASetVariable;
+import org.lbee.instrumentation.tla.value.TLAStringValue;
+import org.lbee.instrumentation.tla.variable.TLAStringVariable;
 import org.lbee.twophase.models.Message;
 import org.lbee.twophase.models.TwoPhaseMessage;
 
@@ -69,7 +69,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
             String rmValue = "{" + strResourceManagers + "}";
             TLAConfigTemplate TLAconfigTemplate = new TLAConfigTemplate(Map.of("RM", rmValue));
             // TODO modify hard-coded path
-            TLAconfigTemplate.generate("TwoPhaseTrace.template.cfg");
+            TLAconfigTemplate.generate("TwoPhaseTrace_v5a.template.cfg");
             isAllRegistered = true;
         }
 

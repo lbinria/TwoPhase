@@ -11,8 +11,11 @@ EXTENDS TLC, Sequences, Naturals, FiniteSets, Bags
 CONSTANTS RM
 
 (* Operators to apply when updating variable *)
+(* signature: [string, string] *)
 ExceptAt(var, arg, val) == [var EXCEPT ![arg] = val]
+(* signature: [any] *)
 AddElement(var, val) == var \cup {val}
+(* signature: [any] *)
 Replace(var, val) == val   \* 1st argument unnecessary but added for consistency
 
 (* Handmade simple valid trace. *)
@@ -65,11 +68,11 @@ Trace_unvalid_0 == <<
     ]
 >>
 
-Trace == Trace_valid_commit
+\* Trace == Trace_valid_commit
 \*Trace == Trace_unvalid_0
 
-\* INSTANCE IOUtils
-\* Trace == IODeserialize("Trace.bin", TRUE)
+INSTANCE IOUtils
+Trace == IODeserialize("Trace.bin", TRUE)
 
 VARIABLES
   rmState,       \* rmState[r] is the state of resource manager r.
