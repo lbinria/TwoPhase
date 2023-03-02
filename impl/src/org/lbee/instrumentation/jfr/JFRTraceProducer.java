@@ -14,14 +14,14 @@ import java.util.Map;
 // @TraceProducer(name="JFR")
 public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
 
-    private FormalInstrumentation<?> instrumentation;
+    private TraceInstrumentation<?> instrumentation;
     private final List<TraceEvent> traces;
 
     public JFRTraceProducer() {
         this.traces = new ArrayList<>();
     }
 
-    public void setIntrumentation(FormalInstrumentation<?> instrumentation) {
+    public void setIntrumentation(TraceInstrumentation<?> instrumentation) {
         this.instrumentation = instrumentation;
     }
 

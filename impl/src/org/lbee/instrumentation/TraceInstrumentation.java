@@ -3,13 +3,14 @@ package org.lbee.instrumentation;
 import org.lbee.instrumentation.clock.InstrumentationClock;
 import org.lbee.instrumentation.clock.LogicalClock;
 import org.lbee.instrumentation.clock.RealTimeClock;
+import org.lbee.instrumentation.config.FormalInstrumentationConfig;
 
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
+public class TraceInstrumentation<TProducer extends TraceProducer<?>> {
 
     // Instrumentation guid
     private final String guid;
@@ -32,7 +33,7 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
         this.clock.sync(clock);
     }
 
-    public FormalInstrumentation(FormalInstrumentationConfig configuration, TProducer traceProducer) {
+    public TraceInstrumentation(FormalInstrumentationConfig configuration, TProducer traceProducer) {
         this.guid = UUID.randomUUID().toString();
         this.configuration = configuration;
         this.instrumentedValues = new HashMap<>();

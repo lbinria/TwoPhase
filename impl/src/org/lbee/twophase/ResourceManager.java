@@ -15,12 +15,16 @@ import java.util.Random;
 
 public class ResourceManager extends Manager implements NamedClient {
 
-    // Instrumentation
-    //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
+    // Manager name
+    private final String name;
+
     // Instrumented values
     private final TLARecordVariable instrumentedState;
     private final TLASetVariable<TLARecordValue> instrumentedMsgs;
 
+    /**
+     * Possible states of resource manager
+     */
     enum ResourceManagerState {
         WORKING,
         PREPARED,
@@ -33,21 +37,37 @@ public class ResourceManager extends Manager implements NamedClient {
     // Transaction manager (to send message)
     private final String transactionManagerName;
 
-    private final String name;
-
     // Current state
-    //@TLAVariable(name="rmState")
     private ResourceManagerState state = ResourceManagerState.WORKING;
 
+    /**
+     * Construct a resource manager
+     * @param socket Client socket
+     * @param name Resource manager name
+     * @param transactionManagerName Attached transaction manager name
+     * @param config Resource manager config
+     * @throws IOException Throw when errors occur on socket
+     */
+    public ResourceManager(Socket socket, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
+        super(socket);
+        this.name = name;
+        this.config = config;
+        this.transactionManagerName = transactionManagerName;
+
+        // Here can be hold by configuration file
+        this.instrumentedState = this.instrumentation.add("rmState", TLARecordVariable::new);
+        this.instrumentedMsgs = this.instrumentation.add("msgs", TLASetVariable::new);
+    }
 
     /**
      * Set state of manager
      * @param state New manager state
      */
     private void setState(ResourceManagerState state) throws TraceProducerException {
+        // Print message
         System.out.printf("%s - %s.state = %s.\n", this.instrumentation.getClock(), this.getName(), state.toString());
+        // Change state
         this.state = state;
-
         // Set new state value (hard-coded for now)
         instrumentedState.set(this.getName(), new TLAStringValue(state.toString().toLowerCase(Locale.ROOT)));
     }
@@ -58,17 +78,6 @@ public class ResourceManager extends Manager implements NamedClient {
      */
     public ResourceManagerState getState() {
         return this.state;
-    }
-
-    public ResourceManager(Socket socket, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
-        super(socket);
-        this.config = config;
-        this.transactionManagerName = transactionManagerName;
-        this.name = name;
-
-        // Here can be hold by configuration file
-        this.instrumentedState = this.instrumentation.add("rmState", TLARecordVariable::new);
-        this.instrumentedMsgs = this.instrumentation.add("msgs", TLASetVariable::new);
     }
 
     @Override
@@ -106,19 +115,6 @@ public class ResourceManager extends Manager implements NamedClient {
         }
     }
 
-    private boolean isWorking() {
-        return this.getState() == ResourceManagerState.WORKING;
-    }
-
-    private boolean isCommitted() {
-        return this.getState() == ResourceManagerState.COMMITTED;
-    }
-
-    private boolean isAborted() {
-        return this.getState() == ResourceManagerState.ABORTED;
-    }
-
-
     protected void register() throws IOException {
         System.out.println("Registering...");
         this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.REGISTER.toString(), this.instrumentation.getClock().getValue()));
@@ -131,7 +127,6 @@ public class ResourceManager extends Manager implements NamedClient {
         this.setState(ResourceManagerState.PREPARED);
 
         // Send message
-        //TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue("Prepared"), "rm", new TLAStringValue(this.getName())));
         TLAMsgs value = new TLAMsgs(new TLAStringValue("Prepared"), new TLAStringValue(this.getName()));
         instrumentedMsgs.add(value);
         instrumentation.commit();
@@ -197,4 +192,29 @@ public class ResourceManager extends Manager implements NamedClient {
                     '}';
         }
     }
+
+    /**
+     * Check whether the manager is in working state
+     * @return True if manager is in working state, else false
+     */
+    private boolean isWorking() {
+        return this.getState() == ResourceManagerState.WORKING;
+    }
+
+    /**
+     * Check whether the manager is in committed state
+     * @return True if manager is in committed state, else false
+     */
+    private boolean isCommitted() {
+        return this.getState() == ResourceManagerState.COMMITTED;
+    }
+
+    /**
+     * Check whether the manager is in aborted state
+     * @return True if manager is in aborted state, else false
+     */
+    private boolean isAborted() {
+        return this.getState() == ResourceManagerState.ABORTED;
+    }
+
 }

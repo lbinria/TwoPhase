@@ -1,4 +1,4 @@
-package org.lbee.instrumentation;
+package org.lbee.instrumentation.config;
 
 import java.util.ArrayList;
 import java.util.List;
