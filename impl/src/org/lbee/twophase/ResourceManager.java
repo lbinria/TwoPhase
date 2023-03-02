@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.util.Locale;
 import java.util.Random;
 
-public class ResourceManager extends NetworkManager implements NamedClient {
+public class ResourceManager extends Manager implements NamedClient {
 
     // Instrumentation
     //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
@@ -121,7 +121,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
 
     protected void register() throws IOException {
         System.out.println("Registering...");
-        this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.REGISTER.toString(), this.instrumentation.getClock().getValue()));
+        this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.REGISTER.toString(), this.instrumentation.getClock().getValue()));
     }
 
     /**
@@ -136,7 +136,7 @@ public class ResourceManager extends NetworkManager implements NamedClient {
         instrumentedMsgs.add(value);
         instrumentation.commit();
 
-        this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
+        this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
 
     }
 

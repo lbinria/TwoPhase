@@ -31,7 +31,7 @@ public class Client {
 
         try (Socket socket = new Socket(hostname, port)) {
 
-            NetworkManager manager;
+            Manager manager;
             switch (type) {
                 case "tm" :
                     manager = new TransactionManager(socket, config.transactionManagerConfig);
@@ -54,12 +54,10 @@ public class Client {
             while (!manager.isShutdown());
 
             // Send bye to server (kill the server thread)
-            manager.sendRaw("bye");
+            manager.networkManager.sendRaw("bye");
 
             // Print end of process
             System.out.println("shutdown.");
-
-            // TODO TM -> done
 
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());

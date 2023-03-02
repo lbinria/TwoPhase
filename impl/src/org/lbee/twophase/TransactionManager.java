@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class TransactionManager extends NetworkManager implements NamedClient {
+public class TransactionManager extends Manager implements NamedClient {
 
     // Instrumentation
     //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
@@ -108,7 +108,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
      */
     private void commit() throws IOException, TraceProducerException {
         for (String rmName : resourceManagers)
-            this.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), this.instrumentation.getClock().getValue()));
+            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), this.instrumentation.getClock().getValue()));
 
         // Display message
         System.out.println(TwoPhaseMessage.COMMIT + ".");
@@ -131,7 +131,7 @@ public class TransactionManager extends NetworkManager implements NamedClient {
 
         for (String rmName : resourceManagers) {
             Message m = new Message(this.getName(), rmName, TwoPhaseMessage.ABORT.toString(), this.instrumentation.getClock().getValue());
-            this.send(m);
+            this.networkManager.send(m);
         }
 
         System.out.println(TwoPhaseMessage.ABORT + ".");
