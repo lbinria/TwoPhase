@@ -46,10 +46,9 @@ public class TransactionManager extends NetworkManager implements NamedClient {
         this.config = config;
 
         // TODO Here can be read from a configuration file
-        //this.instrumentation = new FormalInstrumentation<>(true);
-        this.instrumentedState = (TLAStringVariable) this.instrumentation.add("tmState", TLAStringVariable::new);
-        this.instrumentedMsgs = (TLASetVariable<TLARecordValue>) this.instrumentation.add("msgs", TLASetVariable::new);
-        this.instrumentedPreparedResourceManagers = (TLASetVariable<TLAStringValue>) this.instrumentation.add("tmPrepared", TLASetVariable::new);
+        this.instrumentedState = this.instrumentation.add("tmState", TLAStringVariable::new);
+        this.instrumentedMsgs = this.instrumentation.add("msgs", TLASetVariable<TLARecordValue>::new);
+        this.instrumentedPreparedResourceManagers = this.instrumentation.add("tmPrepared", TLASetVariable<TLAStringValue>::new);
     }
 
     @Override
@@ -111,13 +110,16 @@ public class TransactionManager extends NetworkManager implements NamedClient {
         for (String rmName : resourceManagers)
             this.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), this.instrumentation.getClock().getValue()));
 
+        // Display message
         System.out.println(TwoPhaseMessage.COMMIT + ".");
+
         // Log event (hard-coded for now)
         TLAMsgs value = new TLAMsgs(new TLAStringValue(TwoPhaseMessage.COMMIT.toString()));
         this.instrumentedMsgs.add(value);
-        instrumentedState.set(new TLAStringValue("done"));
-        instrumentation.commit();
+        this.instrumentedState.set(new TLAStringValue("done"));
+        this.instrumentation.commit();
 
+        // Shutdown
         this.shutdown();
     }
 

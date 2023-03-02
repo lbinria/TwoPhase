@@ -67,8 +67,8 @@ public class ResourceManager extends NetworkManager implements NamedClient {
         this.name = name;
 
         // Here can be hold by configuration file
-        this.instrumentedState = (TLARecordVariable) this.instrumentation.add("rmState", TLARecordVariable::new);
-        this.instrumentedMsgs = (TLASetVariable<TLARecordValue>) this.instrumentation.add("msgs", TLASetVariable::new);
+        this.instrumentedState = this.instrumentation.add("rmState", TLARecordVariable::new);
+        this.instrumentedMsgs = this.instrumentation.add("msgs", TLASetVariable::new);
     }
 
     @Override
@@ -133,8 +133,9 @@ public class ResourceManager extends NetworkManager implements NamedClient {
         // Send message
         //TLARecordValue value = new TLARecordValue(Map.of("type", new TLAStringValue("Prepared"), "rm", new TLAStringValue(this.getName())));
         TLAMsgs value = new TLAMsgs(new TLAStringValue("Prepared"), new TLAStringValue(this.getName()));
-        this.instrumentedMsgs.add(value);
-        this.instrumentation.commit();
+        instrumentedMsgs.add(value);
+        instrumentation.commit();
+
         this.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), this.instrumentation.getClock().getValue()));
 
     }

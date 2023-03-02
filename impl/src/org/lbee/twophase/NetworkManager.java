@@ -11,7 +11,6 @@ import java.net.Socket;
 
 public abstract class NetworkManager implements NamedClient {
 
-    private final Socket socket;
     private final InputStream inputStream;
     private final PrintWriter writer;
 
@@ -23,7 +22,6 @@ public abstract class NetworkManager implements NamedClient {
     protected void shutdown() { shutdown = true; }
 
     public NetworkManager(Socket socket) throws IOException {
-        this.socket = socket;
         this.inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
         this.writer = new PrintWriter(outputStream, true);

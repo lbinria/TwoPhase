@@ -49,9 +49,9 @@ public class FormalInstrumentation<TProducer extends TraceProducer<?>> {
      * @param ctor
      * @return
      */
-    public TrackedVariable add(String name, Supplier<? extends TrackedVariable> ctor) {
+    public <TVariable extends TrackedVariable> TVariable add(String name, Supplier<? extends TVariable> ctor) {
         // Construct object from type parameter
-        final TrackedVariable trackedVariable = Objects.requireNonNull(ctor).get();
+        final TVariable trackedVariable = Objects.requireNonNull(ctor).get();
         // Set name of the variable linked to the instrumented value
         trackedVariable.setName(name);
         trackedVariable.setTraceProducer(this.traceProducer);
