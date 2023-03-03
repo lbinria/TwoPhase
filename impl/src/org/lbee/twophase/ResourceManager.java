@@ -1,10 +1,9 @@
 package org.lbee.twophase;
 
 import org.lbee.instrumentation.TraceProducerException;
-import org.lbee.instrumentation.tla.value.TLARecordValue;
+import org.lbee.instrumentation.tla.value.TLAStringValue;
 import org.lbee.instrumentation.tla.variable.TLARecordVariable;
 import org.lbee.instrumentation.tla.variable.TLASetVariable;
-import org.lbee.instrumentation.tla.value.TLAStringValue;
 import org.lbee.twophase.models.Message;
 import org.lbee.twophase.models.TwoPhaseMessage;
 
@@ -20,7 +19,7 @@ public class ResourceManager extends Manager implements NamedClient {
 
     // Instrumented values
     private final TLARecordVariable instrumentedState;
-    private final TLASetVariable<TLARecordValue> instrumentedMsgs;
+    private final TLASetVariable<TLAMsgs> instrumentedMsgs;
 
     /**
      * Possible states of resource manager

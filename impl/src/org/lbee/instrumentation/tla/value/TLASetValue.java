@@ -2,10 +2,9 @@ package org.lbee.instrumentation.tla.value;
 
 import org.lbee.instrumentation.TrackedValue;
 
-public abstract class TLARecordValue extends TrackedValue {
-
+public class TLASetValue<T extends TrackedValue> extends TLACollectionValue<T> {
     @Override
     public String getType() {
-        return "record";
+        return "set";
     }
 }

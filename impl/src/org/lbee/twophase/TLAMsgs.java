@@ -1,11 +1,9 @@
 package org.lbee.twophase;
 
-import org.lbee.instrumentation.TracedValue;
 import org.lbee.instrumentation.TracedValueProperty;
 import org.lbee.instrumentation.tla.value.TLARecordValue;
 import org.lbee.instrumentation.tla.value.TLAStringValue;
 
-@TracedValue(type="record")
 public class TLAMsgs extends TLARecordValue {
 
     @TracedValueProperty(name="type")

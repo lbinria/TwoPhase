@@ -19,7 +19,7 @@ public class TransactionManager extends Manager implements NamedClient {
 
     // Instrumented values
     private final TLAStringVariable instrumentedState;
-    private final TLASetVariable<TLARecordValue> instrumentedMsgs;
+    private final TLASetVariable<TLAMsgs> instrumentedMsgs;
     private final TLASetVariable<TLAStringValue> instrumentedPreparedResourceManagers;
 
     // Config
@@ -45,7 +45,7 @@ public class TransactionManager extends Manager implements NamedClient {
 
         // TODO Here can be read from a configuration file
         this.instrumentedState = this.instrumentation.add("tmState", TLAStringVariable::new);
-        this.instrumentedMsgs = this.instrumentation.add("msgs", TLASetVariable<TLARecordValue>::new);
+        this.instrumentedMsgs = this.instrumentation.add("msgs", TLASetVariable<TLAMsgs>::new);
         this.instrumentedPreparedResourceManagers = this.instrumentation.add("tmPrepared", TLASetVariable<TLAStringValue>::new);
     }
 

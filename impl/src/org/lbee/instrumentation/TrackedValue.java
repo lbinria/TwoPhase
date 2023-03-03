@@ -5,36 +5,23 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@TracedValue(type = "value")
-public class TrackedValue implements TrackableValue {
+public abstract class TrackedValue {
 
-    private final String type;
-    private final Map<String, String> properties;
-    private final Map<String, TrackableValue> dynamicProperties;
+    protected final Map<String, String> properties;
+    //private final Map<String, TrackedValue> dynamicProperties;
 
-    @Override
     public Map<String, String> getProperties() { return this.properties; }
 
-    @Override
-    public Map<String, TrackableValue> getDynamicProperties() { return this.dynamicProperties; }
+    //public Map<String, TrackedValue> getDynamicProperties() { return this.dynamicProperties; }
 
     public TrackedValue() {
-        this(Map.of());
-    }
-
-    public TrackedValue(Map<String, TrackableValue> dynamicProperties) {
         // Get type of value from annotation
-        TracedValue tracedValue = this.getClass().getAnnotation(TracedValue.class);
-        this.type = tracedValue.type();
+        // TracedValue tracedValue = this.getClass().getAnnotation(TracedValue.class);
+        // this.type = tracedValue.type();
         // Get fields annotations
         this.properties = Arrays.stream(this.getClass().getFields()).collect(Collectors.toMap(Field::getName, vm -> vm.getAnnotation(TracedValueProperty.class).name()));
-        this.dynamicProperties = dynamicProperties;
     }
 
-
-    @Override
-    public String getType() {
-        return this.type;
-    }
+    public abstract String getType();
 
 }

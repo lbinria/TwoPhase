@@ -18,7 +18,7 @@ public abstract class TrackedVariable {
         this.traceProducer = traceProducer;
     }
 
-    public void apply(String operator, TrackableValue... args) throws TraceProducerException {
+    protected void apply(String operator, TrackedValue... args) throws TraceProducerException {
         this.traceProducer.produce(operator, this.name, args, 0);
     }
 

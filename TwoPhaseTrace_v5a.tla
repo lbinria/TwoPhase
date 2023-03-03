@@ -68,6 +68,8 @@ Trace_unvalid_0 == <<
     ]
 >>
 
+Word == "bob"
+
 \* Trace == Trace_valid_commit
 \*Trace == Trace_unvalid_0
 
@@ -133,6 +135,7 @@ TPNext ==
     \/
         (* Log and system are TRUE case *)
         (* or Skip log case *)
+        (* not ENABLED (ReadNext /\ TPNext) /\ TPNext /\ i' = i *)
         /\ ReadNext
         /\ [TP!TPNext]_vars
     \/

@@ -37,7 +37,7 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
     }
 
     @Override
-    public JFRTraceEvent produce(String operator, String variableName, TrackableValue[] args, long clock) throws TraceProducerException {
+    public JFRTraceEvent produce(String operator, String variableName, TrackedValue[] args, long clock) throws TraceProducerException {
         try {
             String strArgs = serializeValues(args);
             System.out.printf("%s - Trace event: `%s %s (%s)`.\n", clock, operator, variableName, strArgs);
@@ -51,11 +51,11 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
     }
 
     //
-    private String serializeValues(TrackableValue... values) throws NoSuchFieldException, IllegalAccessException {
+    private String serializeValues(TrackedValue... values) throws NoSuchFieldException, IllegalAccessException {
 
         final JsonArray jsonArgs = new JsonArray();
 
-        for (TrackableValue value : values) {
+        for (TrackedValue value : values) {
             jsonArgs.add(this.serializeValue(value));
         }
 
@@ -64,8 +64,8 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
 
     private JsonElement jsonValue(Object propertyValue) throws NoSuchFieldException, IllegalAccessException {
         final JsonElement jsonValue;
-        if (propertyValue instanceof TrackableValue)
-            jsonValue = serializeValue((TrackableValue) propertyValue);
+        if (propertyValue instanceof TrackedValue)
+            jsonValue = serializeValue((TrackedValue) propertyValue);
         else if (propertyValue instanceof String)
             jsonValue = new JsonPrimitive((String) propertyValue);
         else if (propertyValue instanceof Boolean)
@@ -78,7 +78,7 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
         return jsonValue;
     }
 
-    private JsonObject serializeValue(TrackableValue value) throws NoSuchFieldException, IllegalAccessException {
+    private JsonObject serializeValue(TrackedValue value) throws NoSuchFieldException, IllegalAccessException {
 
         JsonObject jsonObject = new JsonObject();
 
@@ -93,10 +93,12 @@ public class JFRTraceProducer implements TraceProducer<JFRTraceEvent> {
 
         }
 
-        for (Map.Entry<String, TrackableValue> property : value.getDynamicProperties().entrySet()) {
+        /*
+        for (Map.Entry<String, TrackedValue> property : value.getDynamicProperties().entrySet()) {
             JsonElement jsonValue = jsonValue(property.getValue());
             jsonObject.add(property.getKey(), jsonValue);
         }
+        */
 
         jsonObject.add("_type", new JsonPrimitive(value.getType()));
         return jsonObject;
