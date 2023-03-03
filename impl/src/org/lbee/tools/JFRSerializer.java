@@ -3,6 +3,7 @@ package org.lbee.tools;
 import com.google.gson.*;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
+import tlc2.value.ValueInputStream;
 import tlc2.value.ValueOutputStream;
 import tlc2.value.impl.*;
 import util.UniqueString;
@@ -53,14 +54,14 @@ public class JFRSerializer {
             case "bool" -> new BoolValue(jsonElement.getAsBoolean());
             case "int" -> IntValue.gen(jsonElement.getAsInt());
             case "record" -> recordFromJsonObject(jsonObject);
-            default -> new StringValue(""); // TODO raise exception here !
+            default -> new StringValue(""); // TODO throw exception;
         };
 
     }
 
     private static Value recordFromJsonObject(JsonObject jsonObject) {
-        UniqueString[] names = jsonObject.entrySet().stream().filter(e -> !e.getKey().equals("_type") && e.getValue() != JsonNull.INSTANCE).map(e -> UniqueString.uniqueStringOf(e.getKey())).toArray(UniqueString[]::new);
-        Value[] values = jsonObject.entrySet().stream().filter(e -> !e.getKey().equals("_type") && e.getValue() != JsonNull.INSTANCE).map(e -> convertJsonObject(e.getValue().getAsJsonObject())).toArray(Value[]::new);
+        final UniqueString[] names = jsonObject.entrySet().stream().filter(e -> !e.getKey().equals("_type") && e.getValue() != JsonNull.INSTANCE).map(e -> UniqueString.uniqueStringOf(e.getKey())).toArray(UniqueString[]::new);
+        final Value[] values = jsonObject.entrySet().stream().filter(e -> !e.getKey().equals("_type") && e.getValue() != JsonNull.INSTANCE).map(e -> convertJsonObject(e.getValue().getAsJsonObject())).toArray(Value[]::new);
         return new RecordValue(names, values, false);
     }
 
@@ -119,7 +120,7 @@ public class JFRSerializer {
         for (List<RecordedEvent> clockEvents : tlaEventsList) {
 
             final ArrayList<RecordValue> records = new ArrayList<>(clockEvents.size());
-            final ArrayList<UniqueString> keyNames = new ArrayList<>(clockEvents.size());
+            final ArrayList<UniqueString> varNames = new ArrayList<>(clockEvents.size());
 
             System.out.printf("\n---- Sync event %s ----\n", i++);
 
@@ -128,8 +129,8 @@ public class JFRSerializer {
                     continue;
 
                 // Convert args
-                final String json = event.getString(argsName);
-                final Value args = jsonToValue(json);
+                final String jsonArgs = event.getString(argsName);
+                final Value args = jsonToValue(jsonArgs);
 
                 // Get field values
                 final Value[] syncEventValues = {
@@ -140,20 +141,23 @@ public class JFRSerializer {
                 // Create record
                 final RecordValue r = new RecordValue(syncEventNames, syncEventValues, false);
                 records.add(r);
-                keyNames.add(UniqueString.uniqueStringOf(event.getString(varName)));
+                varNames.add(UniqueString.uniqueStringOf(event.getString(varName)));
                 System.out.printf("%s - %s - %s -> %s %s (%s).\n", event.getStartTime(), event.getLong(clockName), event.getString(senderName), event.getString(opName), event.getString(varName), event.getString(argsName));
             }
 
             // Put records in record
-            final UniqueString[] keyNamesArray = keyNames.toArray(UniqueString[]::new);
+            final UniqueString[] varNamesArray = varNames.toArray(UniqueString[]::new);
             final Value[] recordsArray = records.toArray(Value[]::new);
-            final RecordValue eventRecord = new RecordValue(keyNamesArray, recordsArray, false);
+            final RecordValue eventRecord = new RecordValue(varNamesArray, recordsArray, false);
 
             tuples.add(eventRecord);
         }
 
         final Value[] v = tuples.toArray(new Value[0]);
         final TupleValue eventTuple = new TupleValue(v);
+
+        System.out.println("\n--- GENERATED TRACE ---\n");
+        System.out.println(eventTuple + "\n\n");
 
         final ValueOutputStream vos = new ValueOutputStream(out.toFile(), true);
         // Do not normalize TupleValue because normalization depends on the actual

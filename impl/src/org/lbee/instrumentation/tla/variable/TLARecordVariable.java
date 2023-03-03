@@ -11,10 +11,5 @@ public class TLARecordVariable extends TrackedVariable {
         this.apply("ExceptAt", new TLAStringValue(key), value);
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
 }
 

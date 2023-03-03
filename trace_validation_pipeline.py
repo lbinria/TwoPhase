@@ -19,7 +19,7 @@ server_process = Popen([
 
 # Wait the server run, if comment this line, maye some manager running before the server, leading to error
 # This behavior might be interesting for trace validation
-time.sleep(5)
+time.sleep(2)
 
 print("--- Run TM client ---")
 tm_process = Popen([
@@ -89,6 +89,7 @@ print("# Start TLA+ trace spec.")
 
 tla_trace_validation_process = Popen([
     "/usr/lib/jvm/jdk-19/bin/java",
+    "-XX:+UseParallelGC",
     "-cp",
     "/opt/TLAToolbox-1.7.1/toolbox/tla2tools.jar:CommunityModules.jar",
     "tlc2.TLC",

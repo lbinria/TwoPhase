@@ -140,7 +140,7 @@ public class ResourceManager extends Manager implements NamedClient {
      */
     protected void commit() throws TraceProducerException {
         // Simulate some task that take some time
-        long d = 150 + Helper.next(2000);
+        long d = 150 + Helper.next(1000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.COMMITTED);
@@ -179,7 +179,8 @@ public class ResourceManager extends Manager implements NamedClient {
 
             if (taskDuration == -1)
                 /* Set a random task duration */
-                this.taskDuration = new Random().nextInt(10000);
+                //this.taskDuration = new Random().nextInt(10000);
+                this.taskDuration = new Random().nextInt(100);
             else
                 this.taskDuration = taskDuration;
         }

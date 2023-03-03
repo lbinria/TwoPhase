@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 
 public class TransactionManager extends Manager implements NamedClient {
 
-    // Instrumentation
-    //private final FormalInstrumentation<JFRTraceProducer> instrumentation;
     // Instrumented values
     private final TLAStringVariable instrumentedState;
     private final TLASetVariable<TLARecordValue> instrumentedMsgs;
@@ -116,6 +114,7 @@ public class TransactionManager extends Manager implements NamedClient {
         // Log event (hard-coded for now)
         TLAMsgs value = new TLAMsgs(new TLAStringValue(TwoPhaseMessage.COMMIT.toString()));
         this.instrumentedMsgs.add(value);
+        this.instrumentedState.set(new TLAStringValue("bob"));
         this.instrumentedState.set(new TLAStringValue("done"));
         this.instrumentation.commit();
 
