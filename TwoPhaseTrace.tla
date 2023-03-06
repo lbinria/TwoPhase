@@ -3,79 +3,75 @@
 (* Simplified specification of 2PC *)
 (***************************************************************************)
 
-EXTENDS TLC, Sequences, Naturals, FiniteSets
+EXTENDS TLC, Sequences, Naturals, FiniteSets, Bags
 
 (* Matches the configuration of the app. *)
 (* This can be generated via templating *)
 (* Need configuration to be fixed *)
 CONSTANTS RM
 
+(* Operators to apply when updating variable *)
+(* signature: [string, any] *)
+ExceptAt(var, arg, val) == [var EXCEPT ![arg] = val]
+(* signature: [any] *)
+AddElement(var, val) == var \cup {val}
+(* signature: [any] *)
+Replace(var, val) == val   \* 1st argument unnecessary but added for consistency
 
 (* Handmade simple valid trace. *)
 Trace_valid_commit == <<
     (* Trace rm2 was prepared *)
-    <<
-        [ op |-> "w", sender |-> "rm2", key |-> "rmState", val |-> "prepared"],
-        [ op |-> "a", sender |-> "rm2", key |-> "msgs", val |-> "Prepared" ]
-    >>,
-    (* Found log out of spec, shouldn't invalidate trace ... *)
-    (* << [ op |-> "w", sender |-> "bob", key |-> "say", val |-> "hello !"] >>, *)
+    [
+        rmState |-> [op |-> "ExceptAt", args |-> <<"rm2", "prepared">>],
+        msgs |-> [op |-> "AddElement", args |-> <<[type |-> "Prepared", rm |-> "rm2"]>>]
+    ],
     (* Trace rm1 was prepared *)
-    <<
-        [ op |-> "w", sender |-> "rm1", key |-> "rmState", val |-> "prepared"],
-        [ op |-> "a", sender |-> "rm1", key |-> "msgs", val |-> "Prepared" ]
-    >>,
-    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm1" ] >>,
-    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm2" ] >>,
-    <<
-        [ op |-> "a", sender |-> "TM", key |-> "msgs", val |-> "Commit" ],
-        [ op |-> "a", sender |-> "TM", key |-> "tmState", val |-> "done" ]
-    >>
-
+    [
+        rmState |-> [op |-> "ExceptAt", args |-> <<"rm1", "prepared">>],
+        msgs |-> [op |-> "AddElement", args |-> <<[type |-> "Prepared", rm |-> "rm1"]>>]
+    ],
+    (* Trace tm add prepared *)
+    [tmPrepared |-> [op |-> "AddElement", args |-> <<"rm1">>]],
+    [tmPrepared |-> [op |-> "AddElement", args |-> <<"rm2">>]],
+    [
+        msgs |-> [op |-> "AddElement", args |-> <<[type |-> "Commit"]>>],
+        tmState |-> [op |-> "Replace", args |-> <<"done">>]
+    ]
 >>
 
-(* Handmade simple valid trace. *)
-Trace_valid_abort == <<
+(* Handmade simple unvalid trace. *)
+Trace_unvalid_0 == <<
     (* Trace rm2 was prepared *)
-    <<
-        [ op |-> "w", sender |-> "rm2", key |-> "rmState", val |-> "prepared"],
-        [ op |-> "a", sender |-> "rm2", key |-> "msgs", val |-> "Prepared" ]
-    >>,
-    (* Found log out of spec, shouldn't invalidate trace ... *)
-    << [ op |-> "w", sender |-> "bob", key |-> "say", val |-> "hello !"] >>,
-    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm2" ] >>,
+    [
+        rmState |-> [op |-> "ExceptAt", args |-> <<"rm2", "prepared">>],
+        msgs |-> [op |-> "AddElement", args |-> <<[type |-> "Prepared", rm |-> "rm2"]>>]
+    ],
     (* Trace rm1 was prepared *)
-    <<
-        [ op |-> "w", sender |-> "rm1", key |-> "rmState", val |-> "prepared"],
-        [ op |-> "a", sender |-> "rm1", key |-> "msgs", val |-> "Prepared" ]
-    >>,
-    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm1" ] >>,
-
-    <<
-        [ op |-> "a", sender |-> "TM", key |-> "msgs", val |-> "Abort" ],
-        [ op |-> "a", sender |-> "TM", key |-> "tmState", val |-> "done" ]
-    >>
-
+    [
+        rmState |-> [op |-> "ExceptAt", args |-> <<"rm1", "prepared">>],
+        msgs |-> [op |-> "AddElement", args |-> <<[type |-> "Prepared", rm |-> "rm1"]>>]
+    ],
+    (* Trace tm add prepared *)
+    [tmPrepared |-> [op |-> "AddElement", args |-> <<"rm1">>]],
+    [tmPrepared |-> [op |-> "AddElement", args |-> <<"rm2">>]],
+    [
+        msgs |-> [op |-> "AddElement", args |-> <<[type |-> "Abort"]>>],
+        tmState |-> [op |-> "Replace", args |-> <<"done">>]
+    ],
+    (* Trace rm1 was committed *)
+    [
+        rmState |-> [op |-> "ExceptAt", args |-> <<"rm1", "committed">>]
+    ],
+    (* Trace rm2 was aborted *)
+    [
+        rmState |-> [op |-> "ExceptAt", args |-> <<"rm1", "aborted">>]
+    ]
 >>
 
-(* Handmade simple valid trace. But doesn't work because the trace doesn't start after init state *)
-Trace_valid_abort_2 == <<
-    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm2" ] >>,
-    (* Trace rm1 was prepared *)
-    <<
-        [ op |-> "w", sender |-> "rm1", key |-> "rmState", val |-> "prepared"],
-        [ op |-> "a", sender |-> "rm1", key |-> "msgs", val |-> "Prepared" ]
-    >>,
-    << [ op |-> "a", sender |-> "TM", key |-> "tmPrepared", val |-> "rm1" ] >>,
+Word == "bob"
 
-    <<
-        [ op |-> "a", sender |-> "TM", key |-> "msgs", val |-> "Abort" ],
-        [ op |-> "a", sender |-> "TM", key |-> "tmState", val |-> "done" ]
-    >>
-
->>
-
-\* Trace == Trace_valid_abort_2
+\* Trace == Trace_valid_commit
+\*Trace == Trace_unvalid_0
 
 INSTANCE IOUtils
 Trace == IODeserialize("Trace.bin", TRUE)
@@ -86,47 +82,48 @@ VARIABLES
   tmPrepared,    \* The set of RMs from which the TM has received "Prepared"
   msgs,          \* messages.
   i
-  
+
 vars == <<rmState, tmState, tmPrepared, msgs, i>>
 
 TP == INSTANCE TwoPhase
 
 (* Can be generated *)
-TPInit == 
+TPInit ==
   /\ i = 1
   /\ TP!TPInit
 
-(* Map log to TLA+ variables *)
-LogMap(t) ==
-    (* The two state changes go together (see TwoPhase spec) see ordered or not ? ... *)
-    IF Len(t) = 2 /\ t[1].key = "rmState" /\ t[2].key = "msgs" THEN
-        /\ rmState' = [rmState EXCEPT ![t[1].sender] = t[1].val]
-        /\ msgs' = msgs \cup {[type |-> t[2].val, rm |-> t[2].sender]}
-        /\ UNCHANGED <<tmState, tmPrepared>>
+Apply(var, op, args) ==
+   CASE op = "ExceptAt" -> ExceptAt(var, args[1], args[2])
+   []   op = "AddElement" -> AddElement(var, args[1])
+   []   op = "Replace" -> Replace(var, args[1])
 
-    ELSE IF Len(t) = 1 /\ t[1].key = "rmState" THEN
-        /\ rmState' = [rmState EXCEPT ![t[1].sender] = t[1].val]
-        /\ UNCHANGED <<tmState, tmPrepared, msgs>>
 
-    ELSE IF Len(t) = 1 /\ t[1].key = "tmState" THEN
-        /\ tmState' = t[1].val
-        /\ UNCHANGED <<rmState, tmPrepared, msgs>>
+MapVariables(t) ==
+    /\
+        rmState' =
+          IF "rmState" \in DOMAIN t
+          THEN Apply(rmState, t.rmState.op, t.rmState.args)
+          ELSE rmState
+    /\
+        tmState' =
+          IF "tmState" \in DOMAIN t
+          THEN Apply(tmState, t.tmState.op, t.tmState.args)
+          ELSE tmState
+    /\
+        tmPrepared' =
+          IF "tmPrepared" \in DOMAIN t
+          THEN Apply(tmPrepared, t.tmPrepared.op, t.tmPrepared.args)
+          ELSE tmPrepared
+    /\
+        msgs' =
+          IF "msgs" \in DOMAIN t
+          THEN Apply(msgs, t.msgs.op, t.msgs.args)
+          ELSE msgs
 
-    ELSE IF Len(t) = 1 /\ t[1].key = "tmPrepared" THEN
-        /\ tmPrepared' = tmPrepared \cup {t[1].val}
-        /\ UNCHANGED <<tmState, rmState, msgs>>
-
-    ELSE IF Len(t) = 2 /\ t[1].key = "msgs" /\ t[1].sender = "TM" /\ t[2].key = "tmState" THEN
-        /\ msgs' = msgs \cup {[type |-> t[1].val]}
-        /\ tmState' = t[2].val
-        /\ UNCHANGED <<rmState, tmPrepared>>
-    ELSE
-        UNCHANGED <<tmState, rmState, msgs, tmPrepared>>
-
-ReadNext == 
+ReadNext ==
     /\ i <= Len(Trace)
     /\ i' = i + 1
-    /\ LogMap(Trace[i])
+    /\ MapVariables(Trace[i])
 
 -----------------------------------------------------------------------------
 
@@ -134,31 +131,13 @@ ReadNext ==
 term == /\ i > Len(Trace)
         /\ UNCHANGED vars
 
-(*
-TPNext ==
-  \/
-    (* UNCHANGED to accept some arbitrary log between interresting log *)
-    (* but UNCHANGED can lead to accept deadlock ? *)
-    /\ (TP!TPNext \/ UNCHANGED <<tmState, rmState, msgs, tmPrepared>>)
-    /\ ReadNext
-  \/
-    /\ term
-*)
-
 TPNext ==
     \/
         (* Log and system are TRUE case *)
-        /\ TP!TPNext
+        (* or Skip log case *)
+        (* not ENABLED (ReadNext /\ TPNext) /\ TPNext /\ i' = i *)
         /\ ReadNext
-    \/
-        (* Skip log case *)
-        /\ ReadNext
-        /\ UNCHANGED <<tmState, rmState, msgs, tmPrepared>>
-    (*
-    \/
-        /\ TP!TPNext
-        /\ UNCHANGED <<i>>
-    *)
+        /\ [TP!TPNext]_vars
     \/
         (* All trace processed case *)
         /\ term
