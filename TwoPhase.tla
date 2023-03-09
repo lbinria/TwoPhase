@@ -148,7 +148,7 @@ TPNext ==
 (* will be explained in Video Lecture 8.                                   *)
 (***************************************************************************)
 
-TPSpec == TPInit /\ [][TPNext]_<<rmState, tmState, tmPrepared, msgs>>
+TPSpec == TPInit /\ [][TPNext]_<<rmState, tmState, tmPrepared, msgs>> /\ WF_<<rmState, tmState, tmPrepared, msgs>>(TPNext)
   (*************************************************************************)
   (* The complete spec of the Two-Phase Commit protocol.                   *)
   (*************************************************************************)
