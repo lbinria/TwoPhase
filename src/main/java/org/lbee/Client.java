@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 /**
  * Client manager (transaction manager or resource manager)
@@ -28,13 +29,14 @@ public class Client {
         final String type = args[2];
         String resourceManagerName = args[3];
 
-        Map<String, Object> mapConfig = Map.of("RM", new String[] {"rm-0", "rm-1"});
-        ConfigurationWriter.write("twophase.ndjson.conf", mapConfig);
-
         final Configuration config = new Configuration(args);
         // Some printing
         System.out.println(config);
 
+        // Write config in file
+        final String[] rmNames = IntStream.range(0, config.nResourceManager).mapToObj(i -> "rm-" + i).toArray(String[]::new);
+        final Map<String, Object> mapConfig = Map.of("RM", rmNames);
+        ConfigurationWriter.write("twophase.ndjson.conf", mapConfig);
 
         try (Socket socket = new Socket(hostname, port)) {
 
