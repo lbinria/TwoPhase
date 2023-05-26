@@ -1,14 +1,17 @@
 package org.lbee;
 
+import org.lbee.instrumentation.clock.SharedClock;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if (args.length < 1) return;
 
+        SharedClock.get("twophase.clock").reset();
         int port = Integer.parseInt(args[0]);
 
 

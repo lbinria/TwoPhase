@@ -66,6 +66,15 @@ TPInit ==
   /\ tmPrepared   = {}
   /\ msgs = {}
 -----------------------------------------------------------------------------
+TMReset ==
+    /\ tmState' = "init"
+    /\ tmPrepared' = {}
+    /\ UNCHANGED <<rmState, tmState, msgs>>
+
+RMReset(r) ==
+    /\ rmState' = [rmState EXCEPT ![r] = "working"]
+    /\ UNCHANGED <<tmState, tmPrepared, msgs>>
+
 (***************************************************************************)
 (* We now define the actions that may be performed by the processes, first *)
 (* the TM's actions, then the RMs' actions.                                *)
@@ -138,10 +147,11 @@ RMRcvAbortMsg(r) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgs>>
 
 TPNext ==
-  \/ TMCommit \/ TMAbort
+  \/ TMCommit \/ TMAbort \/ TMReset
   \/ \E r \in RM : 
        TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r)
          \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r)
+         \/ RMReset(r)
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* The material below this point is not discussed in Video Lecture 6.  It  *)

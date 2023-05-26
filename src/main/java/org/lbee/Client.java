@@ -27,7 +27,7 @@ public class Client {
         final String hostname = args[0];
         final int port = Integer.parseInt(args[1]);
         final String type = args[2];
-        String resourceManagerName = args[3];
+        final String resourceManagerName = args[3];
 
         final Configuration config = new Configuration(args);
         // Some printing
@@ -40,17 +40,15 @@ public class Client {
 
         try (Socket socket = new Socket(hostname, port)) {
 
-            Manager manager;
+            final Manager manager;
             switch (type) {
-                case "tm" :
-                    manager = new TransactionManager(socket, config.transactionManagerConfig);
-                    break;
-                case "rm" :
+                case "tm" -> manager = new TransactionManager(socket, config.transactionManagerConfig);
+                case "rm" -> {
                     ResourceManager resourceManager = new ResourceManager(socket, resourceManagerName, "TM", config.resourceManagerConfig);
                     resourceManager.register();
                     manager = resourceManager;
-                    break;
-                default : {
+                }
+                default -> {
                     System.out.println("Expected type is tm or rm.");
                     return;
                 }

@@ -48,11 +48,15 @@ public class ResourceManager extends Manager implements NamedClient {
         specState = spec.getVariable("rmState").getField(getName());
     }
 
+    private void reset() {
+        setState(ResourceManagerState.WORKING);
+//        spec.commitChanges("RMReset");
+    }
     /**
      * Set state of manager
      * @param state New manager state
      */
-    private void setState(ResourceManagerState state) throws TraceProducerException {
+    private void setState(ResourceManagerState state) {
         // Change state
         this.state = state;
 //        specState.set(state.toString().toLowerCase(Locale.ROOT));
@@ -120,8 +124,9 @@ public class ResourceManager extends Manager implements NamedClient {
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.COMMITTED);
-
+//        spec.commitChanges("RMRcvCommitMsg");
         // Shutdown process
+        this.reset();
         this.shutdown();
     }
 

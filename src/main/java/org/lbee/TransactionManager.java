@@ -38,6 +38,13 @@ public class TransactionManager extends Manager implements NamedClient {
         this.specTmPrepared = spec.getVariable("tmPrepared");
     }
 
+    private void reset() {
+        resourceManagers.clear();
+        preparedResourceManagers.clear();
+        specTmPrepared.clear();
+        spec.commitChanges("TMReset");
+    }
+
     @Override
     public void run() throws IOException, TraceProducerException {
         // Check eventual received message
@@ -124,6 +131,7 @@ public class TransactionManager extends Manager implements NamedClient {
 
         System.out.println(TwoPhaseMessage.ABORT + ".");
 
+        this.reset();
         this.shutdown();
 
     }
