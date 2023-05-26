@@ -30,7 +30,7 @@ print("# Start TLA+ trace spec.\n")
 tla_trace_validation_process = Popen([
     "python",
     "/home/me/Projects/trace_validation_tools/tools/tla_trace_validation.py",
-    "spec/TwoPhaseTraceConstraint.tla",
+    "spec/TwoPhaseTrace.tla",
     "trace-tla.ndjson"])
 
 tla_trace_validation_process.wait()
