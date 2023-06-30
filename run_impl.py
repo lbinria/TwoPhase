@@ -10,7 +10,7 @@ java_bin = os.path.join(java_home, "java")
 def run():
     print("--- Run server ---")
     server_process = Popen([
-        java_bin,
+        "java",
         "-cp",
         "target/TwoPhase-1.0-SNAPSHOT-jar-with-dependencies.jar",
         "org.lbee.Server",
@@ -22,7 +22,7 @@ def run():
 
     print("--- Run TM client ---")
     tm_process = Popen([
-        java_bin,
+        "java",
         "-cp",
         "target/TwoPhase-1.0-SNAPSHOT-jar-with-dependencies.jar",
         "org.lbee.Client",
@@ -33,7 +33,7 @@ def run():
     for i in range(2):
         print(f"Run rm{i} client")
         rm_process = Popen([
-            java_bin,
+            "java",
             "-cp",
             "target/TwoPhase-1.0-SNAPSHOT-jar-with-dependencies.jar",
             "org.lbee.Client",
