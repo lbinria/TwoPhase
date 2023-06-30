@@ -6,6 +6,9 @@
 EXTENDS TLC, Sequences, SequencesExt, Naturals, FiniteSets, Bags, Json, IOUtils, TwoPhase
 
 ASSUME TLCGet("config").mode = "bfs"
+
+VARIABLES l
+
 vars == <<rmState, tmState, tmPrepared, msgs>>
 
 (* Read trace *)
@@ -15,7 +18,7 @@ JsonTrace ==
     ELSE
         Print(<<"Failed to validate the trace. TRACE_PATH environnement variable was expected.">>, "")
 
-NoVal == "null"
+TraceNil == "null"
 
 (* Replace RM constant *)
 TraceRM ==
@@ -31,8 +34,7 @@ AddElement(cur, val) == cur \cup {val}
 AddElements(cur, vals) == cur \cup ToSet(vals)
 RemoveElement(cur, val) == cur \ {val}
 Clear(cur, val) == {}
-\*RemoveKey(cur, val) == NoVal
-RemoveKey(cur, val) == [k \in DOMAIN cur |-> IF k = val THEN NoVal ELSE cur[k]]
+RemoveKey(cur, val) == [k \in DOMAIN cur |-> IF k = val THEN TraceNil ELSE cur[k]]
 UpdateRec(cur, val) == [k \in DOMAIN cur |-> IF k \in DOMAIN val THEN val[k] ELSE cur[k]]
 
 (* Can be extracted from init *)
@@ -61,8 +63,8 @@ LOCAL ExceptAtPath(var, default, path, op, args) ==
     ELSE
         [var EXCEPT ![h] = Apply(@, default[h], op, args)]
 
-RECURSIVE ExceptAtPaths(_,_,_)
-LOCAL ExceptAtPaths(var, varName, updates) ==
+RECURSIVE ApplyUpdates(_,_,_)
+LOCAL ApplyUpdates(var, varName, updates) ==
     LET update == Head(updates) IN
 
     LET applied ==
@@ -72,16 +74,92 @@ LOCAL ExceptAtPaths(var, varName, updates) ==
             Apply(var, Default(varName), update.op, update.args)
     IN
     IF Len(updates) > 1 THEN
-        ExceptAtPaths(applied, varName, Tail(updates))
+        ApplyUpdates(applied, varName, Tail(updates))
     ELSE
         applied
 
-TP == INSTANCE TwoPhase
-
 TraceInit ==
-    \* The implementation's initial state is deterministic and known.
-    \* TLCGet("level") = 1 => /\ KV!Init
-    TRUE
+    /\ l = 1
+    /\ TPInit
+
+logline ==
+    Trace[l]
+
+MapVariables(t) ==
+    /\
+        IF "rmState" \in DOMAIN t
+        THEN rmState' = ApplyUpdates(rmState, "rmState", t.rmState)
+        ELSE TRUE
+    /\
+        IF "tmState" \in DOMAIN t
+        THEN tmState' = ApplyUpdates(tmState, "tmState", t.tmState)
+        ELSE TRUE
+    /\
+        IF "tmPrepared" \in DOMAIN t
+        THEN tmPrepared' = ApplyUpdates(tmPrepared, "tmPrepared", t.tmPrepared)
+        ELSE TRUE
+    /\
+        IF "msgs" \in DOMAIN t
+        THEN msgs' = ApplyUpdates(msgs, "msgs", t.msgs)
+        ELSE TRUE
+
+IsEvent(e) ==
+    \* Equals FALSE if we get past the end of the log, causing model checking to stop.
+    /\ l \in 1..Len(Trace)
+    /\ IF "desc" \in DOMAIN logline THEN logline.desc = e ELSE TRUE
+    /\ l' = l + 1
+    /\ MapVariables(logline)
+\*    /\ TPNext
+
+IsTMCommit ==
+    /\ IsEvent("TMCommit")
+    /\ TMCommit
+
+IsTMAbort ==
+    /\ IsEvent("TMAbort")
+    /\ TMAbort
+
+IsTMReset ==
+    /\ IsEvent("TMReset")
+    /\ TMReset
+
+IsTMRcvPrepared ==
+    /\ IsEvent("TMRcvPrepared")
+    /\ \E r \in RM : TMRcvPrepared(r)
+
+IsRMPrepare ==
+    /\ IsEvent("RMPrepare")
+    /\ \E r \in RM : RMPrepare(r)
+
+IsRMChooseToAbort ==
+    /\ IsEvent("RMChooseToAbort")
+    /\ \E r \in RM : RMChooseToAbort(r)
+
+IsRMRcvCommitMsg ==
+    /\ IsEvent("RMRcvCommitMsg")
+    /\ \E r \in RM : RMRcvCommitMsg(r)
+
+IsRMRcvAbortMsg ==
+    /\ IsEvent("RMRcvAbortMsg")
+    /\ \E r \in RM : RMRcvAbortMsg(r)
+
+IsRMReset ==
+    /\ IsEvent("RMReset")
+    /\ \E r \in RM : RMReset(r)
+
+TraceNext ==
+        \/ IsTMCommit
+        \/ IsTMAbort
+        \/ IsTMReset
+        \/ IsTMRcvPrepared
+        \/ IsRMPrepare
+        \/ IsRMChooseToAbort
+        \/ IsRMRcvCommitMsg
+        \/ IsRMRcvAbortMsg
+        \/ IsRMReset
+
+
+ComposedNext == TRUE
 
 TraceSpec ==
     \* Because of  [A]_v <=> A \/ v=v'  , the following formula is logically
@@ -90,31 +168,7 @@ TraceSpec ==
      \* states of a *seen* state.  Since one or more states may appear one or
      \* more times in the the trace, the  UNCHANGED vars  combined with the
      \*  TraceView  that includes  TLCGet("level")  is our workaround.
-    TraceInit /\ [][TPNext \/ UNCHANGED vars]_vars
-
-MapVariables(t) ==
-    /\
-        IF "rmState" \in DOMAIN t
-        THEN rmState' = ExceptAtPaths(rmState, "rmState", t.rmState)
-        ELSE TRUE
-    /\
-        IF "tmState" \in DOMAIN t
-        THEN tmState' = ExceptAtPaths(tmState, "tmState", t.tmState)
-        ELSE TRUE
-    /\
-        IF "tmPrepared" \in DOMAIN t
-        THEN tmPrepared' = ExceptAtPaths(tmPrepared, "tmPrepared", t.tmPrepared)
-        ELSE TRUE
-    /\
-        IF "msgs" \in DOMAIN t
-        THEN msgs' = ExceptAtPaths(msgs, "msgs", t.msgs)
-        ELSE TRUE
-
-TraceNextConstraint ==
-    LET i == TLCGet("level")
-    IN
-        /\ i <= Len(Trace)
-        /\ MapVariables(Trace[i])
+    TraceInit /\ [][TraceNext]_<<l, vars>>
 
 TraceAccepted ==
     LET d == TLCGet("stats").diameter IN
@@ -130,5 +184,7 @@ TraceView ==
      \* to be different states.
     <<vars, TLCGet("level")>>
 
+BASE == INSTANCE TwoPhase
+BaseSpec == BASE!TPInit /\ [][BASE!TPNext \/ ComposedNext]_vars
 -----------------------------------------------------------------------------
 =============================================================================

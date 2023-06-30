@@ -126,7 +126,7 @@ public class ResourceManager extends Manager implements NamedClient {
         this.setState(ResourceManagerState.COMMITTED);
 //        spec.commitChanges("RMRcvCommitMsg");
         // Shutdown process
-        this.reset();
+        //this.reset();
         this.shutdown();
     }
 
