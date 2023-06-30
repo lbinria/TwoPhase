@@ -149,7 +149,7 @@ public class TransactionManager extends Manager implements NamedClient {
         /* Add prepared resource manager to prepared set */
         String rmName = optionalResourceManager.get();
         preparedResourceManagers.add(rmName);
-//        specTmPrepared.add(rmName);
+        specTmPrepared.add(rmName);
         spec.commitChanges("TMRcvPrepared");
     }
 
