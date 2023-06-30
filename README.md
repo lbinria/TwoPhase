@@ -8,8 +8,6 @@ An implementation of Two phase protocol (simplified) specification.
 - Apache maven >= 3.6.3
 - Python >= 3.9.12
 
-Install trace_validation_tools scripts.
-
 ## Run
 
 Run implementation alone:

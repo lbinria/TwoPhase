@@ -23,7 +23,7 @@ if len(sys.argv) > 2:
 
 # Run TLA
 tla_trace_validation_process = Popen([
-    java_bin,
+    "java",
     "-XX:+UseParallelGC",
     "-cp",
     tla_cp,
