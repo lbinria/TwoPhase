@@ -1,10 +1,17 @@
 import os
-import time
-import signal
-from subprocess import Popen, PIPE
+import subprocess
 import run_impl
 import trace_merger
+import tla_trace_validation
+import argparse
 
+parser = argparse.ArgumentParser(
+    prog='Trace validation pipeline',
+    description='This program aims to execute a pipeline that validate implementation of KeyValueStore against a formal spec.')
+
+parser.add_argument('-c', '--compile', type=bool, action=argparse.BooleanOptionalAction)
+
+args = parser.parse_args()
 
 print("# Clean up")
 
@@ -12,6 +19,10 @@ trace_files = [f for f in os.listdir(".") if f.endswith('.ndjson')]
 print(f"Cleanup: {trace_files}")
 for trace_file in trace_files:
     os.remove(trace_file)
+
+if args.compile:
+    print("# Package.\n")
+    subprocess.run(["mvn", "package"])
 
 print("# Start implementation.\n")
 
@@ -26,13 +37,6 @@ with open("trace-tla.ndjson", "w") as f:
 
 print("# Start TLA+ trace spec.\n")
 
-
-tla_trace_validation_process = Popen([
-    "python",
-    "tla_trace_validation.py",
-    "spec/TwoPhaseTrace.tla",
-    "trace-tla.ndjson"])
-
-tla_trace_validation_process.wait()
+tla_trace_validation.run_tla("spec/TwoPhaseTrace.tla","trace-tla.ndjson")
 
 print("End pipeline.")

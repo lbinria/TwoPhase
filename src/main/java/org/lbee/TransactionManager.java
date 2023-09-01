@@ -1,7 +1,5 @@
 package org.lbee;
 
-import org.lbee.instrumentation.TraceInstrumentation;
-import org.lbee.instrumentation.TraceProducerException;
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.models.Message;
@@ -38,7 +36,7 @@ public class TransactionManager extends Manager implements NamedClient {
         this.specTmPrepared = spec.getVariable("tmPrepared");
     }
 
-    private void reset() {
+    private void reset() throws IOException {
         resourceManagers.clear();
         preparedResourceManagers.clear();
         specTmPrepared.clear();
@@ -46,7 +44,7 @@ public class TransactionManager extends Manager implements NamedClient {
     }
 
     @Override
-    public void run() throws IOException, TraceProducerException {
+    public void run() throws IOException {
         // Check eventual received message
         super.run();
 
@@ -72,7 +70,7 @@ public class TransactionManager extends Manager implements NamedClient {
 
     }
 
-    protected void receive(Message message) throws IOException, TraceProducerException {
+    protected void receive(Message message) throws IOException {
         switch (message.getContent()) {
             case "Register" -> this.receivedRegister(message.getFrom());
             case "Prepared" -> this.receivePrepared(message.getFrom());
@@ -117,7 +115,7 @@ public class TransactionManager extends Manager implements NamedClient {
     /**
      * @TLAAction TMAbort
      */
-    public void abort() throws IOException, TraceProducerException {
+    public void abort() throws IOException {
         System.out.printf("%s timeout reach.\n", this.getName());
 
         // Notify
@@ -139,7 +137,7 @@ public class TransactionManager extends Manager implements NamedClient {
     /**
      * @TLAAction TMRcvPrepared(r)
      */
-    public void receivePrepared(String sender) {
+    public void receivePrepared(String sender) throws IOException {
         /* Search receive prepared resource manager in resource manager set */
         Optional<String> optionalResourceManager = resourceManagers.stream().filter(rmName -> rmName.equals(sender)).findFirst();
         /* If it doesn't exist do nothing */

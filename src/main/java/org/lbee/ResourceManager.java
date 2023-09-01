@@ -1,13 +1,11 @@
 package org.lbee;
 
-import org.lbee.instrumentation.TraceProducerException;
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.models.Message;
 import org.lbee.models.TwoPhaseMessage;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -71,7 +69,7 @@ public class ResourceManager extends Manager implements NamedClient {
     }
 
     @Override
-    public void run() throws IOException, TraceProducerException {
+    public void run() throws IOException {
         // Check eventual received message
         super.run();
 
@@ -90,7 +88,7 @@ public class ResourceManager extends Manager implements NamedClient {
     }
 
     @Override
-    protected void receive(Message message) throws IOException, TraceProducerException {
+    protected void receive(Message message) {
         // Redirect message to method to execute
         switch (message.getContent()) {
             case "Commit" -> this.commit();
@@ -108,7 +106,7 @@ public class ResourceManager extends Manager implements NamedClient {
     /**
      * @TLA-action RMPrepare(r)
      */
-    protected void prepare() throws IOException, TraceProducerException {
+    protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
         specMessages.add(Map.of("type","Prepared", "rm", getName()));
         spec.commitChanges("RMPrepare");
@@ -118,7 +116,7 @@ public class ResourceManager extends Manager implements NamedClient {
     /**
      * @TLA-action RMRcvCommitMsg(r)
      */
-    protected void commit() throws TraceProducerException {
+    protected void commit() {
         // Simulate some task that take some time
         long d = 150 + Helper.next(1000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
@@ -133,7 +131,7 @@ public class ResourceManager extends Manager implements NamedClient {
     /**
      * @TLA-action RMRcvAbortMsg(r)
      */
-    protected void abort() throws TraceProducerException {
+    protected void abort() {
         // Simulate some task that take some time
         long d = 150 + Helper.next(2000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);

@@ -26,19 +26,19 @@ TPDefault(varName) ==
 TPMapVariables(t) ==
     /\
         IF "rmState" \in DOMAIN t
-        THEN rmState' = ApplyUpdates(rmState, "rmState", t.rmState)
+        THEN rmState' = MapVariable(rmState, "rmState", t)
         ELSE TRUE
     /\
         IF "tmState" \in DOMAIN t
-        THEN tmState' = ApplyUpdates(tmState, "tmState", t.tmState)
+        THEN tmState' = MapVariable(tmState, "tmState", t)
         ELSE TRUE
     /\
         IF "tmPrepared" \in DOMAIN t
-        THEN tmPrepared' = ApplyUpdates(tmPrepared, "tmPrepared", t.tmPrepared)
+        THEN tmPrepared' = MapVariable(tmPrepared, "tmPrepared", t)
         ELSE TRUE
     /\
         IF "msgs" \in DOMAIN t
-        THEN msgs' = ApplyUpdates(msgs, "msgs", t.msgs)
+        THEN msgs' = MapVariable(msgs, "msgs", t)
         ELSE TRUE
 
 
@@ -91,7 +91,7 @@ TPTraceNext ==
         \/ IsRMReset
 
 
-ComposedNext == TRUE
+ComposedNext == FALSE
 
 BASE == INSTANCE TwoPhase
 BaseSpec == BASE!TPInit /\ [][BASE!TPNext \/ ComposedNext]_vars

@@ -1,14 +1,11 @@
 package org.lbee;
 
 import org.lbee.instrumentation.ConfigurationWriter;
-import org.lbee.instrumentation.TraceProducerException;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
@@ -70,8 +67,6 @@ public class Client {
             System.out.println("Server not found: " + ex.getMessage());
         } catch (IOException ex) {
             System.out.println("I/O error: " + ex.getMessage());
-        } catch (TraceProducerException ex) {
-            // TODO do something
         }
     }
 

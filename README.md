@@ -2,30 +2,67 @@
 
 An implementation of Two phase protocol (simplified) specification.
 
-## Prerequisite
+# Prerequisites
 
-- Java >= 17.0.0
-- Apache maven >= 3.6.3
-- Python >= 3.9.12
+- Java >= 17
+- Apache maven >= 3.6
+- Python >= 3.9
+- TLA+ >= 1.8.0 (The Clarke release)
 
-## Run
+### Install the trace validation tools (and TLA+)
 
-Run implementation alone:
+See README at https://github.com/lbinria/trace_validation_tools
+
+### Install python librairies
+
+The `ndjson` Python library is needed in order to perform the
+validation; it can be installed with:
+
+`pip install ndjson`
+
+We suppose that `python` and `pip` are the commands for Python and
+its package installer, if otherwise you should change the above line
+and some of the following accordingly.
+
+# Build the Java program
+
+Change the version of the dependency `org.lbee.instrumentation` in the
+file [pom.xml](pom.xml) according to the one you use (in .m2 or on the
+github maven registry) and run
+
+`mvn package`
+
+# Perform trace validation
+
+To check the conformity of the trace produced by the program, the
+script [trace_validation_pipeline.py](trace_validation_pipeline.py)
+can be used:
+
+`python trace_validation_pipeline.py -c`
+
+It consists of the following steps:
+- clean old trace files
+- compile implementation of TwoPhase
+- run implementation of TwoPhase
+- [merge trace files / config into one trace file (when different processes produce different trace files)]
+- Run TLC on the resulting trace file
+
+### Perform trace validation on a trace file
+
+Alternatively, we can run the implementation with the command
+
+`mvn exec:java`
+
+or
 
 `python run_impl.py`
 
-Run implementation following by trace validation:
+and then perform the trace validation on the obtained trace file
+`trace-tla.ndjson` by using the command:
 
-`python trace_validation_pipeline.py`
+`python tla_trace_validation.py spec/TwoPhaseTrace.tla --trace trace-tla.ndjson`
 
-## Project structure
+# Directory structure
 
-spec/ directory contains Two phase TLA+ specification and Two phase specification for trace validation.
-
-src/ directory contains a java implementation of Two phase spec.
-
-## Trace validation
-
-In this version we test only the tracing of messages between transaction manager and resource managers.
-
-We use a shared memory clock between each process, that means that process must be run on the same physical computer.  
+- `spec/**`: contains TwoPhase specification and trace specification
+- `src/**`: contains TwoPhase implementation

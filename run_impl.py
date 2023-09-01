@@ -3,16 +3,14 @@ import time
 import signal
 from subprocess import Popen
 
-java_home = os.environ["JAVA_HOME"]
-assert java_home != None, "JAVA_HOME variable is not set."
-java_bin = os.path.join(java_home, "java")
+jar_name = "TwoPhase-1.1-jar-with-dependencies.jar"
 
 def run():
     print("--- Run server ---")
     server_process = Popen([
         "java",
         "-cp",
-        "target/TwoPhase-1.0-SNAPSHOT-jar-with-dependencies.jar",
+        f"target/{jar_name}",
         "org.lbee.Server",
         "6869"])
 
@@ -24,7 +22,7 @@ def run():
     tm_process = Popen([
         "java",
         "-cp",
-        "target/TwoPhase-1.0-SNAPSHOT-jar-with-dependencies.jar",
+        f"target/{jar_name}",
         "org.lbee.Client",
         "localhost", "6869", "tm", ""])
 
@@ -35,7 +33,7 @@ def run():
         rm_process = Popen([
             "java",
             "-cp",
-            "target/TwoPhase-1.0-SNAPSHOT-jar-with-dependencies.jar",
+            f"target/{jar_name}",
             "org.lbee.Client",
             "localhost", "6869", "rm", f"rm-{i}"])
 
