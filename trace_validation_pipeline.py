@@ -30,7 +30,7 @@ run_impl.run()
 
 print("# Merge trace with config.\n")
 
-trace_tla = trace_merger.run(["."], config="twophase.ndjson.conf", sort=True)
+trace_tla = trace_merger.run(["."], config="twophase.ndjson.conf", sort=True, remove_meta=True)
 # Write to file
 with open("trace-tla.ndjson", "w") as f:
     f.write(trace_tla)
