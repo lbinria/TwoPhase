@@ -1,13 +1,11 @@
 package org.lbee;
 
 import org.lbee.instrumentation.VirtualField;
-import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.models.Message;
 import org.lbee.models.TwoPhaseMessage;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;

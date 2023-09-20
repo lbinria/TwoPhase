@@ -6,6 +6,7 @@ import org.lbee.models.TwoPhaseMessage;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -46,9 +47,9 @@ public class ResourceManager extends Manager implements NamedClient {
         specState = spec.getVariable("rmState").getField(getName());
     }
 
-    private void reset() {
+    private void reset() throws IOException {
         setState(ResourceManagerState.WORKING);
-//        spec.commitChanges("RMReset");
+        spec.commitChanges("RMReset");
     }
     /**
      * Set state of manager
@@ -57,7 +58,7 @@ public class ResourceManager extends Manager implements NamedClient {
     private void setState(ResourceManagerState state) {
         // Change state
         this.state = state;
-//        specState.set(state.toString().toLowerCase(Locale.ROOT));
+        specState.set(state.toString().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -88,7 +89,7 @@ public class ResourceManager extends Manager implements NamedClient {
     }
 
     @Override
-    protected void receive(Message message) {
+    protected void receive(Message message) throws IOException {
         // Redirect message to method to execute
         switch (message.getContent()) {
             case "Commit" -> this.commit();
@@ -116,13 +117,13 @@ public class ResourceManager extends Manager implements NamedClient {
     /**
      * @TLA-action RMRcvCommitMsg(r)
      */
-    protected void commit() {
+    protected void commit() throws IOException {
         // Simulate some task that take some time
         long d = 150 + Helper.next(1000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.COMMITTED);
-//        spec.commitChanges("RMRcvCommitMsg");
+        spec.commitChanges("RMRcvCommitMsg");
         // Shutdown process
         //this.reset();
         this.shutdown();
@@ -131,12 +132,13 @@ public class ResourceManager extends Manager implements NamedClient {
     /**
      * @TLA-action RMRcvAbortMsg(r)
      */
-    protected void abort() {
+    protected void abort() throws IOException {
         // Simulate some task that take some time
         long d = 150 + Helper.next(2000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.ABORTED);
+        spec.commitChanges("RMRcvAbortMsg");
         // Shutdown process
         this.shutdown();
     }

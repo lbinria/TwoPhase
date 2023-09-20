@@ -17,6 +17,9 @@ public class NetworkManager {
     }
 
     protected boolean send(Message message) throws IOException {
+        // Oooops ! An error occurs (simulate a message lost)
+//        if (message.getContent().equals("Prepared"))
+//            return true;
         // Send message to server
         writer.println("s:" + message.toString());
         // Read response
