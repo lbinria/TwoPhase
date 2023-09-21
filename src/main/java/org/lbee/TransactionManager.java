@@ -20,6 +20,9 @@ public class TransactionManager extends Manager implements NamedClient {
     // Resource manager prepared to commit
     private final HashSet<String> preparedResourceManagers;
 
+    // Number of resource manager prepared to commit
+    private int nbPrepared;
+
     private boolean isAllRegistered = false;
 
     private final VirtualField specTmPrepared;
@@ -29,6 +32,9 @@ public class TransactionManager extends Manager implements NamedClient {
 
         resourceManagers = new HashSet<>();
         preparedResourceManagers = new HashSet<>();
+        // Note: invert comment to introduce bug
+        nbPrepared = 0;
+//        nbPrepared = 1;
         this.config = config;
 
         this.specTmPrepared = spec.getVariable("tmPrepared");
@@ -37,6 +43,7 @@ public class TransactionManager extends Manager implements NamedClient {
     private void reset() throws IOException {
         resourceManagers.clear();
         preparedResourceManagers.clear();
+        nbPrepared = 0;
         specTmPrepared.clear();
         spec.commitChanges("TMReset");
     }
@@ -55,7 +62,6 @@ public class TransactionManager extends Manager implements NamedClient {
             System.out.println("All expected resource managers are registered.");
             String strResourceManagers = this.resourceManagers.stream().map(r -> "\"" + r + "\"").collect(Collectors.joining(", "));
             String rmValue = "{" + strResourceManagers + "}";
-            // TODO here write to trace file
             isAllRegistered = true;
         }
 
@@ -78,7 +84,8 @@ public class TransactionManager extends Manager implements NamedClient {
     }
 
     protected boolean checkCommit()  {
-        return this.preparedResourceManagers.containsAll(this.resourceManagers) || this.config.commitAnyway;
+//        return this.preparedResourceManagers.containsAll(this.resourceManagers) || this.config.commitAnyway;
+        return this.nbPrepared == this.resourceManagers.size();
     }
 
     /**
@@ -112,6 +119,7 @@ public class TransactionManager extends Manager implements NamedClient {
         /* Add prepared resource manager to prepared set */
         String rmName = optionalResourceManager.get();
         preparedResourceManagers.add(rmName);
+        nbPrepared++;
         specTmPrepared.add(rmName);
         spec.commitChanges("TMRcvPrepared");
     }
