@@ -39,9 +39,9 @@ public class Client {
 
             final Manager manager;
             switch (type) {
-                case "tm" -> manager = new TransactionManager(socket, config.transactionManagerConfig);
+                case "tm" -> manager = new TransactionManager(socket, config.tmConfig);
                 case "rm" -> {
-                    ResourceManager resourceManager = new ResourceManager(socket, resourceManagerName, "TM", config.resourceManagerConfig);
+                    ResourceManager resourceManager = new ResourceManager(socket, resourceManagerName, "TM", config.rmConfig);
                     resourceManager.register();
                     manager = resourceManager;
                 }
@@ -70,24 +70,4 @@ public class Client {
         }
     }
 
-    private static class Configuration {
-
-        public int nResourceManager = 2;
-        public TransactionManager.TransactionManagerConfiguration transactionManagerConfig;
-        public ResourceManager.ResourceManagerConfiguration resourceManagerConfig;
-
-        public Configuration(final String[] args) {
-            this.transactionManagerConfig = new TransactionManager.TransactionManagerConfiguration(nResourceManager, Integer.MAX_VALUE, false);
-            this.resourceManagerConfig = new ResourceManager.ResourceManagerConfiguration(false, -1, false);
-        }
-
-        @Override
-        public String toString() {
-            return "Configuration{" +
-                    "transactionManagerConfig=" + transactionManagerConfig +
-                    ", resourceManagerConfig=" + resourceManagerConfig +
-                    '}';
-        }
-
-    }
 }

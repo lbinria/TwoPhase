@@ -1,11 +1,9 @@
 --------------------------- MODULE TwoPhaseTrace ---------------------------
 (***************************************************************************)
-(* Simplified specification of 2PC *)
+(* Trace spec that refines 2PC *)
 (***************************************************************************)
 
 EXTENDS TLC, Sequences, SequencesExt, Naturals, FiniteSets, Bags, Json, IOUtils, TwoPhase, TVOperators, TraceSpec
-
-vars == <<rmState, tmState, tmPrepared, msgs>>
 
 (* Override CONSTANTS *)
 
@@ -41,8 +39,7 @@ TPMapVariables(t) ==
         THEN msgs' = MapVariable(msgs, "msgs", t)
         ELSE TRUE
 
-
-
+(* Predicate actions *)
 IsTMCommit ==
     /\ IsEvent("TMCommit")
     /\ TMCommit
@@ -51,13 +48,13 @@ IsTMAbort ==
     /\ IsEvent("TMAbort")
     /\ TMAbort
 
-IsTMReset ==
-    /\ IsEvent("TMReset")
-    /\ TMReset
-
 IsTMRcvPrepared ==
     /\ IsEvent("TMRcvPrepared")
-    /\ \E r \in RM : TMRcvPrepared(r)
+    /\
+        IF "event_args" \in DOMAIN logline /\ Len(logline.event_args) >= 1 THEN
+            TMRcvPrepared(logline.event_args[1])
+        ELSE
+            \E r \in RM : TMRcvPrepared(r)
 
 IsRMPrepare ==
     /\ IsEvent("RMPrepare")
@@ -69,35 +66,40 @@ IsRMPrepare ==
 
 IsRMChooseToAbort ==
     /\ IsEvent("RMChooseToAbort")
-    /\ \E r \in RM : RMChooseToAbort(r)
+    /\
+        IF "event_args" \in DOMAIN logline /\ Len(logline.event_args) >= 1 THEN
+            RMChooseToAbort(logline.event_args[1])
+        ELSE
+            \E r \in RM : RMChooseToAbort(r)
 
 IsRMRcvCommitMsg ==
     /\ IsEvent("RMRcvCommitMsg")
-    /\ \E r \in RM : RMRcvCommitMsg(r)
+    /\
+        IF "event_args" \in DOMAIN logline /\ Len(logline.event_args) >= 1 THEN
+            RMRcvCommitMsg(logline.event_args[1])
+        ELSE
+            \E r \in RM : RMRcvCommitMsg(r)
 
 IsRMRcvAbortMsg ==
     /\ IsEvent("RMRcvAbortMsg")
-    /\ \E r \in RM : RMRcvAbortMsg(r)
-
-IsRMReset ==
-    /\ IsEvent("RMReset")
-    /\ \E r \in RM : RMReset(r)
+    /\
+        IF "event_args" \in DOMAIN logline /\ Len(logline.event_args) >= 1 THEN
+            RMRcvAbortMsg(logline.event_args[1])
+        ELSE
+            \E r \in RM : RMRcvAbortMsg(r)
 
 TPTraceNext ==
         \/ IsTMCommit
         \/ IsTMAbort
-        \/ IsTMReset
         \/ IsTMRcvPrepared
         \/ IsRMPrepare
         \/ IsRMChooseToAbort
         \/ IsRMRcvCommitMsg
         \/ IsRMRcvAbortMsg
-        \/ IsRMReset
 
-
+(* Eventually composed actions *)
 ComposedNext == FALSE
 
-BASE == INSTANCE TwoPhase
-BaseSpec == BASE!TPInit /\ [][BASE!TPNext \/ ComposedNext]_vars
+BaseSpec == TPInit /\ [][TPNext \/ ComposedNext]_vars
 -----------------------------------------------------------------------------
 =============================================================================

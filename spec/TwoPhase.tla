@@ -38,6 +38,8 @@ VARIABLES
     (* particular protocol, that's not a problem.                          *)
     (***********************************************************************)
 
+vars == <<rmState, tmState, tmPrepared, msgs>>
+
 Messages ==
   (*************************************************************************)
   (* The set of all possible messages.  Messages of type "Prepared" are    *)
@@ -66,14 +68,6 @@ TPInit ==
   /\ tmPrepared   = {}
   /\ msgs = {}
 -----------------------------------------------------------------------------
-TMReset ==
-    /\ tmState' = "init"
-    /\ tmPrepared' = {}
-    /\ UNCHANGED <<rmState, tmState, msgs>>
-
-RMReset(r) ==
-    /\ rmState' = [rmState EXCEPT ![r] = "working"]
-    /\ UNCHANGED <<tmState, tmPrepared, msgs>>
 
 (***************************************************************************)
 (* We now define the actions that may be performed by the processes, first *)
@@ -147,18 +141,17 @@ RMRcvAbortMsg(r) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgs>>
 
 TPNext ==
-  \/ TMCommit \/ TMAbort \/ TMReset
+  \/ TMCommit \/ TMAbort
   \/ \E r \in RM : 
        TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r)
          \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r)
-         \/ RMReset(r)
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* The material below this point is not discussed in Video Lecture 6.  It  *)
 (* will be explained in Video Lecture 8.                                   *)
 (***************************************************************************)
 
-TPSpec == TPInit /\ [][TPNext]_<<rmState, tmState, tmPrepared, msgs>> /\ WF_<<rmState, tmState, tmPrepared, msgs>>(TPNext)
+TPSpec == TPInit /\ [][TPNext]_vars /\ WF_vars(TPNext)
   (*************************************************************************)
   (* The complete spec of the Two-Phase Commit protocol.                   *)
   (*************************************************************************)

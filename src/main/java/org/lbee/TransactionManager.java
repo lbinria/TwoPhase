@@ -14,11 +14,9 @@ import java.util.stream.Collectors;
 public class TransactionManager extends Manager implements NamedClient {
 
     // Config
-    private final TransactionManager.TransactionManagerConfiguration config;
+    private final TransactionManagerConfiguration config;
     // Resource manager linked to TM
     private final HashSet<String> resourceManagers;
-    // Resource manager prepared to commit
-    private final HashSet<String> preparedResourceManagers;
 
     // Number of resource manager prepared to commit
     private int nbPrepared;
@@ -34,26 +32,16 @@ public class TransactionManager extends Manager implements NamedClient {
         super("TM", socket);
 
         resourceManagers = new HashSet<>();
-        preparedResourceManagers = new HashSet<>();
         // Note: invert comment to introduce bug
 //        nbPrepared = 0;
-
         // Even if nbPrepared is false, increase the commit delay led to a valid trace
         // Because the last RM have time to send is Prepared message before TM propose to commit
-        nbPrepared = 1;
+        nbPrepared = 0;
         commitDelay = 1;
 
         this.config = config;
 
         this.specTmPrepared = spec.getVariable("tmPrepared");
-    }
-
-    private void reset() throws IOException {
-        resourceManagers.clear();
-        preparedResourceManagers.clear();
-        nbPrepared = 0;
-        specTmPrepared.clear();
-        spec.commitChanges("TMReset");
     }
 
     @Override
@@ -62,7 +50,7 @@ public class TransactionManager extends Manager implements NamedClient {
         super.run();
 
         // Waiting for all resource manager registered
-        if (resourceManagers.size() < config.nResourceManager)
+        if (resourceManagers.size() < config.nResourceManager())
             return;
 
         // Do just once
@@ -98,7 +86,6 @@ public class TransactionManager extends Manager implements NamedClient {
     }
 
     protected boolean checkCommit()  {
-//        return this.preparedResourceManagers.containsAll(this.resourceManagers) || this.config.commitAnyway;
         return this.nbPrepared >= this.resourceManagers.size();
     }
 
@@ -126,30 +113,17 @@ public class TransactionManager extends Manager implements NamedClient {
     public void receivePrepared(String sender) throws IOException {
         /* Search receive prepared resource manager in resource manager set */
         Optional<String> optionalResourceManager = resourceManagers.stream().filter(rmName -> rmName.equals(sender)).findFirst();
-        /* If it doesn't exist do nothing */
+        /* If it doesn't exist, do nothing */
         if (optionalResourceManager.isEmpty())
             return;
 
         /* Add prepared resource manager to prepared set */
         String rmName = optionalResourceManager.get();
-        preparedResourceManagers.add(rmName);
         nbPrepared++;
         specTmPrepared.add(rmName);
         spec.commitChanges("TMRcvPrepared");
     }
 
-    /**
-     * Configuration of a resource manager
-     * @param timeout Is resource manager should fail, invoke an unknown exception
-     * @param commitAnyway Commit even if some RM are not prepared (introduce error in implementation)
-     */
-    record TransactionManagerConfiguration(int nResourceManager, int timeout, boolean commitAnyway) {
-        @Override
-        public String toString() {
-            return "TransactionManagerConfiguration{" +
-                    "timeout=" + timeout +
-                    '}';
-        }
-    }
+
 
 }

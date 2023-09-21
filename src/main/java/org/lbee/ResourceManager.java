@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 public class ResourceManager extends Manager implements NamedClient {
 
@@ -76,14 +75,14 @@ public class ResourceManager extends Manager implements NamedClient {
         // If working simulate task, and then prepare
         if (this.getState() == ResourceManagerState.WORKING) {
             try {
-                Thread.sleep(config.taskDuration);
+                Thread.sleep(config.taskDuration());
             } catch (InterruptedException ex) {
             }
             this.prepare();
         }
 
         /* Task fail eventually */
-        if (this.config.shouldFail)
+        if (this.config.shouldFail())
             throw new IOException();
     }
 
@@ -123,35 +122,6 @@ public class ResourceManager extends Manager implements NamedClient {
         // Shutdown process
         //this.reset();
         this.shutdown();
-    }
-
-    /**
-     * Configuration of a resource manager
-     * @param shouldFail Is resource manager should fail, invoke an unknown exception
-     * @param taskDuration Duration of the simulated task
-     * @param prepareAnyway Prepare resource manager even if is not in "working" state (introduce error in implementation)
-     */
-    record ResourceManagerConfiguration(boolean shouldFail, int taskDuration, boolean prepareAnyway) {
-
-        ResourceManagerConfiguration(boolean shouldFail, int taskDuration, boolean prepareAnyway) {
-            this.shouldFail = shouldFail;
-            this.prepareAnyway = prepareAnyway;
-
-            if (taskDuration == -1)
-                /* Set a random task duration */
-                //this.taskDuration = new Random().nextInt(10000);
-                this.taskDuration = new Random().nextInt(100);
-            else
-                this.taskDuration = taskDuration;
-        }
-
-        @Override
-        public String toString() {
-            return "ResourceManagerConfiguration{" +
-                    "shouldFail=" + shouldFail +
-                    ", taskDuration=" + taskDuration +
-                    '}';
-        }
     }
 
     /**
