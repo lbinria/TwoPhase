@@ -3,7 +3,7 @@ import time
 import signal
 from subprocess import Popen
 
-jar_name = "TwoPhase-1.1-jar-with-dependencies.jar"
+jar_name = "TwoPhase-1.1-noabort-demo-jar-with-dependencies.jar"
 
 def run():
     print("--- Run server ---")
