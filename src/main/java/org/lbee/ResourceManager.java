@@ -1,5 +1,6 @@
 package org.lbee;
 
+import org.lbee.helpers.Helper;
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.models.Message;
 import org.lbee.models.TwoPhaseMessage;
@@ -93,14 +94,14 @@ public class ResourceManager extends Manager implements NamedClient {
     @Override
     protected void receive(Message message) throws IOException {
         /* Eventually commit */
-        if (message.getContent().equals(TwoPhaseMessage.COMMIT.toString()))
+        if (message.getContent().equals(TwoPhaseMessage.Commit.toString()))
             this.commit();
         /* Nothing else to do */
     }
 
     protected void register() throws IOException {
         System.out.println("Registering...");
-        this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.REGISTER.toString(), 0));
+        this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Register.toString(), 0));
     }
 
     /**
@@ -116,9 +117,9 @@ public class ResourceManager extends Manager implements NamedClient {
         long elapsedTime = System.currentTimeMillis() - lastSendTime;
         // Send every second
         if (this.state == ResourceManagerState.PREPARED && elapsedTime >= 100) {
-            specMessages.add(Map.of("type",TwoPhaseMessage.PREPARED.toString(), "rm", getName()));
+            specMessages.add(Map.of("type",TwoPhaseMessage.Prepared.toString(), "rm", getName()));
             spec.commitChanges();
-            this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), 0));
+            this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
             lastSendTime = System.currentTimeMillis();
         }
     }

@@ -72,9 +72,9 @@ public class TransactionManager extends Manager implements NamedClient {
     }
 
     protected void receive(Message message) throws IOException {
-        if (message.getContent().equals(TwoPhaseMessage.REGISTER.toString())) {
+        if (message.getContent().equals(TwoPhaseMessage.Register.toString())) {
             this.receivedRegister(message.getFrom());
-        } else if (message.getContent().equals(TwoPhaseMessage.PREPARED.toString())) {
+        } else if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             this.receivePrepared(message.getFrom());
         }
     }
@@ -93,14 +93,14 @@ public class TransactionManager extends Manager implements NamedClient {
      */
     private void commit() throws IOException {
         // Notify
-        specMessages.add(Map.of("type", TwoPhaseMessage.COMMIT.toString()));
+        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
         spec.commitChanges("TMCommit");
 
         for (String rmName : resourceManagers)
-            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.COMMIT.toString(), 0));
+            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
 
         // Display message
-        System.out.println(TwoPhaseMessage.COMMIT + ".");
+        System.out.println(TwoPhaseMessage.Commit + ".");
 
         // Shutdown
         this.shutdown();
