@@ -72,11 +72,10 @@ public class TransactionManager extends Manager implements NamedClient {
     }
 
     protected void receive(Message message) throws IOException {
-        switch (message.getContent()) {
-            case "Register" -> this.receivedRegister(message.getFrom());
-            case "Prepared" -> this.receivePrepared(message.getFrom());
-            /* Nothing to do */
-            default -> {}
+        if (message.getContent().equals(TwoPhaseMessage.REGISTER.toString())) {
+            this.receivedRegister(message.getFrom());
+        } else if (message.getContent().equals(TwoPhaseMessage.PREPARED.toString())) {
+            this.receivePrepared(message.getFrom());
         }
     }
 
@@ -94,7 +93,7 @@ public class TransactionManager extends Manager implements NamedClient {
      */
     private void commit() throws IOException {
         // Notify
-        specMessages.add(Map.of("type", "Commit"));
+        specMessages.add(Map.of("type", TwoPhaseMessage.COMMIT.toString()));
         spec.commitChanges("TMCommit");
 
         for (String rmName : resourceManagers)
