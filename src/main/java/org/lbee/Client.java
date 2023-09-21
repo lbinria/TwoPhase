@@ -2,6 +2,10 @@ package org.lbee;
 
 import com.google.gson.JsonObject;
 import org.lbee.instrumentation.ConfigurationWriter;
+import org.lbee.protocol.Configuration;
+import org.lbee.protocol.Manager;
+import org.lbee.protocol.ResourceManager;
+import org.lbee.protocol.TransactionManager;
 
 import java.io.IOException;
 import java.net.Socket;

@@ -11,7 +11,7 @@ def run():
         "java",
         "-cp",
         f"target/{jar_name}",
-        "org.lbee.Server",
+        "org.lbee.network.Server",
         "6869"])
 
     # Wait the server run, if comment this line, maye some manager running before the server, leading to error
