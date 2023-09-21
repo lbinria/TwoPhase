@@ -93,7 +93,7 @@ public class ResourceManager extends Manager implements NamedClient {
     @Override
     protected void receive(Message message) throws IOException {
         /* Eventually commit */
-        if (message.getContent().equals("Commit"))
+        if (message.getContent().equals(TwoPhaseMessage.COMMIT.toString()))
             this.commit();
         /* Nothing else to do */
     }
@@ -116,7 +116,7 @@ public class ResourceManager extends Manager implements NamedClient {
         long elapsedTime = System.currentTimeMillis() - lastSendTime;
         // Send every second
         if (this.state == ResourceManagerState.PREPARED && elapsedTime >= 100) {
-            specMessages.add(Map.of("type","Prepared", "rm", getName()));
+            specMessages.add(Map.of("type",TwoPhaseMessage.PREPARED.toString(), "rm", getName()));
             spec.commitChanges();
             this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), 0));
             lastSendTime = System.currentTimeMillis();
