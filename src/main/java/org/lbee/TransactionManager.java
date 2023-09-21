@@ -27,14 +27,22 @@ public class TransactionManager extends Manager implements NamedClient {
 
     private final VirtualField specTmPrepared;
 
+    private final int commitDelay;
+    private long lastTick;
+
     public TransactionManager(Socket socket, TransactionManagerConfiguration config) throws IOException {
         super("TM", socket);
 
         resourceManagers = new HashSet<>();
         preparedResourceManagers = new HashSet<>();
         // Note: invert comment to introduce bug
-        nbPrepared = 0;
-//        nbPrepared = 1;
+//        nbPrepared = 0;
+
+        // Even if nbPrepared is false, increase the commit delay led to a valid trace
+        // Because the last RM have time to send is Prepared message before TM propose to commit
+        nbPrepared = 1;
+        commitDelay = 1;
+
         this.config = config;
 
         this.specTmPrepared = spec.getVariable("tmPrepared");
@@ -65,8 +73,14 @@ public class TransactionManager extends Manager implements NamedClient {
             isAllRegistered = true;
         }
 
-        if (checkCommit())
-            this.commit();
+        if (checkCommit()) {
+            if (lastTick == 0)
+                lastTick = System.currentTimeMillis();
+
+            // Wait 1s
+            if (System.currentTimeMillis() - lastTick >= commitDelay)
+                this.commit();
+        }
     }
 
     protected void receive(Message message) throws IOException {
@@ -85,7 +99,7 @@ public class TransactionManager extends Manager implements NamedClient {
 
     protected boolean checkCommit()  {
 //        return this.preparedResourceManagers.containsAll(this.resourceManagers) || this.config.commitAnyway;
-        return this.nbPrepared == this.resourceManagers.size();
+        return this.nbPrepared >= this.resourceManagers.size();
     }
 
     /**
