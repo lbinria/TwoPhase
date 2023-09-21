@@ -9,9 +9,9 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+// import java.util.stream.Collectors;
 
-public class TransactionManager extends Manager implements NamedClient {
+public class TransactionManager extends Manager {
 
     // Config
     private final TransactionManagerConfiguration config;
@@ -21,7 +21,7 @@ public class TransactionManager extends Manager implements NamedClient {
     // Number of resource manager prepared to commit
     private int nbPrepared;
 
-    private boolean isAllRegistered = false;
+    // private boolean isAllRegistered = false;
 
     private final VirtualField specTmPrepared;
 
@@ -54,12 +54,12 @@ public class TransactionManager extends Manager implements NamedClient {
             return;
 
         // Do just once
-        if (!isAllRegistered) {
-            System.out.println("All expected resource managers are registered.");
-            String strResourceManagers = this.resourceManagers.stream().map(r -> "\"" + r + "\"").collect(Collectors.joining(", "));
-            String rmValue = "{" + strResourceManagers + "}";
-            isAllRegistered = true;
-        }
+        // if (!isAllRegistered) {
+        //     System.out.println("All expected resource managers are registered.");
+        //     String strResourceManagers = this.resourceManagers.stream().map(r -> "\"" + r + "\"").collect(Collectors.joining(", "));
+        //     String rmValue = "{" + strResourceManagers + "}";
+        //     isAllRegistered = true;
+        // }
 
         if (checkCommit()) {
             if (lastTick == 0)

@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.Locale;
 import java.util.Map;
 
-public class ResourceManager extends Manager implements NamedClient {
+public class ResourceManager extends Manager {
 
     /**
      * Possible states of resource manager
@@ -46,10 +46,10 @@ public class ResourceManager extends Manager implements NamedClient {
         specState = spec.getVariable("rmState").getField(getName());
     }
 
-    private void reset() throws IOException {
-        setState(ResourceManagerState.WORKING);
-        spec.commitChanges("RMReset");
-    }
+    // private void reset() throws IOException {
+    //     setState(ResourceManagerState.WORKING);
+    //     spec.commitChanges("RMReset");
+    // }
 
     /**
      * Set state of manager
@@ -142,16 +142,16 @@ public class ResourceManager extends Manager implements NamedClient {
      * Check whether the manager is in working state
      * @return True if manager is in working state, else false
      */
-    private boolean isWorking() {
-        return this.getState() == ResourceManagerState.WORKING;
-    }
+    // private boolean isWorking() {
+    //     return this.getState() == ResourceManagerState.WORKING;
+    // }
 
     /**
      * Check whether the manager is in committed state
      * @return True if manager is in committed state, else false
      */
-    private boolean isCommitted() {
-        return this.getState() == ResourceManagerState.COMMITTED;
-    }
+    // private boolean isCommitted() {
+    //     return this.getState() == ResourceManagerState.COMMITTED;
+    // }
 
 }
