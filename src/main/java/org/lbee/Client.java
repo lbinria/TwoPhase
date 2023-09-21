@@ -1,5 +1,6 @@
 package org.lbee;
 
+import com.google.gson.JsonObject;
 import org.lbee.instrumentation.ConfigurationWriter;
 
 import java.io.IOException;
@@ -26,14 +27,10 @@ public class Client {
         final String type = args[2];
         final String resourceManagerName = args[3];
 
-        final Configuration config = new Configuration(args);
-        // Some printing
-        System.out.println(config);
+        final JsonObject jsonConfig = ConfigurationWriter.read("twophase.ndjson.conf");
+        System.out.println(jsonConfig);
 
-        // Write config in file
-        final String[] rmNames = IntStream.range(0, config.nResourceManager).mapToObj(i -> "rm-" + i).toArray(String[]::new);
-        final Map<String, Object> mapConfig = Map.of("RM", rmNames);
-        ConfigurationWriter.write("twophase.ndjson.conf", mapConfig);
+        final Configuration config = new Configuration(jsonConfig);
 
         try (Socket socket = new Socket(hostname, port)) {
 

@@ -1,16 +1,20 @@
 package org.lbee;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import java.util.Random;
 
 public class Configuration {
 
-    public int nResourceManager = 2;
     public TransactionManagerConfiguration tmConfig;
     public ResourceManagerConfiguration rmConfig;
 
-    public Configuration(final String[] args) {
-        this.tmConfig = new TransactionManagerConfiguration(nResourceManager, Integer.MAX_VALUE);
+    public Configuration(JsonObject jsonConfig) {
+        JsonArray jsonResourceManagerNames = jsonConfig.get("RM").getAsJsonArray();
+        this.tmConfig = new TransactionManagerConfiguration(jsonResourceManagerNames.size(), Integer.MAX_VALUE);
         this.rmConfig = new ResourceManagerConfiguration(false, -1);
+
     }
 
     @Override
