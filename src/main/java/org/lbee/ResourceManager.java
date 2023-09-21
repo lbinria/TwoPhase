@@ -6,6 +6,7 @@ import org.lbee.models.TwoPhaseMessage;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -17,8 +18,7 @@ public class ResourceManager extends Manager implements NamedClient {
     enum ResourceManagerState {
         WORKING,
         PREPARED,
-        COMMITTED,
-        ABORTED
+        COMMITTED
     }
 
     // Config
@@ -46,9 +46,9 @@ public class ResourceManager extends Manager implements NamedClient {
         specState = spec.getVariable("rmState").getField(getName());
     }
 
-    private void reset() {
+    private void reset() throws IOException {
         setState(ResourceManagerState.WORKING);
-//        spec.commitChanges("RMReset");
+        spec.commitChanges("RMReset");
     }
     /**
      * Set state of manager
@@ -57,7 +57,7 @@ public class ResourceManager extends Manager implements NamedClient {
     private void setState(ResourceManagerState state) {
         // Change state
         this.state = state;
-//        specState.set(state.toString().toLowerCase(Locale.ROOT));
+        specState.set(state.toString().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -88,14 +88,11 @@ public class ResourceManager extends Manager implements NamedClient {
     }
 
     @Override
-    protected void receive(Message message) {
-        // Redirect message to method to execute
-        switch (message.getContent()) {
-            case "Commit" -> this.commit();
-            case "Abort" -> this.abort();
-            /* Nothing to do */
-            default -> {}
-        }
+    protected void receive(Message message) throws IOException {
+        /* Eventually commit */
+        if (message.getContent().equals("Commit"))
+            this.commit();
+        /* Nothing else to do */
     }
 
     protected void register() throws IOException {
@@ -116,28 +113,15 @@ public class ResourceManager extends Manager implements NamedClient {
     /**
      * @TLA-action RMRcvCommitMsg(r)
      */
-    protected void commit() {
+    protected void commit() throws IOException {
         // Simulate some task that take some time
         long d = 150 + Helper.next(1000);
         //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
         try {Thread.sleep(d); } catch (InterruptedException ex) {}
         this.setState(ResourceManagerState.COMMITTED);
-//        spec.commitChanges("RMRcvCommitMsg");
+        spec.commitChanges("RMRcvCommitMsg");
         // Shutdown process
         //this.reset();
-        this.shutdown();
-    }
-
-    /**
-     * @TLA-action RMRcvAbortMsg(r)
-     */
-    protected void abort() {
-        // Simulate some task that take some time
-        long d = 150 + Helper.next(2000);
-        //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
-        try {Thread.sleep(d); } catch (InterruptedException ex) {}
-        this.setState(ResourceManagerState.ABORTED);
-        // Shutdown process
         this.shutdown();
     }
 
@@ -184,14 +168,6 @@ public class ResourceManager extends Manager implements NamedClient {
      */
     private boolean isCommitted() {
         return this.getState() == ResourceManagerState.COMMITTED;
-    }
-
-    /**
-     * Check whether the manager is in aborted state
-     * @return True if manager is in aborted state, else false
-     */
-    private boolean isAborted() {
-        return this.getState() == ResourceManagerState.ABORTED;
     }
 
 }

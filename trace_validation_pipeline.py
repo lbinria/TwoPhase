@@ -37,6 +37,6 @@ with open("trace-tla.ndjson", "w") as f:
 
 print("# Start TLA+ trace spec.\n")
 
-tla_trace_validation.run_tla("spec/TwoPhaseTrace.tla","trace-tla.ndjson")
+tla_trace_validation.run_tla("spec/TwoPhaseNoabortTrace.tla","trace-tla.ndjson")
 
 print("End pipeline.")

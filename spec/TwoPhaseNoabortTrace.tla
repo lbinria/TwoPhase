@@ -1,9 +1,6 @@
---------------------------- MODULE TwoPhaseTrace ---------------------------
-(***************************************************************************)
-(* Simplified specification of 2PC *)
-(***************************************************************************)
+---- MODULE TwoPhaseNoabortTrace ----
 
-EXTENDS TLC, Sequences, SequencesExt, Naturals, FiniteSets, Bags, Json, IOUtils, TwoPhase, TVOperators, TraceSpec
+EXTENDS TLC, Sequences, SequencesExt, Naturals, FiniteSets, Bags, Json, IOUtils, TwoPhaseNoabort, TVOperators, TraceSpec
 
 vars == <<rmState, tmState, tmPrepared, msgs>>
 
@@ -47,10 +44,6 @@ IsTMCommit ==
     /\ IsEvent("TMCommit")
     /\ TMCommit
 
-IsTMAbort ==
-    /\ IsEvent("TMAbort")
-    /\ TMAbort
-
 IsTMReset ==
     /\ IsEvent("TMReset")
     /\ TMReset
@@ -67,17 +60,9 @@ IsRMPrepare ==
         ELSE
             \E r \in RM : RMPrepare(r)
 
-IsRMChooseToAbort ==
-    /\ IsEvent("RMChooseToAbort")
-    /\ \E r \in RM : RMChooseToAbort(r)
-
 IsRMRcvCommitMsg ==
     /\ IsEvent("RMRcvCommitMsg")
     /\ \E r \in RM : RMRcvCommitMsg(r)
-
-IsRMRcvAbortMsg ==
-    /\ IsEvent("RMRcvAbortMsg")
-    /\ \E r \in RM : RMRcvAbortMsg(r)
 
 IsRMReset ==
     /\ IsEvent("RMReset")
@@ -85,13 +70,10 @@ IsRMReset ==
 
 TPTraceNext ==
         \/ IsTMCommit
-        \/ IsTMAbort
         \/ IsTMReset
         \/ IsTMRcvPrepared
         \/ IsRMPrepare
-        \/ IsRMChooseToAbort
         \/ IsRMRcvCommitMsg
-        \/ IsRMRcvAbortMsg
         \/ IsRMReset
 
 
@@ -99,5 +81,4 @@ ComposedNext == FALSE
 
 BASE == INSTANCE TwoPhase
 BaseSpec == BASE!TPInit /\ [][BASE!TPNext \/ ComposedNext]_vars
------------------------------------------------------------------------------
-=============================================================================
+====

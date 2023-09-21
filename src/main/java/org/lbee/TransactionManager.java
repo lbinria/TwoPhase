@@ -1,13 +1,11 @@
 package org.lbee;
 
 import org.lbee.instrumentation.VirtualField;
-import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.models.Message;
 import org.lbee.models.TwoPhaseMessage;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -61,13 +59,8 @@ public class TransactionManager extends Manager implements NamedClient {
             isAllRegistered = true;
         }
 
-        // TODO commit can be happen at the same time as abort => error
         if (checkCommit())
             this.commit();
-
-        if (checkTimeout())
-            this.abort();
-
     }
 
     protected void receive(Message message) throws IOException {
@@ -88,12 +81,6 @@ public class TransactionManager extends Manager implements NamedClient {
         return this.preparedResourceManagers.containsAll(this.resourceManagers) || this.config.commitAnyway;
     }
 
-    protected boolean checkTimeout() {
-
-        //return this.instrumentation.getClock().getValue() >= this.config.timeout;
-        return false;
-    }
-
     /**
      * @TLAAction TMCommit
      */
@@ -110,28 +97,6 @@ public class TransactionManager extends Manager implements NamedClient {
 
         // Shutdown
         this.shutdown();
-    }
-
-    /**
-     * @TLAAction TMAbort
-     */
-    public void abort() throws IOException {
-        System.out.printf("%s timeout reach.\n", this.getName());
-
-        // Notify
-        specMessages.add(Map.of("type", "Abort"));
-        spec.commitChanges("TMAbort");
-
-        for (String rmName : resourceManagers) {
-            Message m = new Message(this.getName(), rmName, TwoPhaseMessage.ABORT.toString(), 0);
-            this.networkManager.send(m);
-        }
-
-        System.out.println(TwoPhaseMessage.ABORT + ".");
-
-        this.reset();
-        this.shutdown();
-
     }
 
     /**
