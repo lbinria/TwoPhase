@@ -6,7 +6,6 @@ import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.network.NetworkManager;
 
 import java.io.*;
-import java.net.Socket;
 
 public abstract class Manager {
 
@@ -35,9 +34,9 @@ public abstract class Manager {
      */
     protected void shutdown() { shutdown = true; }
 
-    public Manager(String name, Socket socket) throws IOException {
+    public Manager(String name, NetworkManager networkManager) throws IOException {
         this.name = name;
-        this.networkManager = new NetworkManager(socket);
+        this.networkManager = networkManager;
         this.shutdown = false;
 
         this.spec = BehaviorRecorder.create(name + ".ndjson", SharedClock.get("twophase.clock"));

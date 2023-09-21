@@ -1,9 +1,9 @@
 package org.lbee.protocol;
 
 import org.lbee.instrumentation.VirtualField;
+import org.lbee.network.NetworkManager;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -26,8 +26,8 @@ public class TransactionManager extends Manager {
     private final int commitDuration;
     private long lastTick;
 
-    public TransactionManager(Socket socket, TransactionManagerConfiguration config) throws IOException {
-        super("TM", socket);
+    public TransactionManager(NetworkManager networkManager, TransactionManagerConfiguration config) throws IOException {
+        super("TM", networkManager);
 
         resourceManagers = new HashSet<>();
         // Note: invert comment to introduce bug

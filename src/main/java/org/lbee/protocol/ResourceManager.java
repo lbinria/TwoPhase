@@ -2,9 +2,9 @@ package org.lbee.protocol;
 
 import org.lbee.helpers.Helper;
 import org.lbee.instrumentation.VirtualField;
+import org.lbee.network.NetworkManager;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.Locale;
 import java.util.Map;
 
@@ -37,8 +37,8 @@ public class ResourceManager extends Manager {
      * @param config Resource manager config
      * @throws IOException Throw when errors occur on socket
      */
-    public ResourceManager(Socket socket, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
-        super(name, socket);
+    public ResourceManager(NetworkManager networkManager, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
+        super(name, networkManager);
         this.config = config;
         this.transactionManagerName = transactionManagerName;
         specState = spec.getVariable("rmState").getField(getName());

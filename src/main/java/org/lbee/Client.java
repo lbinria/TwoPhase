@@ -2,6 +2,7 @@ package org.lbee;
 
 import com.google.gson.JsonObject;
 import org.lbee.instrumentation.ConfigurationWriter;
+import org.lbee.network.NetworkManager;
 import org.lbee.protocol.Configuration;
 import org.lbee.protocol.Manager;
 import org.lbee.protocol.ResourceManager;
@@ -39,10 +40,11 @@ public class Client {
         try (Socket socket = new Socket(hostname, port)) {
 
             final Manager manager;
+            NetworkManager networkManager = new NetworkManager(socket);
             switch (type) {
-                case "tm" -> manager = new TransactionManager(socket, config.tmConfig);
+                case "tm" -> manager = new TransactionManager(networkManager, config.tmConfig);
                 case "rm" -> {
-                    ResourceManager resourceManager = new ResourceManager(socket, resourceManagerName, "TM", config.rmConfig);
+                    ResourceManager resourceManager = new ResourceManager(networkManager, resourceManagerName, "TM", config.rmConfig);
                     resourceManager.register();
                     manager = resourceManager;
                 }
