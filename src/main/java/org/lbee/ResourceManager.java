@@ -49,6 +49,7 @@ public class ResourceManager extends Manager implements NamedClient {
         setState(ResourceManagerState.WORKING);
         spec.commitChanges("RMReset");
     }
+
     /**
      * Set state of manager
      * @param state New manager state
@@ -81,6 +82,9 @@ public class ResourceManager extends Manager implements NamedClient {
             this.prepare();
         }
 
+        // Continuously send prepared while not committed
+        sendPrepared();
+
         /* Task fail eventually */
         if (this.config.shouldFail())
             throw new IOException();
@@ -104,9 +108,19 @@ public class ResourceManager extends Manager implements NamedClient {
      */
     protected void prepare() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
-        specMessages.add(Map.of("type","Prepared", "rm", getName()));
-        spec.commitChanges("RMPrepare");
-        this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), 0));
+    }
+
+    private long lastSendTime;
+    private void sendPrepared() throws IOException {
+        // Compute elapsed time between now and last message send
+        long elapsedTime = System.currentTimeMillis() - lastSendTime;
+        // Send every second
+        if (this.state == ResourceManagerState.PREPARED && elapsedTime >= 100) {
+            specMessages.add(Map.of("type","Prepared", "rm", getName()));
+            spec.commitChanges();
+            this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.PREPARED.toString(), 0));
+            lastSendTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -120,7 +134,6 @@ public class ResourceManager extends Manager implements NamedClient {
         this.setState(ResourceManagerState.COMMITTED);
         spec.commitChanges("RMRcvCommitMsg");
         // Shutdown process
-        //this.reset();
         this.shutdown();
     }
 

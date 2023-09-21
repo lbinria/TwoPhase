@@ -39,8 +39,7 @@ record ResourceManagerConfiguration(boolean shouldFail, int taskDuration) {
 
         if (taskDuration == -1)
             /* Set a random task duration */
-            //this.taskDuration = new Random().nextInt(10000);
-            this.taskDuration = new Random().nextInt(100);
+            this.taskDuration = new Random().nextInt(500);
         else
             this.taskDuration = taskDuration;
     }
