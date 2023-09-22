@@ -12,7 +12,7 @@ def run():
         "-cp",
         f"target/{jar_name}",
         "org.lbee.network.Server",
-        "6869"])
+        "6869", "unordered"])
 
     # Wait the server run, if comment this line, maye some manager running before the server, leading to error
     # This behavior might be interesting for trace validation
