@@ -42,14 +42,15 @@ public class TransactionManager extends Manager {
     @Override
     public void run() throws IOException {
         do {
-            Message message = networkManager.receive(this.getName());
-            while (message == null) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
-                message = networkManager.receive(this.getName());
-            }
+            Message message = networkManager.syncReceive(this.getName());
+//            Message message = networkManager.receive(this.getName());
+//            while (message == null) {
+//                try {
+//                    Thread.sleep(10);
+//                } catch (InterruptedException e) {
+//                }
+//                message = networkManager.receive(this.getName());
+//            }
             this.receive(message);
 
             if (checkCommit()) {

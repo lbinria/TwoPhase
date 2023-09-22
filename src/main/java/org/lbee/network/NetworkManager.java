@@ -38,6 +38,27 @@ public class NetworkManager {
         }
     }
 
+    public Message syncReceive(String processName) throws IOException {
+        while (true) {
+            // Request for message destined to me
+            writer.println("r:" + processName);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(this.inputStream));
+            String data = reader.readLine();
+
+            // Date is not null return
+            if (!data.equals("null")) {
+                String[] components = data.split(";");
+                return new Message(components);
+            }
+
+            // Data is null, block
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
     public void sendRaw(String s) {
         writer.println(s);
     }
