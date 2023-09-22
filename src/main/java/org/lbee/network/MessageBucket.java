@@ -3,18 +3,21 @@ package org.lbee.network;
 import org.lbee.protocol.Message;
 
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Bucket where processes can pick some received messages
  */
-public class MessageBucket {
+public class MessageBucket<TMessageBox extends MessageBox> {
 
-    // Queue of messages by recipient
-    private final HashMap<String, ConcurrentLinkedQueue<Message>> messageQueues;
+    // Map of message boxes by recipient
+    private final HashMap<String, TMessageBox> messageBoxes;
+    private final Supplier<TMessageBox> messageBoxCtor;
 
-    public MessageBucket() {
-        this.messageQueues = new HashMap<>();
+    public MessageBucket(Supplier<TMessageBox> messageBoxCtor) {
+        this.messageBoxes = new HashMap<>();
+        this.messageBoxCtor = Objects.requireNonNull(messageBoxCtor);
     }
 
     /**
@@ -22,27 +25,25 @@ public class MessageBucket {
      * @param message Message to send
      */
     public void put(Message message) {
-        if (!this.messageQueues.containsKey(message.getTo()))
-            this.messageQueues.put(message.getTo(), new ConcurrentLinkedQueue<>());
+        if (!this.messageBoxes.containsKey(message.getTo()))
+            this.messageBoxes.put(message.getTo(), messageBoxCtor.get());
 
-        this.messageQueues.get(message.getTo()).add(message);
+        this.messageBoxes.get(message.getTo()).put(message);
     }
 
     /**
      * Take message of some addressee process (if any)
      * @param recipientName Recipient process name
      * @return Received message
-     * @throws InterruptedException
      */
-    public Message take(String recipientName) throws InterruptedException {
+    public Message take(String recipientName) {
         // Get message queue of recipient
-        ConcurrentLinkedQueue<Message> messageQueue = this.messageQueues.get(recipientName);
-        // Not message queue, return null
-        if (messageQueue == null)
+        MessageBox messageBox = this.messageBoxes.get(recipientName);
+        // No message, return null
+        if (messageBox == null)
             return null;
 
-        // No message for recipient, return null, else get the first message
-        return messageQueue.isEmpty() ? null : this.messageQueues.get(recipientName).poll();
+        return messageBox.take();
     }
 
 }

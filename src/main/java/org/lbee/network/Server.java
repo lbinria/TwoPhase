@@ -14,18 +14,23 @@ public class Server {
         SharedClock.get("twophase.clock").reset();
         int port = Integer.parseInt(args[0]);
 
+        final MessageBucket<MessageBox> messageBucket;
+        if (args.length > 1 && args[1].equals("unordered"))
+            messageBucket = new MessageBucket<>(UnorderedMessageBox::new);
+        else
+            messageBucket = new MessageBucket<>(QueueMessageBox::new);
+
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
             System.out.println("Server is listening on port " + port);
 
-            MessageBucket networkMock = new MessageBucket();
 
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected");
 
-                new ServerThread(socket, networkMock).start();
+                new ServerThread(socket, messageBucket).start();
             }
 
         } catch (IOException ex) {
