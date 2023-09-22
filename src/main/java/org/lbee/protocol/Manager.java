@@ -8,10 +8,7 @@ import org.lbee.network.NetworkManager;
 import java.io.*;
 
 public abstract class Manager {
-
-    // Manager name
     private final String name;
-    // Network manager
     public final NetworkManager networkManager;
 
     protected final BehaviorRecorder spec;

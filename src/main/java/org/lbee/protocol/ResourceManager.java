@@ -103,9 +103,9 @@ public class ResourceManager extends Manager {
         /* Eventually commit */
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.commit();
-            System.out.println("rm COMMIT");
+            System.out.println("RM received COMMIT");
         } else {
-            System.out.println("rm OTHER");
+            System.out.println("RM received OTHER");
         }
         /* Nothing else to do */
     }
@@ -135,7 +135,7 @@ public class ResourceManager extends Manager {
             this.networkManager
                     .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
             lastSendTime = System.currentTimeMillis();
-            System.out.println("rm SEND prepared");
+            System.out.println("RM send PREPARED");
         }
     }
 

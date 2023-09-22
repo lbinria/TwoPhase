@@ -34,10 +34,8 @@ public class TransactionManager extends Manager {
         // trace
         // Because the last RM have time to send is Prepared message before TM propose
         // to commit
-        nbPrepared = 0;
-
+        this.nbPrepared = 0;
         this.config = config;
-
         this.specTmPrepared = spec.getVariable("tmPrepared");
     }
 
@@ -58,7 +56,6 @@ public class TransactionManager extends Manager {
 
             if (checkCommit()) {
                 this.commit();
-                System.out.println("TM COMMIT");
             }
         } while (!this.isShutdown());
     }
@@ -66,12 +63,12 @@ public class TransactionManager extends Manager {
     protected void receive(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Register.toString())) {
             this.receivedRegister(message.getFrom());
-            System.out.println("tm REGISTER");
+            System.out.println("TM received REGISTER");
         } else if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             this.receivePrepared(message.getFrom());
-            System.out.println("tm PREPARED");
+            System.out.println("TM received PREPARED");
         } else {
-            System.out.println("tm OTHER");
+            System.out.println("TM received OTHER");
         }
     }
 
@@ -96,7 +93,7 @@ public class TransactionManager extends Manager {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
 
         // Display message
-        System.out.println(TwoPhaseMessage.Commit + ".");
+        System.out.println("TM committed: "+TwoPhaseMessage.Commit + ".");
 
         // Shutdown
         this.shutdown();
