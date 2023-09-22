@@ -1,9 +1,12 @@
 package org.lbee.protocol;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Configuration {
 
@@ -11,8 +14,8 @@ public class Configuration {
     public ResourceManagerConfiguration rmConfig;
 
     public Configuration(JsonObject jsonConfig) {
-        JsonArray jsonResourceManagerNames = jsonConfig.get("RM").getAsJsonArray();
-        this.tmConfig = new TransactionManagerConfiguration(jsonResourceManagerNames.size(), Integer.MAX_VALUE);
+        List<String> resourceManagerNames = jsonConfig.get("RM").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+        this.tmConfig = new TransactionManagerConfiguration(resourceManagerNames, resourceManagerNames.size(), Integer.MAX_VALUE);
         this.rmConfig = new ResourceManagerConfiguration(false, -1);
 
     }
@@ -57,7 +60,7 @@ record ResourceManagerConfiguration(boolean shouldFail, int taskDuration) {
  * Configuration of a resource manager
  * @param timeout Is resource manager should fail, invoke an unknown exception
  */
-record TransactionManagerConfiguration(int nResourceManager, int timeout) {
+record TransactionManagerConfiguration(List<String> resourceManagerNames, int nResourceManager, int timeout) {
     @Override
     public String toString() {
         return "TransactionManagerConfiguration{" +

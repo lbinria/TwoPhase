@@ -27,7 +27,7 @@ public class TransactionManager extends Manager {
             throws IOException {
         super("TM", networkManager);
 
-        resourceManagers = new HashSet<>();
+        resourceManagers = new HashSet<>(config.resourceManagerNames());
         // Note: invert comment to introduce bug
         // nbPrepared = 0;
         // Even if nbPrepared is false, increase the commit duration led to a valid
@@ -49,11 +49,6 @@ public class TransactionManager extends Manager {
             }
             this.receive(message);
 
-            // Waiting for all resource manager registered
-            if (resourceManagers.size() < config.nResourceManager()) {
-                continue;
-            }
-
             if (checkCommit()) {
                 this.commit();
             }
@@ -61,20 +56,12 @@ public class TransactionManager extends Manager {
     }
 
     protected void receive(Message message) throws IOException {
-        if (message.getContent().equals(TwoPhaseMessage.Register.toString())) {
-            this.receivedRegister(message.getFrom());
-            System.out.println("TM received REGISTER");
-        } else if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
+        if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             this.receivePrepared(message.getFrom());
             System.out.println("TM received PREPARED");
         } else {
             System.out.println("TM received OTHER");
         }
-    }
-
-    protected void receivedRegister(String resourceManagerName) {
-        System.out.printf("Register a new resource manager: %s.\n", resourceManagerName);
-        this.resourceManagers.add(resourceManagerName);
     }
 
     protected boolean checkCommit() {

@@ -110,12 +110,6 @@ public class ResourceManager extends Manager {
         /* Nothing else to do */
     }
 
-    public void register() throws IOException {
-        System.out.println("Registering...");
-        this.networkManager
-                .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Register.toString(), 0));
-    }
-
     /**
      * @TLA-action RMPrepare(r)
      */
