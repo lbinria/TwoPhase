@@ -73,25 +73,27 @@ public class ResourceManager extends Manager {
 
     @Override
     public void run() throws IOException {
+        
+        // If working simulate task, and then prepare
+        if (this.getState() == ResourceManagerState.WORKING) {
+            try {
+                Thread.sleep(config.taskDuration());
+            } catch (InterruptedException ex) {
+            }
+            this.prepare();
+        }
+        // Continuously send prepared while not committed
+        this.sendPrepared();
         do {
-            // Check eventual received message
-            // super.run();
             Message message = networkManager.receive(this.getName());
-            if (message != null) {
-                this.receive(message);
-            }
-
-            // If working simulate task, and then prepare
-            if (this.getState() == ResourceManagerState.WORKING) {
+            while (message == null) {
                 try {
-                    Thread.sleep(config.taskDuration());
-                } catch (InterruptedException ex) {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
                 }
-                this.prepare();
+                message = networkManager.receive(this.getName());
             }
-
-            // Continuously send prepared while not committed
-            sendPrepared();
+            this.receive(message);
 
             /* Task fail eventually */
             // if (this.config.shouldFail())
