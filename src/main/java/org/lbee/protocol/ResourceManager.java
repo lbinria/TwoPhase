@@ -31,13 +31,15 @@ public class ResourceManager extends Manager {
 
     /**
      * Construct a resource manager
-     * @param socket Client socket
-     * @param name Resource manager name
+     * 
+     * @param socket                 Client socket
+     * @param name                   Resource manager name
      * @param transactionManagerName Attached transaction manager name
-     * @param config Resource manager config
+     * @param config                 Resource manager config
      * @throws IOException Throw when errors occur on socket
      */
-    public ResourceManager(NetworkManager networkManager, String name, String transactionManagerName, ResourceManagerConfiguration config) throws IOException {
+    public ResourceManager(NetworkManager networkManager, String name, String transactionManagerName,
+            ResourceManagerConfiguration config) throws IOException {
         super(name, networkManager);
         this.config = config;
         this.transactionManagerName = transactionManagerName;
@@ -45,12 +47,13 @@ public class ResourceManager extends Manager {
     }
 
     // private void reset() throws IOException {
-    //     setState(ResourceManagerState.WORKING);
-    //     spec.commitChanges("RMReset");
+    // setState(ResourceManagerState.WORKING);
+    // spec.commitChanges("RMReset");
     // }
 
     /**
      * Set state of manager
+     * 
      * @param state New manager state
      */
     private void setState(ResourceManagerState state) {
@@ -61,6 +64,7 @@ public class ResourceManager extends Manager {
 
     /**
      * Get state of manager
+     * 
      * @return Current state of manager
      */
     public ResourceManagerState getState() {
@@ -69,37 +73,47 @@ public class ResourceManager extends Manager {
 
     @Override
     public void run() throws IOException {
-        // Check eventual received message
-        super.run();
-
-        // If working simulate task, and then prepare
-        if (this.getState() == ResourceManagerState.WORKING) {
-            try {
-                Thread.sleep(config.taskDuration());
-            } catch (InterruptedException ex) {
+        do {
+            // Check eventual received message
+            // super.run();
+            Message message = networkManager.receive(this.getName());
+            if (message != null) {
+                this.receive(message);
             }
-            this.prepare();
-        }
 
-        // Continuously send prepared while not committed
-        sendPrepared();
+            // If working simulate task, and then prepare
+            if (this.getState() == ResourceManagerState.WORKING) {
+                try {
+                    Thread.sleep(config.taskDuration());
+                } catch (InterruptedException ex) {
+                }
+                this.prepare();
+            }
 
-        /* Task fail eventually */
-        if (this.config.shouldFail())
-            throw new IOException();
+            // Continuously send prepared while not committed
+            sendPrepared();
+
+            /* Task fail eventually */
+            // if (this.config.shouldFail())
+            // throw new IOException();
+        } while (!this.isShutdown());
     }
 
-    @Override
-    protected void receive(Message message) throws IOException {
+    private void receive(Message message) throws IOException {
         /* Eventually commit */
-        if (message.getContent().equals(TwoPhaseMessage.Commit.toString()))
+        if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.commit();
+            System.out.println("rm COMMIT");
+        } else {
+            System.out.println("rm OTHER");
+        }
         /* Nothing else to do */
     }
 
     public void register() throws IOException {
         System.out.println("Registering...");
-        this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Register.toString(), 0));
+        this.networkManager
+                .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Register.toString(), 0));
     }
 
     /**
@@ -110,15 +124,18 @@ public class ResourceManager extends Manager {
     }
 
     private long lastSendTime;
+
     private void sendPrepared() throws IOException {
         // Compute elapsed time between now and last message send
         long elapsedTime = System.currentTimeMillis() - lastSendTime;
         // Send every second
         if (this.state == ResourceManagerState.PREPARED && elapsedTime >= 100) {
-            specMessages.add(Map.of("type",TwoPhaseMessage.Prepared.toString(), "rm", getName()));
+            specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
             spec.commitChanges();
-            this.networkManager.send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
+            this.networkManager
+                    .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
             lastSendTime = System.currentTimeMillis();
+            System.out.println("rm SEND prepared");
         }
     }
 
@@ -128,8 +145,12 @@ public class ResourceManager extends Manager {
     protected void commit() throws IOException {
         // Simulate some task that take some time
         long d = 150 + Helper.next(1000);
-        //System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(), d);
-        try {Thread.sleep(d); } catch (InterruptedException ex) {}
+        // System.out.printf("COMMIT TASK DURATION of %s : %s ms.\n", this.getName(),
+        // d);
+        try {
+            Thread.sleep(d);
+        } catch (InterruptedException ex) {
+        }
         this.setState(ResourceManagerState.COMMITTED);
         spec.commitChanges("RMRcvCommitMsg");
         // Shutdown process
@@ -138,18 +159,20 @@ public class ResourceManager extends Manager {
 
     /**
      * Check whether the manager is in working state
+     * 
      * @return True if manager is in working state, else false
      */
     // private boolean isWorking() {
-    //     return this.getState() == ResourceManagerState.WORKING;
+    // return this.getState() == ResourceManagerState.WORKING;
     // }
 
     /**
      * Check whether the manager is in committed state
+     * 
      * @return True if manager is in committed state, else false
      */
     // private boolean isCommitted() {
-    //     return this.getState() == ResourceManagerState.COMMITTED;
+    // return this.getState() == ResourceManagerState.COMMITTED;
     // }
 
 }

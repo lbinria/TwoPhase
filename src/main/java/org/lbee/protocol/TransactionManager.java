@@ -23,19 +23,18 @@ public class TransactionManager extends Manager {
 
     private final VirtualField specTmPrepared;
 
-    private final int commitDuration;
-    private long lastTick;
-
-    public TransactionManager(NetworkManager networkManager, TransactionManagerConfiguration config) throws IOException {
+    public TransactionManager(NetworkManager networkManager, TransactionManagerConfiguration config)
+            throws IOException {
         super("TM", networkManager);
 
         resourceManagers = new HashSet<>();
         // Note: invert comment to introduce bug
-//        nbPrepared = 0;
-        // Even if nbPrepared is false, increase the commit duration led to a valid trace
-        // Because the last RM have time to send is Prepared message before TM propose to commit
+        // nbPrepared = 0;
+        // Even if nbPrepared is false, increase the commit duration led to a valid
+        // trace
+        // Because the last RM have time to send is Prepared message before TM propose
+        // to commit
         nbPrepared = 0;
-        commitDuration = 0;
 
         this.config = config;
 
@@ -44,36 +43,35 @@ public class TransactionManager extends Manager {
 
     @Override
     public void run() throws IOException {
-        // Check eventual received message
-        super.run();
+        do {
+            // Check eventual received message
+            Message message = networkManager.receive(this.getName());
+            if (message == null) {
+                continue;
+            }
+            this.receive(message);
 
-        // Waiting for all resource manager registered
-        if (resourceManagers.size() < config.nResourceManager())
-            return;
+            // Waiting for all resource manager registered
+            if (resourceManagers.size() < config.nResourceManager()) {
+                continue;
+            }
 
-        // Do just once
-        // if (!isAllRegistered) {
-        //     System.out.println("All expected resource managers are registered.");
-        //     String strResourceManagers = this.resourceManagers.stream().map(r -> "\"" + r + "\"").collect(Collectors.joining(", "));
-        //     String rmValue = "{" + strResourceManagers + "}";
-        //     isAllRegistered = true;
-        // }
-
-        if (checkCommit()) {
-            if (lastTick == 0)
-                lastTick = System.currentTimeMillis();
-
-            // Wait 1s
-            if (System.currentTimeMillis() - lastTick >= commitDuration)
+            if (checkCommit()) {
                 this.commit();
-        }
+                System.out.println("TM COMMIT");
+            }
+        } while (!this.isShutdown());
     }
 
     protected void receive(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Register.toString())) {
             this.receivedRegister(message.getFrom());
+            System.out.println("tm REGISTER");
         } else if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             this.receivePrepared(message.getFrom());
+            System.out.println("tm PREPARED");
+        } else {
+            System.out.println("tm OTHER");
         }
     }
 
@@ -82,7 +80,7 @@ public class TransactionManager extends Manager {
         this.resourceManagers.add(resourceManagerName);
     }
 
-    protected boolean checkCommit()  {
+    protected boolean checkCommit() {
         return this.nbPrepared >= this.resourceManagers.size();
     }
 
@@ -109,7 +107,8 @@ public class TransactionManager extends Manager {
      */
     public void receivePrepared(String sender) throws IOException {
         /* Search receive prepared resource manager in resource manager set */
-        Optional<String> optionalResourceManager = resourceManagers.stream().filter(rmName -> rmName.equals(sender)).findFirst();
+        Optional<String> optionalResourceManager = resourceManagers.stream().filter(rmName -> rmName.equals(sender))
+                .findFirst();
         /* If it doesn't exist, do nothing */
         if (optionalResourceManager.isEmpty())
             return;
@@ -120,7 +119,5 @@ public class TransactionManager extends Manager {
         specTmPrepared.add(rmName);
         spec.commitChanges("TMRcvPrepared");
     }
-
-
 
 }

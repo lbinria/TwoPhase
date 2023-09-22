@@ -54,17 +54,16 @@ public class Client {
                 }
             }
 
-            do {
+            // do {
                 // Execute manager
                 manager.run();
-            }
-            while (!manager.isShutdown());
+            // } while (!manager.isShutdown());
 
             // Send bye to server (kill the server thread)
             manager.networkManager.sendRaw("bye");
 
             // Print end of process
-            System.out.println("shutdown.");
+            System.out.println(type+": shutdown.");
 
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());

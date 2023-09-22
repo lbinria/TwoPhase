@@ -25,14 +25,19 @@ public abstract class Manager {
 
     /**
      * Is the manager has been shutdown
+     * 
      * @return True if manager has been shutdown
      */
-    public boolean isShutdown() { return shutdown; }
+    public boolean isShutdown() {
+        return shutdown;
+    }
 
     /**
      * Shutdown the manager
      */
-    protected void shutdown() { shutdown = true; }
+    protected void shutdown() {
+        shutdown = true;
+    }
 
     public Manager(String name, NetworkManager networkManager) throws IOException {
         this.name = name;
@@ -43,18 +48,6 @@ public abstract class Manager {
         this.specMessages = spec.getVariable("msgs");
     }
 
-    public void run() throws IOException {
-        // Try to receive message for addressed to this process
-        Message message = networkManager.receive(this.getName());
-
-        // No message, return
-        if (message == null)
-            return;
-
-        // Calls receive with received message
-        receive(message);
-    }
-
-    abstract void receive(Message message) throws IOException;
+    public abstract void run() throws IOException ;
 
 }
