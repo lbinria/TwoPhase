@@ -42,10 +42,13 @@ public class TransactionManager extends Manager {
     @Override
     public void run() throws IOException {
         do {
-            // Check eventual received message
             Message message = networkManager.receive(this.getName());
-            if (message == null) {
-                continue;
+            while (message == null) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
+                message = networkManager.receive(this.getName());
             }
             this.receive(message);
 
@@ -80,7 +83,7 @@ public class TransactionManager extends Manager {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
 
         // Display message
-        System.out.println("TM committed: "+TwoPhaseMessage.Commit + ".");
+        System.out.println("TM committed: " + TwoPhaseMessage.Commit + ".");
 
         // Shutdown
         this.shutdown();
