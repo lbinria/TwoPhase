@@ -59,7 +59,7 @@ public class Client {
             manager.networkManager.sendRaw("bye");
 
             // Print end of process
-            System.out.println(type+": shutdown.");
+            // System.out.println(type+": shutdown.");
 
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());

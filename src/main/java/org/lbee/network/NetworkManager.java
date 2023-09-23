@@ -1,12 +1,17 @@
 package org.lbee.network;
 
+import org.lbee.helpers.Helper;
 import org.lbee.protocol.Message;
 
 import java.io.*;
 import java.net.Socket;
 
 public class NetworkManager {
-
+    // interval between checking if a message has been received
+    private final static int INTERVAL_BETWEEN_MESSAGE_POLL = 10;
+    // used to simulate a timeout for message receive
+    private final static int FACTOR = 100;
+    
     private final InputStream inputStream;
     private final PrintWriter writer;
 
@@ -38,22 +43,25 @@ public class NetworkManager {
         }
     }
 
-    public Message syncReceive(String processName) throws IOException {
+    public Message syncReceive(String processName, int timeout) throws IOException, TimeOutException {
+        if (Helper.next(timeout*FACTOR) < timeout) {
+            throw new TimeOutException();
+        }
         while (true) {
             // Request for message destined to me
             writer.println("r:" + processName);
             BufferedReader reader = new BufferedReader(new InputStreamReader(this.inputStream));
             String data = reader.readLine();
 
-            // Date is not null return
+            // Data is not null, return
             if (!data.equals("null")) {
                 String[] components = data.split(";");
                 return new Message(components);
             }
 
-            // Data is null, block
+            // Data is null, block INTERVAL_BETWEEN_MESSAGE_POLL ms
             try {
-                Thread.sleep(10);
+                Thread.sleep(INTERVAL_BETWEEN_MESSAGE_POLL);
             } catch (InterruptedException e) {
             }
         }

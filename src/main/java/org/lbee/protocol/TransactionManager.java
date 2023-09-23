@@ -2,6 +2,7 @@ package org.lbee.protocol;
 
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.network.NetworkManager;
+import org.lbee.network.TimeOutException;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -10,15 +11,12 @@ import java.util.Optional;
 // import java.util.stream.Collectors;
 
 public class TransactionManager extends Manager {
-
-    // Config
+    // Configuration handler
     private final TransactionManagerConfiguration config;
-    // Resource manager linked to TM
+    // Resource managers managed by TM
     private final HashSet<String> resourceManagers;
-
     // Number of resource manager prepared to commit
     private int nbPrepared;
-
     // private boolean isAllRegistered = false;
 
     private final VirtualField specTmPrepared;
@@ -28,12 +26,12 @@ public class TransactionManager extends Manager {
         super("TM", networkManager);
 
         resourceManagers = new HashSet<>(config.resourceManagerNames());
-        // Note: invert comment to introduce bug
-        // nbPrepared = 0;
-        // Even if nbPrepared is false, increase the commit duration led to a valid
-        // trace
-        // Because the last RM have time to send is Prepared message before TM propose
-        // to commit
+        // Even if nbPrepared doesn't neccesarily reflect the number of prepared RM when
+        // the commit decision os taken,
+        // increasing the commit duration might lead to a valid trace
+        // because the last RM (not counted by nbPrepared when the commit decision was
+        // taken)
+        // has time to send its Prepared message before TM send the commit message
         this.nbPrepared = 0;
         this.config = config;
         this.specTmPrepared = spec.getVariable("tmPrepared");
@@ -42,16 +40,16 @@ public class TransactionManager extends Manager {
     @Override
     public void run() throws IOException {
         do {
-            Message message = networkManager.syncReceive(this.getName());
-//            Message message = networkManager.receive(this.getName());
-//            while (message == null) {
-//                try {
-//                    Thread.sleep(10);
-//                } catch (InterruptedException e) {
-//                }
-//                message = networkManager.receive(this.getName());
-//            }
-            this.receive(message);
+            boolean received = false;
+            do {
+                try {
+                    Message message = networkManager.syncReceive(this.getName(), 10);
+                    this.receive(message);
+                    received = true;
+                } catch (TimeOutException e) {
+                    System.out.println("receive Timeout");
+                }
+            } while (!received);
 
             if (checkCommit()) {
                 this.commit();
@@ -60,11 +58,9 @@ public class TransactionManager extends Manager {
     }
 
     protected void receive(Message message) throws IOException {
+        System.out.println("TM received: " + message.getContent());
         if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             this.receivePrepared(message.getFrom());
-            System.out.println("TM received PREPARED");
-        } else {
-            System.out.println("TM received OTHER");
         }
     }
 
@@ -76,16 +72,14 @@ public class TransactionManager extends Manager {
      * @TLAAction TMCommit
      */
     private void commit() throws IOException {
+        System.out.println("TM sends Commits");
         // Notify
         specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
         spec.commitChanges("TMCommit");
-
-        for (String rmName : resourceManagers)
+        // sends Commits to all RM
+        for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
-
-        // Display message
-        System.out.println("TM committed: " + TwoPhaseMessage.Commit + ".");
-
+        }
         // Shutdown
         this.shutdown();
     }

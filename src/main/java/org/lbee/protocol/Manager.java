@@ -33,6 +33,7 @@ public abstract class Manager {
      * Shutdown the manager
      */
     protected void shutdown() {
+        System.out.println(this.name+" shutdown");
         shutdown = true;
     }
 
