@@ -23,7 +23,7 @@ public class TransactionManager extends Manager {
 
     public TransactionManager(NetworkManager networkManager, TransactionManagerConfiguration config)
             throws IOException {
-        super("TM", networkManager);
+        super("tm", networkManager);
 
         resourceManagers = new HashSet<>(config.resourceManagerNames());
         // Even if nbPrepared doesn't neccesarily reflect the number of prepared RM when

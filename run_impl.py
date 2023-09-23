@@ -35,7 +35,7 @@ def run():
             "-cp",
             f"target/{jar_name}",
             "org.lbee.Client",
-            "localhost", "6869", "rm", f"RM-{i}"])
+            "localhost", "6869", "rm", f"rm-{i}"])
 
         rm_processes.append(rm_process)
 
