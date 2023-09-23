@@ -6,13 +6,12 @@ import org.lbee.network.TimeOutException;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 // import java.util.stream.Collectors;
 
 public class TransactionManager extends Manager {
-    // Configuration handler
-    private final TransactionManagerConfiguration config;
     // Resource managers managed by TM
     private final HashSet<String> resourceManagers;
     // Number of resource manager prepared to commit
@@ -21,19 +20,17 @@ public class TransactionManager extends Manager {
 
     private final VirtualField specTmPrepared;
 
-    public TransactionManager(NetworkManager networkManager, TransactionManagerConfiguration config)
+    public TransactionManager(NetworkManager networkManager, List<String> resourceManagerNames)
             throws IOException {
         super("tm", networkManager);
 
-        resourceManagers = new HashSet<>(config.resourceManagerNames());
+        this.resourceManagers = new HashSet<>(resourceManagerNames);
         // Even if nbPrepared doesn't neccesarily reflect the number of prepared RM when
-        // the commit decision os taken,
-        // increasing the commit duration might lead to a valid trace
-        // because the last RM (not counted by nbPrepared when the commit decision was
-        // taken)
-        // has time to send its Prepared message before TM send the commit message
+        // the commit decision was taken, increasing the commit duration might lead to a
+        // valid trace because the last RM (not counted by nbPrepared when the commit
+        // decision was taken) has time to send its Prepared message before TM send the
+        // commit message
         this.nbPrepared = 0;
-        this.config = config;
         this.specTmPrepared = spec.getVariable("tmPrepared");
     }
 
@@ -68,8 +65,8 @@ public class TransactionManager extends Manager {
     }
 
     protected boolean checkCommit() {
-        System.out.println("TM nbPrepared = "+nbPrepared);
-        System.out.println("TM rms = "+this.resourceManagers);
+        System.out.println("TM nbPrepared = " + nbPrepared);
+        System.out.println("TM rms = " + this.resourceManagers);
         return this.nbPrepared >= this.resourceManagers.size();
     }
 

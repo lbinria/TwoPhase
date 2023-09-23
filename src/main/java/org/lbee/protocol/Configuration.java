@@ -12,12 +12,19 @@ public class Configuration {
 
     public TransactionManagerConfiguration tmConfig;
     public ResourceManagerConfiguration rmConfig;
+    private final List<String> resourceManagerNames;
 
     public Configuration(JsonObject jsonConfig) {
-        List<String> resourceManagerNames = jsonConfig.get("RM").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
-        this.tmConfig = new TransactionManagerConfiguration(resourceManagerNames, resourceManagerNames.size(), Integer.MAX_VALUE);
+        resourceManagerNames = jsonConfig.get("RM").getAsJsonArray().asList().stream()
+                .map(JsonElement::getAsString).toList();
+        this.tmConfig = new TransactionManagerConfiguration(resourceManagerNames, resourceManagerNames.size(),
+                Integer.MAX_VALUE);
         this.rmConfig = new ResourceManagerConfiguration(false, -1);
 
+    }
+
+    public List<String> getResourceManagerNames() {
+        return List.copyOf(resourceManagerNames);
     }
 
     @Override
@@ -32,7 +39,9 @@ public class Configuration {
 
 /**
  * Configuration of a resource manager
- * @param shouldFail Is resource manager should fail, invoke an unknown exception
+ * 
+ * @param shouldFail   Is resource manager should fail, invoke an unknown
+ *                     exception
  * @param taskDuration Duration of the simulated task
  */
 record ResourceManagerConfiguration(boolean shouldFail, int taskDuration) {
@@ -58,6 +67,7 @@ record ResourceManagerConfiguration(boolean shouldFail, int taskDuration) {
 
 /**
  * Configuration of a resource manager
+ * 
  * @param timeout Is resource manager should fail, invoke an unknown exception
  */
 record TransactionManagerConfiguration(List<String> resourceManagerNames, int nResourceManager, int timeout) {

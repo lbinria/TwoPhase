@@ -42,7 +42,7 @@ public class Client {
             final Manager manager;
             NetworkManager networkManager = new NetworkManager(socket);
             switch (type) {
-                case "tm" -> manager = new TransactionManager(networkManager, config.tmConfig);
+                case "tm" -> manager = new TransactionManager(networkManager, config.getResourceManagerNames());
                 case "rm" -> manager = new ResourceManager(networkManager, resourceManagerName, "tm", config.rmConfig);
                 default -> {
                     System.out.println("Expected type is tm or rm.");
