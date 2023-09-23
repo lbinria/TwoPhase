@@ -52,6 +52,7 @@ public class TransactionManager extends Manager {
             } while (!received);
 
             if (checkCommit()) {
+                System.out.println("TM check commit OK");
                 this.commit();
             }
         } while (!this.isShutdown());
@@ -65,6 +66,8 @@ public class TransactionManager extends Manager {
     }
 
     protected boolean checkCommit() {
+        System.out.println("TM nbPrepared = "+nbPrepared);
+        System.out.println("TM rms = "+this.resourceManagers);
         return this.nbPrepared >= this.resourceManagers.size();
     }
 
