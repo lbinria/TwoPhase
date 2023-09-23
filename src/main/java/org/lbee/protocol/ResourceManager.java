@@ -73,7 +73,6 @@ public class ResourceManager extends Manager {
 
     @Override
     public void run() throws IOException {
-        
         // If working simulate task, and then prepare
         if (this.getState() == ResourceManagerState.WORKING) {
             try {
@@ -94,10 +93,6 @@ public class ResourceManager extends Manager {
                 message = networkManager.receive(this.getName());
             }
             this.receive(message);
-
-            /* Task fail eventually */
-            // if (this.config.shouldFail())
-            // throw new IOException();
         } while (!this.isShutdown());
     }
 
