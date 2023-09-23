@@ -7,7 +7,8 @@ public class Helper {
     public static Random random = new Random(42);
 
     public static int next(int bound) {
-        return random.nextInt(bound);
+        // return random.nextInt(bound);
+        return (int) Math.floor(Math.random() * bound);
     }
 
 }

@@ -10,7 +10,7 @@ public class NetworkManager {
     // interval between checking if a message has been received
     private final static int INTERVAL_BETWEEN_MESSAGE_POLL = 10;
     // used to simulate a timeout for message receive
-    private final static int FACTOR = 100;
+    private final static int FACTOR = 2;
     
     private final InputStream inputStream;
     private final PrintWriter writer;

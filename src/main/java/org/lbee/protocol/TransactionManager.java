@@ -40,6 +40,8 @@ public class TransactionManager extends Manager {
     @Override
     public void run() throws IOException {
         do {
+            // block on receiving message until timeout
+            // -> retry if timeout
             boolean received = false;
             do {
                 try {
@@ -47,7 +49,7 @@ public class TransactionManager extends Manager {
                     this.receive(message);
                     received = true;
                 } catch (TimeOutException e) {
-                    System.out.println("receive Timeout");
+                    System.out.println("TM receive TIMEOUT");
                 }
             } while (!received);
 

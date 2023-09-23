@@ -3,6 +3,7 @@ package org.lbee.protocol;
 import org.lbee.helpers.Helper;
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.network.NetworkManager;
+import org.lbee.network.TimeOutException;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -82,17 +83,17 @@ public class ResourceManager extends Manager {
             this.prepare();
         }
         // Continuously send prepared while not committed
-        this.sendPrepared();
         do {
-            Message message = networkManager.receive(this.getName());
-            while (message == null) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
-                message = networkManager.receive(this.getName());
+            // send Prepared message
+            this.sendPrepared();
+            // block on receiving message until timeout
+            // -> send again if timeout
+            try {
+                Message message = networkManager.syncReceive(this.getName(), 10);
+                this.receive(message);
+            } catch (TimeOutException e) {
+                System.out.println(this.getName() + "receive TIMEOUT");
             }
-            this.receive(message);
         } while (!this.isShutdown());
     }
 
