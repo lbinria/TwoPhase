@@ -19,15 +19,17 @@ def run():
     time.sleep(2)
 
     print("--- Run TM client ---")
+    duration = -1
     tm_process = Popen([
         "java",
         "-cp",
         f"target/{jar_name}",
         "org.lbee.Client",
-        "localhost", "6869", "tm", ""])
+        "localhost", "6869", "tm", "",f"{duration}"])
 
     print("--- Run RM clients ---")
     rm_processes = []
+    duration = 10
     for i in range(2):
         print(f"Run rm{i} client")
         rm_process = Popen([
@@ -35,7 +37,9 @@ def run():
             "-cp",
             f"target/{jar_name}",
             "org.lbee.Client",
-            "localhost", "6869", "rm", f"rm-{i}"])
+            "localhost", "6869", "rm", f"rm-{i}", f"{duration}"])
+        # if duration is the same for all RMs the bug (in TM) has much less chances to appear
+        duration += 100
 
         rm_processes.append(rm_process)
 

@@ -8,10 +8,10 @@ import java.net.Socket;
 
 public class NetworkManager {
     // interval between checking if a message has been received
-    private final static int INTERVAL_BETWEEN_MESSAGE_POLL = 10;
+    private final static int INTERVAL_BETWEEN_MESSAGE_POLL = 5;
     // used to simulate a timeout for message receive
     private final static int FACTOR = 2;
-    
+
     private final InputStream inputStream;
     private final PrintWriter writer;
 
@@ -44,9 +44,7 @@ public class NetworkManager {
     }
 
     public Message syncReceive(String processName, int timeout) throws IOException, TimeOutException {
-        if (Helper.next(timeout*FACTOR) < timeout) {
-            throw new TimeOutException();
-        }
+        long lastSendTime = System.currentTimeMillis();
         while (true) {
             // Request for message destined to me
             writer.println("r:" + processName);
@@ -63,6 +61,10 @@ public class NetworkManager {
             try {
                 Thread.sleep(INTERVAL_BETWEEN_MESSAGE_POLL);
             } catch (InterruptedException e) {
+            }
+            long elapsedTime = System.currentTimeMillis() - lastSendTime;
+            if (elapsedTime > timeout) {
+                throw new TimeOutException();
             }
         }
     }

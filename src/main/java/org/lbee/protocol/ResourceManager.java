@@ -4,7 +4,6 @@ import org.lbee.helpers.Helper;
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
-
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
@@ -20,31 +19,35 @@ public class ResourceManager extends Manager {
         COMMITTED
     }
 
-    // Config
-    private final ResourceManagerConfiguration config;
     // Transaction manager (to send message)
     private final String transactionManagerName;
-
     // Current state
     private ResourceManagerState state = ResourceManagerState.WORKING;
+    private final int taskDuration;
 
+    // tracing
     private final VirtualField specState;
 
     /**
      * Construct a resource manager
      * 
-     * @param socket                 Client socket
+     * @param NetworkManager         Network support (for send/receive messages)
      * @param name                   Resource manager name
      * @param transactionManagerName Attached transaction manager name
-     * @param config                 Resource manager config
-     * @throws IOException Throw when errors occur on socket
+     * @param taskDuration           Duration of underlying task
+     * @throws IOException Throws when errors occur on clock 
      */
     public ResourceManager(NetworkManager networkManager, String name, String transactionManagerName,
-            ResourceManagerConfiguration config) throws IOException {
+            int taskDuration) throws IOException {
         super(name, networkManager);
-        this.config = config;
         this.transactionManagerName = transactionManagerName;
+        if (taskDuration == -1) {
+            this.taskDuration = Helper.next(500);
+        } else {
+            this.taskDuration = taskDuration;
+        }
         specState = spec.getVariable("rmState").getField(getName());
+        System.out.println("RM " + name + " - " + taskDuration + " ms");
     }
 
     // private void reset() throws IOException {
@@ -77,10 +80,10 @@ public class ResourceManager extends Manager {
         // If working simulate task, and then prepare
         if (this.getState() == ResourceManagerState.WORKING) {
             try {
-                Thread.sleep(config.taskDuration());
+                Thread.sleep(this.taskDuration);
             } catch (InterruptedException ex) {
             }
-            this.prepare();
+            // this.prepare();
         }
         // Continuously send prepared while not committed
         do {
@@ -89,10 +92,10 @@ public class ResourceManager extends Manager {
             // block on receiving message until timeout
             // -> send again if timeout
             try {
-                Message message = networkManager.syncReceive(this.getName(), 10);
+                Message message = networkManager.syncReceive(this.getName(), -1);
                 this.receive(message);
             } catch (TimeOutException e) {
-                System.out.println(this.getName() + "receive TIMEOUT");
+                System.out.println("RM " + this.getName() + " received TIMEOUT ");
             }
         } while (!this.isShutdown());
     }
@@ -101,34 +104,20 @@ public class ResourceManager extends Manager {
         /* Eventually commit */
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.commit();
-            System.out.println("RM received COMMIT");
+            System.out.println("RM " + this.getName() + " received COMMIT");
         } else {
-            System.out.println("RM received OTHER");
+            System.out.println("RM " + this.getName() + "  received OTHER");
         }
         /* Nothing else to do */
     }
 
-    /**
-     * @TLA-action RMPrepare(r)
-     */
-    protected void prepare() throws IOException {
-        this.setState(ResourceManagerState.PREPARED);
-    }
-
-    private long lastSendTime;
-
     private void sendPrepared() throws IOException {
-        // Compute elapsed time between now and last message send
-        long elapsedTime = System.currentTimeMillis() - lastSendTime;
-        // Send every second
-        if (this.state == ResourceManagerState.PREPARED && elapsedTime >= 100) {
-            specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
-            spec.commitChanges();
-            this.networkManager
-                    .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
-            lastSendTime = System.currentTimeMillis();
-            System.out.println("RM send PREPARED");
-        }
+        this.setState(ResourceManagerState.PREPARED);
+        specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
+        spec.commitChanges();
+        this.networkManager
+                .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
+        System.out.println("RM " + this.getName() + "  send PREPARED");
     }
 
     /**

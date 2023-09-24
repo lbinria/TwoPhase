@@ -21,8 +21,8 @@ public class Client {
 
     public static void main(String[] args) throws IOException {
 
-        if (args.length < 4) {
-            System.out.println("Missing arguments. hostname, port, type={tm, rm} expected.");
+        if (args.length < 5) {
+            System.out.println("Missing arguments. hostname, port, type={tm, rm}, rmName, duration expected.");
             return;
         }
 
@@ -31,6 +31,7 @@ public class Client {
         final int port = Integer.parseInt(args[1]);
         final String type = args[2];
         final String resourceManagerName = args[3];
+        final int duration = Integer.parseInt(args[4]);
 
         final JsonObject jsonConfig = ConfigurationWriter.read("twophase.ndjson.conf");
         System.out.println(jsonConfig);
@@ -43,7 +44,7 @@ public class Client {
             NetworkManager networkManager = new NetworkManager(socket);
             switch (type) {
                 case "tm" -> manager = new TransactionManager(networkManager, config.getResourceManagerNames());
-                case "rm" -> manager = new ResourceManager(networkManager, resourceManagerName, "tm", config.rmConfig);
+                case "rm" -> manager = new ResourceManager(networkManager, resourceManagerName, "tm", duration);
                 default -> {
                     System.out.println("Expected type is tm or rm.");
                     return;

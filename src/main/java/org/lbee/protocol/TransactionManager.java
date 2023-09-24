@@ -5,18 +5,18 @@ import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-// import java.util.stream.Collectors;
+import java.util.Set;
 
 public class TransactionManager extends Manager {
-    // Resource managers managed by TM
-    private final HashSet<String> resourceManagers;
-    // Number of resource manager prepared to commit
-    private int nbPrepared;
-    // private boolean isAllRegistered = false;
+    // Resource managers managed by TM (as specified in the configuration)
+    private final Set<String> resourceManagers;
+    // Number of resource managers prepared to commit
+    private Collection<String> preparedRMs;
 
     private final VirtualField specTmPrepared;
 
@@ -25,12 +25,13 @@ public class TransactionManager extends Manager {
         super("tm", networkManager);
 
         this.resourceManagers = new HashSet<>(resourceManagerNames);
-        // Even if nbPrepared doesn't neccesarily reflect the number of prepared RM when
+        // Even if preparedRMs.size doesn't neccesarily reflect the number of prepared RM when
         // the commit decision was taken, increasing the commit duration might lead to a
         // valid trace because the last RM (not counted by nbPrepared when the commit
         // decision was taken) has time to send its Prepared message before TM send the
         // commit message
-        this.nbPrepared = 0;
+        this.preparedRMs = new ArrayList<>();
+        // this.preparedRMs = new HashSet<>();
         this.specTmPrepared = spec.getVariable("tmPrepared");
     }
 
@@ -42,7 +43,7 @@ public class TransactionManager extends Manager {
             boolean received = false;
             do {
                 try {
-                    Message message = networkManager.syncReceive(this.getName(), 10);
+                    Message message = networkManager.syncReceive(this.getName(), 100);
                     this.receive(message);
                     received = true;
                 } catch (TimeOutException e) {
@@ -58,16 +59,22 @@ public class TransactionManager extends Manager {
     }
 
     protected void receive(Message message) throws IOException {
-        System.out.println("TM received: " + message.getContent());
+        System.out.println("TM received: " + message.getContent() + " from " + message.getFrom());
         if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
-            this.receivePrepared(message.getFrom());
+            String preparedRM = message.getFrom();
+            // if the message is from an RM managed by the TM
+            if (resourceManagers.contains(preparedRM)) {
+                this.preparedRMs.add(preparedRM);
+                specTmPrepared.add(preparedRM);
+                spec.commitChanges("TMRcvPrepared");
+
+            }
         }
     }
 
     protected boolean checkCommit() {
-        System.out.println("TM nbPrepared = " + nbPrepared);
-        System.out.println("TM rms = " + this.resourceManagers);
-        return this.nbPrepared >= this.resourceManagers.size();
+        System.out.println("TM rms = " + this.preparedRMs);
+        return this.preparedRMs.size() >= this.resourceManagers.size();
     }
 
     /**
@@ -75,7 +82,6 @@ public class TransactionManager extends Manager {
      */
     private void commit() throws IOException {
         System.out.println("TM sends Commits");
-        // Notify
         specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
         spec.commitChanges("TMCommit");
         // sends Commits to all RM
@@ -85,23 +91,4 @@ public class TransactionManager extends Manager {
         // Shutdown
         this.shutdown();
     }
-
-    /**
-     * @TLAAction TMRcvPrepared(r)
-     */
-    public void receivePrepared(String sender) throws IOException {
-        /* Search receive prepared resource manager in resource manager set */
-        Optional<String> optionalResourceManager = resourceManagers.stream().filter(rmName -> rmName.equals(sender))
-                .findFirst();
-        /* If it doesn't exist, do nothing */
-        if (optionalResourceManager.isEmpty())
-            return;
-
-        /* Add prepared resource manager to prepared set */
-        String rmName = optionalResourceManager.get();
-        nbPrepared++;
-        specTmPrepared.add(rmName);
-        spec.commitChanges("TMRcvPrepared");
-    }
-
 }
