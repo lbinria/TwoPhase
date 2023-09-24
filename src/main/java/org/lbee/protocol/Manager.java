@@ -1,10 +1,7 @@
 package org.lbee.protocol;
-
 import org.lbee.instrumentation.BehaviorRecorder;
 import org.lbee.instrumentation.VirtualField;
-import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.network.NetworkManager;
-
 import java.io.*;
 
 public abstract class Manager {
@@ -21,7 +18,7 @@ public abstract class Manager {
     }
 
     /**
-     * Is the manager has been shutdown
+     * The manager has been shutdown?
      * 
      * @return True if manager has been shutdown
      */
@@ -33,19 +30,18 @@ public abstract class Manager {
      * Shutdown the manager
      */
     protected void shutdown() {
-        System.out.println(this.name+" shutdown");
+        System.out.println("-- "+this.name + " shutdown");
         shutdown = true;
     }
 
-    public Manager(String name, NetworkManager networkManager) throws IOException {
+    public Manager(String name, NetworkManager networkManager, BehaviorRecorder spec) {
         this.name = name;
         this.networkManager = networkManager;
         this.shutdown = false;
 
-        this.spec = BehaviorRecorder.create(name + ".ndjson", SharedClock.get("twophase.clock"));
+        this.spec = spec;
         this.specMessages = spec.getVariable("msgs");
     }
 
-    public abstract void run() throws IOException ;
-
+    public abstract void run() throws IOException;
 }

@@ -1,6 +1,4 @@
 package org.lbee.network;
-
-import org.lbee.helpers.Helper;
 import org.lbee.protocol.Message;
 
 import java.io.*;
@@ -9,8 +7,6 @@ import java.net.Socket;
 public class NetworkManager {
     // interval between checking if a message has been received
     private final static int INTERVAL_BETWEEN_MESSAGE_POLL = 5;
-    // used to simulate a timeout for message receive
-    private final static int FACTOR = 2;
 
     private final InputStream inputStream;
     private final PrintWriter writer;

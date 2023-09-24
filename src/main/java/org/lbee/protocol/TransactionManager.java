@@ -1,5 +1,6 @@
 package org.lbee.protocol;
 
+import org.lbee.instrumentation.BehaviorRecorder;
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
@@ -20,12 +21,13 @@ public class TransactionManager extends Manager {
 
     private final VirtualField specTmPrepared;
 
-    public TransactionManager(NetworkManager networkManager, List<String> resourceManagerNames)
-            throws IOException {
-        super("tm", networkManager);
+    public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
+            BehaviorRecorder spec) {
+        super(name, networkManager, spec);
 
         this.resourceManagers = new HashSet<>(resourceManagerNames);
-        // Even if preparedRMs.size doesn't neccesarily reflect the number of prepared RM when
+        // Even if preparedRMs.size doesn't neccesarily reflect the number of prepared
+        // RM when
         // the commit decision was taken, increasing the commit duration might lead to a
         // valid trace because the last RM (not counted by nbPrepared when the commit
         // decision was taken) has time to send its Prepared message before TM send the
@@ -65,9 +67,9 @@ public class TransactionManager extends Manager {
             // if the message is from an RM managed by the TM
             if (resourceManagers.contains(preparedRM)) {
                 this.preparedRMs.add(preparedRM);
+                // Tracing
                 specTmPrepared.add(preparedRM);
                 spec.commitChanges("TMRcvPrepared");
-
             }
         }
     }
@@ -82,12 +84,13 @@ public class TransactionManager extends Manager {
      */
     private void commit() throws IOException {
         System.out.println("TM sends Commits");
-        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
-        spec.commitChanges("TMCommit");
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
         }
+        // Tracing
+        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
+        spec.commitChanges("TMCommit");
         // Shutdown
         this.shutdown();
     }

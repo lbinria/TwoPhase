@@ -1,7 +1,10 @@
 package org.lbee;
 
 import com.google.gson.JsonObject;
+
+import org.lbee.instrumentation.BehaviorRecorder;
 import org.lbee.instrumentation.ConfigurationWriter;
+import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.network.NetworkManager;
 import org.lbee.protocol.Configuration;
 import org.lbee.protocol.Manager;
@@ -11,8 +14,6 @@ import org.lbee.protocol.TransactionManager;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Map;
-// import java.util.stream.IntStream;
 
 /**
  * Client manager (transaction manager or resource manager)
@@ -25,7 +26,6 @@ public class Client {
             System.out.println("Missing arguments. hostname, port, type={tm, rm}, rmName, duration expected.");
             return;
         }
-
         // Get hostname, port and type of manager
         final String hostname = args[0];
         final int port = Integer.parseInt(args[1]);
@@ -35,33 +35,31 @@ public class Client {
 
         final JsonObject jsonConfig = ConfigurationWriter.read("twophase.ndjson.conf");
         System.out.println(jsonConfig);
-
         final Configuration config = new Configuration(jsonConfig);
 
         try (Socket socket = new Socket(hostname, port)) {
-
             final Manager manager;
             NetworkManager networkManager = new NetworkManager(socket);
             switch (type) {
-                case "tm" -> manager = new TransactionManager(networkManager, config.getResourceManagerNames());
-                case "rm" -> manager = new ResourceManager(networkManager, resourceManagerName, "tm", duration);
+                case "tm" -> {
+                    String tmName = "tm";
+                    BehaviorRecorder spec = BehaviorRecorder.create(tmName + ".ndjson",
+                            SharedClock.get("twophase.clock"));
+                    manager = new TransactionManager(networkManager, tmName, config.getResourceManagerNames(), spec);
+                }
+                case "rm" -> {
+                    BehaviorRecorder spec = BehaviorRecorder.create(resourceManagerName + ".ndjson",
+                            SharedClock.get("twophase.clock"));
+                    manager = new ResourceManager(networkManager, resourceManagerName, "tm", duration, spec);
+                }
                 default -> {
                     System.out.println("Expected type is tm or rm.");
                     return;
                 }
             }
-
-            // do {
-                // Execute manager
-                manager.run();
-            // } while (!manager.isShutdown());
-
+            manager.run();
             // Send bye to server (kill the server thread)
             manager.networkManager.sendRaw("bye");
-
-            // Print end of process
-            // System.out.println(type+": shutdown.");
-
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());
         } catch (IOException ex) {
