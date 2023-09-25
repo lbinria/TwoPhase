@@ -27,7 +27,6 @@ public class TransactionManager extends Manager {
     public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
             BehaviorRecorder spec) {
         super(name, networkManager, spec);
-
         this.resourceManagers = new HashSet<>(resourceManagerNames);
         // Even if preparedRMs.size doesn't neccesarily reflect the number of prepared
         // RM when
@@ -46,10 +45,8 @@ public class TransactionManager extends Manager {
         do {
             // Abort with some probablity
             this.abort();
-
             if (!this.isShutdown()) {
-                // block on receiving message until timeout
-                // -> retry if timeout
+                // block on receiving message until timeout, retry if timeout
                 boolean received = false;
                 do {
                     try {
@@ -62,7 +59,6 @@ public class TransactionManager extends Manager {
                 } while (!received);
 
                 if (checkCommit()) {
-                    System.out.println("TM check commit OK");
                     this.commit();
                 }
             }
@@ -75,20 +71,21 @@ public class TransactionManager extends Manager {
     private void abort() throws IOException {
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
         if (possibleAbort == 1) {
-            System.out.println("TM sends Abort");
             // sends Abort to all RM
             for (String rmName : resourceManagers) {
                 this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
             }
-            this.shutdown();
             // Tracing
             specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString()));
             spec.commitChanges("TMAbort");
+
+            this.shutdown();
+
+            System.out.println("TM sends Abort");
         }
     }
 
     protected void receive(Message message) throws IOException {
-        System.out.println("TM received " + message.getContent() + " from " + message.getFrom());
         if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             String preparedRM = message.getFrom();
             // if the message is from an RM managed by the TM
@@ -99,10 +96,12 @@ public class TransactionManager extends Manager {
                 spec.commitChanges("TMRcvPrepared");
             }
         }
+
+        System.out.println("TM received " + message.getContent() + " from " + message.getFrom());
     }
 
     protected boolean checkCommit() {
-        System.out.println("TM check commit (rms = " + this.preparedRMs + ")");
+        // System.out.println("TM check commit (rms = " + this.preparedRMs + ")");
         return this.preparedRMs.size() >= this.resourceManagers.size();
     }
 
@@ -110,7 +109,6 @@ public class TransactionManager extends Manager {
      * @TLAAction TMCommit
      */
     private void commit() throws IOException {
-        System.out.println("TM sends Commits");
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
@@ -118,7 +116,9 @@ public class TransactionManager extends Manager {
         // Tracing
         specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
         spec.commitChanges("TMCommit");
-        // Shutdown
+
+        System.out.println("TM sent Commits");
+
         this.shutdown();
     }
 }

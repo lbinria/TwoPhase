@@ -20,6 +20,7 @@ public class ResourceManager extends Manager {
         COMMITTED,
         ABORTED
     }
+
     private static final int MAX_TASK_DURATION = 100;
 
     // Transaction manager (to send message)
@@ -51,8 +52,10 @@ public class ResourceManager extends Manager {
         } else {
             this.taskDuration = taskDuration;
         }
+        // prepare tracing
         this.specMessages = spec.getVariable("msgs");
         this.specState = spec.getVariable("rmState").getField(getName());
+
         System.out.println("RM " + name + " WORKING - " + taskDuration + " ms");
     }
 
@@ -64,7 +67,7 @@ public class ResourceManager extends Manager {
     private void setState(ResourceManagerState state) {
         this.state = state;
         // Tracing
-        specState.set(state.toString().toLowerCase(Locale.ROOT));
+        this.specState.set(state.toString().toLowerCase(Locale.ROOT));
     }
 
     @Override
@@ -77,7 +80,7 @@ public class ResourceManager extends Manager {
             this.sendPrepared();
             // block on receiving message until timeout, send again if timeout
             try {
-                Message message = networkManager.syncReceive(this.getName(), this.taskDuration*2);
+                Message message = networkManager.syncReceive(this.getName(), this.taskDuration * 2);
                 this.receive(message);
             } catch (TimeOutException e) {
                 System.out.println("RM " + this.getName() + " received TIMEOUT ");
@@ -85,35 +88,40 @@ public class ResourceManager extends Manager {
         } while (!this.isShutdown());
     }
 
-    private void working(){
+    private void working() {
         // Simulate task
         try {
             Thread.sleep(this.taskDuration);
         } catch (InterruptedException ex) {
         }
-    } 
+    }
+
     private void sendPrepared() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
         this.networkManager
                 .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
-        System.out.println("RM " + this.getName() + " send " + TwoPhaseMessage.Prepared);
         // Tracing
         specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
         spec.commitChanges();
+
+        System.out.println("RM " + this.getName() + " send " + TwoPhaseMessage.Prepared);
     }
 
     private void receive(Message message) throws IOException {
-        System.out.println("RM " + this.getName() + " received: " + message.getContent() + " from " + message.getFrom());
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.setState(ResourceManagerState.COMMITTED);
             // Tracing
             spec.commitChanges("RMRcvCommitMsg");
+
             this.shutdown();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             this.setState(ResourceManagerState.ABORTED);
             // Tracing
             spec.commitChanges("RMRcvAbortMsg");
+            
             this.shutdown();
         }
+
+        System.out.println("RM " + this.getName() + " received: " + message.getContent() + " from " + message.getFrom());
     }
 }
