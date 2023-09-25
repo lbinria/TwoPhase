@@ -1,5 +1,6 @@
 package org.lbee.protocol;
 
+import org.lbee.helpers.Helper;
 import org.lbee.instrumentation.BehaviorRecorder;
 import org.lbee.instrumentation.VirtualField;
 import org.lbee.network.NetworkManager;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TransactionManager extends Manager {
+    private final static int PROBABILITY_TO_ABORT = 2;
     // Resource managers managed by TM (as specified in the configuration)
     private final Set<String> resourceManagers;
     // Number of resource managers prepared to commit
@@ -40,24 +42,47 @@ public class TransactionManager extends Manager {
     @Override
     public void run() throws IOException {
         do {
-            // block on receiving message until timeout
-            // -> retry if timeout
-            boolean received = false;
-            do {
-                try {
-                    Message message = networkManager.syncReceive(this.getName(), 100);
-                    this.receive(message);
-                    received = true;
-                } catch (TimeOutException e) {
-                    System.out.println("TM receive TIMEOUT");
-                }
-            } while (!received);
+            // Abort with some probablity
+            this.abort();
 
-            if (checkCommit()) {
-                System.out.println("TM check commit OK");
-                this.commit();
+            if (!this.isShutdown()) {
+                // block on receiving message until timeout
+                // -> retry if timeout
+                boolean received = false;
+                do {
+                    try {
+                        Message message = networkManager.syncReceive(this.getName(), 100);
+                        this.receive(message);
+                        received = true;
+                    } catch (TimeOutException e) {
+                        System.out.println("TM receive TIMEOUT");
+                    }
+                } while (!received);
+
+                if (checkCommit()) {
+                    System.out.println("TM check commit OK");
+                    this.commit();
+                }
             }
         } while (!this.isShutdown());
+    }
+
+    /**
+     * @TLAAction TMAbort
+     */
+    private void abort() throws IOException {
+        int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
+        if (possibleAbort == 1) {
+            System.out.println("TM sends Abort");
+            // sends Abort to all RM
+            for (String rmName : resourceManagers) {
+                this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
+            }
+            this.shutdown();
+            // Tracing
+            specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString()));
+            spec.commitChanges("TMAbort");
+        }
     }
 
     protected void receive(Message message) throws IOException {
