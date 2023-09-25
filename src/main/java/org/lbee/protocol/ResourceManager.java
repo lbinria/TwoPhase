@@ -29,6 +29,7 @@ public class ResourceManager extends Manager {
     private final int taskDuration;
 
     // tracing
+    private final VirtualField specMessages;
     private final VirtualField specState;
 
     /**
@@ -50,7 +51,8 @@ public class ResourceManager extends Manager {
         } else {
             this.taskDuration = taskDuration;
         }
-        specState = spec.getVariable("rmState").getField(getName());
+        this.specMessages = spec.getVariable("msgs");
+        this.specState = spec.getVariable("rmState").getField(getName());
         System.out.println("RM " + name + " WORKING - " + taskDuration + " ms");
     }
 
@@ -67,11 +69,8 @@ public class ResourceManager extends Manager {
 
     @Override
     public void run() throws IOException {
-        // Simulate task, and then prepare
-        try {
-            Thread.sleep(this.taskDuration);
-        } catch (InterruptedException ex) {
-        }
+        // work
+        working();
         // Continuously send prepared while not committed
         do {
             // send Prepared message
@@ -86,6 +85,13 @@ public class ResourceManager extends Manager {
         } while (!this.isShutdown());
     }
 
+    private void working(){
+        // Simulate task
+        try {
+            Thread.sleep(this.taskDuration);
+        } catch (InterruptedException ex) {
+        }
+    } 
     private void sendPrepared() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
         this.networkManager

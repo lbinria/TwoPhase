@@ -21,6 +21,7 @@ public class TransactionManager extends Manager {
     // Number of resource managers prepared to commit
     private Collection<String> preparedRMs;
 
+    private final VirtualField specMessages;
     private final VirtualField specTmPrepared;
 
     public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
@@ -36,6 +37,7 @@ public class TransactionManager extends Manager {
         // commit message
         this.preparedRMs = new ArrayList<>();
         // this.preparedRMs = new HashSet<>();
+        this.specMessages = spec.getVariable("msgs");
         this.specTmPrepared = spec.getVariable("tmPrepared");
     }
 
