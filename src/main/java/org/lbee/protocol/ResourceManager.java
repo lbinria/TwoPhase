@@ -78,7 +78,7 @@ public class ResourceManager extends Manager {
             this.sendPrepared();
             // block on receiving message until timeout, send again if timeout
             try {
-                Message message = networkManager.syncReceive(this.getName(), this.taskDuration/2);
+                Message message = networkManager.syncReceive(this.getName(), this.taskDuration*2);
                 this.receive(message);
             } catch (TimeOutException e) {
                 System.out.println("RM " + this.getName() + " received TIMEOUT ");

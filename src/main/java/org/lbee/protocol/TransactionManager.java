@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TransactionManager extends Manager {
-    private final static int PROBABILITY_TO_ABORT = 2;
+    private final static int PROBABILITY_TO_ABORT = 100;
     // Resource managers managed by TM (as specified in the configuration)
     private final Set<String> resourceManagers;
     // Number of resource managers prepared to commit
