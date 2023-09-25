@@ -31,7 +31,7 @@ def run():
     rm_processes = []
     duration = 10
     for i in range(2):
-        print(f"Run rm{i} client")
+        # print(f"Run rm{i} client")
         rm_process = Popen([
             "java",
             "-cp",

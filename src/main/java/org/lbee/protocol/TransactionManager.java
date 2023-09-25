@@ -61,7 +61,7 @@ public class TransactionManager extends Manager {
     }
 
     protected void receive(Message message) throws IOException {
-        System.out.println("TM received: " + message.getContent() + " from " + message.getFrom());
+        System.out.println("TM received " + message.getContent() + " from " + message.getFrom());
         if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             String preparedRM = message.getFrom();
             // if the message is from an RM managed by the TM
@@ -75,7 +75,7 @@ public class TransactionManager extends Manager {
     }
 
     protected boolean checkCommit() {
-        System.out.println("TM rms = " + this.preparedRMs);
+        System.out.println("TM check commit (rms = " + this.preparedRMs + ")");
         return this.preparedRMs.size() >= this.resourceManagers.size();
     }
 

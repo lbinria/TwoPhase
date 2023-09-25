@@ -52,7 +52,7 @@ public class ServerThread extends Thread {
                 }
 
             } while (!text.equals("bye"));
-            System.out.println("A client quit.");
+            // System.out.println("A client quit.");
             socket.close();
         } catch (IOException ex) {
             System.out.println("Server exception: " + ex.getMessage());
