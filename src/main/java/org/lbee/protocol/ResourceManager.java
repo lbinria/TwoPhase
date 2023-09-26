@@ -98,11 +98,11 @@ public class ResourceManager extends Manager {
 
     private void sendPrepared() throws IOException {
         this.setState(ResourceManagerState.PREPARED);
-        this.networkManager
-                .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
         // Tracing
         specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
         spec.commitChanges();
+        this.networkManager
+                .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
 
         System.out.println("RM " + this.getName() + " send " + TwoPhaseMessage.Prepared);
     }

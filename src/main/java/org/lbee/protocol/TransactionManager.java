@@ -19,7 +19,7 @@ public class TransactionManager extends Manager {
     // Resource managers managed by TM (as specified in the configuration)
     private final Set<String> resourceManagers;
     // Number of resource managers prepared to commit
-    private Collection<String> preparedRMs;
+    private final Collection<String> preparedRMs;
 
     private final VirtualField specMessages;
     private final VirtualField specTmPrepared;
@@ -71,13 +71,13 @@ public class TransactionManager extends Manager {
     private void abort() throws IOException {
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
         if (possibleAbort == 1) {
+            // Tracing
+            specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString()));
+            spec.commitChanges("TMAbort");
             // sends Abort to all RM
             for (String rmName : resourceManagers) {
                 this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
             }
-            // Tracing
-            specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString()));
-            spec.commitChanges("TMAbort");
 
             this.shutdown();
 
@@ -109,13 +109,14 @@ public class TransactionManager extends Manager {
      * @TLAAction TMCommit
      */
     private void commit() throws IOException {
+        // Tracing
+        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
+        spec.commitChanges("TMCommit");
+
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
         }
-        // Tracing
-        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
-        spec.commitChanges("TMCommit");
 
         System.out.println("TM sent Commits");
 

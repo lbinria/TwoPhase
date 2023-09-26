@@ -39,7 +39,7 @@ def run():
             "org.lbee.Client",
             "localhost", "6869", "rm", f"rm-{i}", f"{duration}"])
         # if duration is the same for all RMs the bug (in TM) has much less chances to appear
-        duration += 100
+        duration += 1
 
         rm_processes.append(rm_process)
 
