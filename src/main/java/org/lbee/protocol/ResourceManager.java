@@ -1,8 +1,8 @@
 package org.lbee.protocol;
 
 import org.lbee.helpers.Helper;
-import org.lbee.instrumentation.BehaviorRecorder;
-import org.lbee.instrumentation.VirtualField;
+import org.lbee.instrumentation.trace.TLATracer;
+import org.lbee.instrumentation.trace.VirtualField;
 import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class ResourceManager extends Manager {
      * @param spec                   Trace instrumentation
      */
     public ResourceManager(NetworkManager networkManager, String name, String transactionManagerName,
-            int taskDuration, BehaviorRecorder spec) {
+            int taskDuration, TLATracer spec) {
         super(name, networkManager, spec);
         this.transactionManagerName = transactionManagerName;
         this.state = ResourceManagerState.WORKING;
@@ -107,6 +107,7 @@ public class ResourceManager extends Manager {
         this.setState(ResourceManagerState.PREPARED);
 
         // Tracing
+        // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())));
         specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
         spec.commitChanges(eventName);
         this.networkManager

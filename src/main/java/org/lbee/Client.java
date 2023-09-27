@@ -2,8 +2,8 @@ package org.lbee;
 
 import com.google.gson.JsonObject;
 
-import org.lbee.instrumentation.BehaviorRecorder;
-import org.lbee.instrumentation.ConfigurationWriter;
+import org.lbee.instrumentation.trace.TLATracer;
+import org.lbee.instrumentation.helper.ConfigurationManager;
 import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.network.NetworkManager;
 import org.lbee.protocol.Configuration;
@@ -33,7 +33,7 @@ public class Client {
         final String resourceManagerName = args[3];
         final int duration = Integer.parseInt(args[4]);
 
-        final JsonObject jsonConfig = ConfigurationWriter.read("twophase.ndjson.conf");
+        final JsonObject jsonConfig = ConfigurationManager.read("twophase.ndjson.conf");
         System.out.println(jsonConfig);
         final Configuration config = new Configuration(jsonConfig);
 
@@ -43,12 +43,12 @@ public class Client {
             switch (type) {
                 case "tm" -> {
                     String tmName = "tm";
-                    BehaviorRecorder spec = BehaviorRecorder.create(tmName + ".ndjson",
+                    TLATracer spec = TLATracer.getTracer(tmName + ".ndjson",
                             SharedClock.get("twophase.clock"));
                     manager = new TransactionManager(networkManager, tmName, config.getResourceManagerNames(), spec);
                 }
                 case "rm" -> {
-                    BehaviorRecorder spec = BehaviorRecorder.create(resourceManagerName + ".ndjson",
+                    TLATracer spec = TLATracer.getTracer(resourceManagerName + ".ndjson",
                             SharedClock.get("twophase.clock"));
                     manager = new ResourceManager(networkManager, resourceManagerName, "tm", duration, spec);
                 }

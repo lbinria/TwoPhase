@@ -1,8 +1,8 @@
 package org.lbee.protocol;
 
 import org.lbee.helpers.Helper;
-import org.lbee.instrumentation.BehaviorRecorder;
-import org.lbee.instrumentation.VirtualField;
+import org.lbee.instrumentation.trace.TLATracer;
+import org.lbee.instrumentation.trace.VirtualField;
 import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 
@@ -25,7 +25,7 @@ public class TransactionManager extends Manager {
     private final VirtualField specTmPrepared;
 
     public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
-            BehaviorRecorder spec) {
+    TLATracer spec) {
         super(name, networkManager, spec);
         this.resourceManagers = new HashSet<>(resourceManagerNames);
         // Even if preparedRMs.size doesn't neccesarily reflect the number of prepared
