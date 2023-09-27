@@ -73,7 +73,7 @@ public class TransactionManager extends Manager {
         if (possibleAbort == 1) {
             // Tracing
             specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString()));
-            spec.commitChanges("TMAbort");
+            spec.log("TMAbort");
             // sends Abort to all RM
             for (String rmName : resourceManagers) {
                 this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
@@ -93,7 +93,7 @@ public class TransactionManager extends Manager {
                 this.preparedRMs.add(preparedRM);
                 // Tracing
                 specTmPrepared.add(preparedRM);
-                spec.commitChanges("TMRcvPrepared");
+                spec.log("TMRcvPrepared");
             }
         }
 
@@ -111,7 +111,7 @@ public class TransactionManager extends Manager {
     private void commit() throws IOException {
         // Tracing
         specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
-        spec.commitChanges("TMCommit");
+        spec.log("TMCommit");
 
         // sends Commits to all RM
         for (String rmName : resourceManagers) {

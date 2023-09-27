@@ -109,7 +109,7 @@ public class ResourceManager extends Manager {
         // Tracing
         // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())));
         specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
-        spec.commitChanges(eventName);
+        spec.log(eventName);
         this.networkManager
                 .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
 
@@ -120,13 +120,13 @@ public class ResourceManager extends Manager {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.setState(ResourceManagerState.COMMITTED);
             // Tracing
-            spec.commitChanges("RMRcvCommitMsg");
+            spec.log("RMRcvCommitMsg");
 
             this.shutdown();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             this.setState(ResourceManagerState.ABORTED);
             // Tracing
-            spec.commitChanges("RMRcvAbortMsg");
+            spec.log("RMRcvAbortMsg");
             
             this.shutdown();
         }
