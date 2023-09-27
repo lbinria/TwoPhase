@@ -97,10 +97,18 @@ public class ResourceManager extends Manager {
     }
 
     private void sendPrepared() throws IOException {
+        // Trace optimization (specify event name to reduce state space)
+        final String eventName;
+        if (this.state != ResourceManagerState.PREPARED) {
+            eventName = "RMPrepare";
+        } else
+            eventName = "Stuttering";
+
         this.setState(ResourceManagerState.PREPARED);
+
         // Tracing
         specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
-        spec.commitChanges();
+        spec.commitChanges(eventName);
         this.networkManager
                 .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
 
