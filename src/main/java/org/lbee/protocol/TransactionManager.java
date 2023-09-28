@@ -1,6 +1,5 @@
 package org.lbee.protocol;
 
-import org.lbee.helpers.Helper;
 import org.lbee.instrumentation.trace.TLATracer;
 import org.lbee.instrumentation.trace.VirtualField;
 import org.lbee.network.NetworkManager;
@@ -15,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TransactionManager extends Manager {
-    private final static int PROBABILITY_TO_ABORT = 100;
+    private final static int ABORT_TIMEOUT = 100;
     // Resource managers managed by TM (as specified in the configuration)
     private final Set<String> resourceManagers;
     // Number of resource managers prepared to commit
@@ -42,9 +41,12 @@ public class TransactionManager extends Manager {
 
     @Override
     public void run() throws IOException {
+        long startTime = System.currentTimeMillis();
         do {
-            // Abort with some probablity
-            this.abort();
+            // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
+            if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
+                this.abort();
+            }
             if (!this.isShutdown()) {
                 // block on receiving message until timeout, retry if timeout
                 boolean received = false;
@@ -55,6 +57,11 @@ public class TransactionManager extends Manager {
                         received = true;
                     } catch (TimeOutException e) {
                         System.out.println("TM receive TIMEOUT");
+                        // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
+                        if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
+                            this.abort();
+                            break;
+                        }
                     }
                 } while (!received);
 
@@ -69,19 +76,16 @@ public class TransactionManager extends Manager {
      * @TLAAction TMAbort
      */
     private void abort() throws IOException {
-        int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
-        if (possibleAbort == 1) {
-            spec.startLog(); // prepare to log event
-            // sends Abort to all RM
-            for (String rmName : resourceManagers) {
-                this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
-            }
-            specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); // add Add op for Messages to the trace
-            spec.endLog("TMAbort"); // log event
-            this.shutdown();
-
-            System.out.println("TM sends Abort");
+        spec.startLog(); // prepare to log event
+        // sends Abort to all RM
+        for (String rmName : resourceManagers) {
+            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
         }
+        specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); // add Add op for Messages to the trace
+        spec.endLog("TMAbort"); // log event
+        this.shutdown();
+
+        System.out.println("TM sends Abort");
     }
 
     protected void receive(Message message) throws IOException {
@@ -96,7 +100,8 @@ public class TransactionManager extends Manager {
             }
         }
 
-        System.out.println("TM received " + message.getContent() + " from " + message.getFrom());
+        System.out.println(
+                "TM received " + message.getContent() + " from " + message.getFrom() + " => " + this.preparedRMs);
     }
 
     protected boolean checkCommit() {

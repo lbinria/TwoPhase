@@ -58,6 +58,7 @@ public class Client {
                 }
             }
             manager.run();
+            System.out.println("DONE: "+manager.getName());
             // Send bye to server (kill the server thread)
             manager.networkManager.sendRaw("bye");
         } catch (UnknownHostException ex) {

@@ -21,6 +21,7 @@ public class ResourceManager extends Manager {
         ABORTED
     }
 
+    private final static int PROBABILITY_TO_ABORT = 2;
     private static final int MAX_TASK_DURATION = 100;
 
     // Transaction manager (to send message)
@@ -61,6 +62,13 @@ public class ResourceManager extends Manager {
 
     @Override
     public void run() throws IOException {
+        // possible crash of the RM
+        int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
+        if (possibleAbort == 1) {
+            System.out.println("RM " + this.getName() + " ABORT ");
+            this.shutdown();
+            return;
+        }
         // work
         working();
         // Continuously send prepared while not committed
@@ -105,7 +113,7 @@ public class ResourceManager extends Manager {
         // TwoPhaseMessage.Prepared.toString(), "rm", getName())));
         specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())); // add Add op for
                                                                                                 // Messages to the trace
-        spec.endLog("TMCommit"); // log event
+        spec.endLog(eventName); // log event
 
         System.out.println("RM " + this.getName() + " send " + TwoPhaseMessage.Prepared);
     }
@@ -118,6 +126,7 @@ public class ResourceManager extends Manager {
             spec.endLog("RMRcvCommitMsg");
             this.shutdown();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
+            spec.startLog(); // prepare to log event
             this.state = ResourceManagerState.ABORTED;
             this.specState.set(state.toString().toLowerCase(Locale.ROOT));
             spec.endLog("RMRcvAbortMsg");
