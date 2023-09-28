@@ -59,17 +59,6 @@ public class ResourceManager extends Manager {
         System.out.println("RM " + name + " WORKING - " + taskDuration + " ms");
     }
 
-    /**
-     * Set state of manager
-     * 
-     * @param state New manager state
-     */
-    private void setState(ResourceManagerState state) {
-        this.state = state;
-        // Tracing
-        this.specState.set(state.toString().toLowerCase(Locale.ROOT));
-    }
-
     @Override
     public void run() throws IOException {
         // work
@@ -101,36 +90,41 @@ public class ResourceManager extends Manager {
         final String eventName;
         if (this.state != ResourceManagerState.PREPARED) {
             eventName = "RMPrepare";
-        } else
+        } else {
             eventName = "Stuttering";
+        }
 
-        this.setState(ResourceManagerState.PREPARED);
+        spec.startLog(); // prepare to log event
+        this.state = ResourceManagerState.PREPARED;
+        this.specState.set(state.toString().toLowerCase(Locale.ROOT));
+        // spec.log(eventName);
+        this.networkManager.send(new Message(
+                this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
 
-        // Tracing
-        // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())));
-        specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName()));
-        spec.log(eventName);
-        this.networkManager
-                .send(new Message(this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
+        // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type",
+        // TwoPhaseMessage.Prepared.toString(), "rm", getName())));
+        specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())); // add Add op for
+                                                                                                // Messages to the trace
+        spec.endLog("TMCommit"); // log event
 
         System.out.println("RM " + this.getName() + " send " + TwoPhaseMessage.Prepared);
     }
 
     private void receive(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
-            this.setState(ResourceManagerState.COMMITTED);
-            // Tracing
-            spec.log("RMRcvCommitMsg");
-
+            spec.startLog(); // prepare to log event
+            this.state = ResourceManagerState.COMMITTED;
+            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
+            spec.endLog("RMRcvCommitMsg");
             this.shutdown();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
-            this.setState(ResourceManagerState.ABORTED);
-            // Tracing
-            spec.log("RMRcvAbortMsg");
-            
+            this.state = ResourceManagerState.ABORTED;
+            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
+            spec.endLog("RMRcvAbortMsg");
             this.shutdown();
         }
 
-        System.out.println("RM " + this.getName() + " received: " + message.getContent() + " from " + message.getFrom());
+        System.out.println("RM " + this.getName() +
+                " received: " + message.getContent() + " from " + message.getFrom());
     }
 }

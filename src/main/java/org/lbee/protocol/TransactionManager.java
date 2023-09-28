@@ -25,7 +25,7 @@ public class TransactionManager extends Manager {
     private final VirtualField specTmPrepared;
 
     public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
-    TLATracer spec) {
+            TLATracer spec) {
         super(name, networkManager, spec);
         this.resourceManagers = new HashSet<>(resourceManagerNames);
         // Even if preparedRMs.size doesn't neccesarily reflect the number of prepared
@@ -71,14 +71,13 @@ public class TransactionManager extends Manager {
     private void abort() throws IOException {
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
         if (possibleAbort == 1) {
-            // Tracing
-            specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString()));
-            spec.log("TMAbort");
+            spec.startLog(); // prepare to log event
             // sends Abort to all RM
             for (String rmName : resourceManagers) {
                 this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
             }
-
+            specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); // add Add op for Messages to the trace
+            spec.endLog("TMAbort"); // log event
             this.shutdown();
 
             System.out.println("TM sends Abort");
@@ -90,10 +89,10 @@ public class TransactionManager extends Manager {
             String preparedRM = message.getFrom();
             // if the message is from an RM managed by the TM
             if (resourceManagers.contains(preparedRM)) {
+                spec.startLog(); // prepare to log event
                 this.preparedRMs.add(preparedRM);
-                // Tracing
-                specTmPrepared.add(preparedRM);
-                spec.log("TMRcvPrepared");
+                specTmPrepared.add(preparedRM); // add tm state change to the trace
+                spec.endLog("TMRcvPrepared"); // log event
             }
         }
 
@@ -109,14 +108,13 @@ public class TransactionManager extends Manager {
      * @TLAAction TMCommit
      */
     private void commit() throws IOException {
-        // Tracing
-        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
-        spec.log("TMCommit");
-
+        spec.startLog(); // prepare to log event
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
         }
+        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString())); // add Add op for Messages to the trace
+        spec.endLog("TMCommit"); // log event
 
         System.out.println("TM sent Commits");
 
