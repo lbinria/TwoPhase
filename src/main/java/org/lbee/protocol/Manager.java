@@ -18,14 +18,14 @@ public abstract class Manager {
      * 
      * @return True if manager has been shutdown
      */
-    public boolean isShutdown() {
+    public boolean isTerminated() {
         return shutdown;
     }
 
     /**
      * Shutdown the manager
      */
-    protected void shutdown() {
+    protected void terminate() {
         System.out.println("-- "+this.name + " shutdown");
         shutdown = true;
     }

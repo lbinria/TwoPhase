@@ -21,7 +21,7 @@ public class ResourceManager extends Manager {
         ABORTED
     }
 
-    private final static int PROBABILITY_TO_ABORT = 2;
+    private final static int PROBABILITY_TO_ABORT = 100;
     private static final int MAX_TASK_DURATION = 100;
 
     // Transaction manager (to send message)
@@ -54,8 +54,8 @@ public class ResourceManager extends Manager {
             this.taskDuration = taskDuration;
         }
         // prepare tracing
-        this.specMessages = spec.getVariable("msgs");
-        this.specState = spec.getVariable("rmState").getField(getName());
+        this.specMessages = spec.getVariableTracer("msgs");
+        this.specState = spec.getVariableTracer("rmState").getField(getName());
 
         System.out.println("RM " + name + " WORKING - " + taskDuration + " ms");
     }
@@ -66,7 +66,7 @@ public class ResourceManager extends Manager {
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
         if (possibleAbort == 1) {
             System.out.println("RM " + this.getName() + " ABORT ");
-            this.shutdown();
+            this.terminate();
             return;
         }
         // work
@@ -82,7 +82,7 @@ public class ResourceManager extends Manager {
             } catch (TimeOutException e) {
                 System.out.println("RM " + this.getName() + " received TIMEOUT ");
             }
-        } while (!this.isShutdown());
+        } while (!this.isTerminated());
     }
 
     private void working() {
@@ -124,13 +124,13 @@ public class ResourceManager extends Manager {
             this.state = ResourceManagerState.COMMITTED;
             this.specState.set(state.toString().toLowerCase(Locale.ROOT));
             spec.endLog("RMRcvCommitMsg");
-            this.shutdown();
+            this.terminate();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             spec.startLog(); // prepare to log event
             this.state = ResourceManagerState.ABORTED;
             this.specState.set(state.toString().toLowerCase(Locale.ROOT));
             spec.endLog("RMRcvAbortMsg");
-            this.shutdown();
+            this.terminate();
         }
 
         System.out.println("RM " + this.getName() +

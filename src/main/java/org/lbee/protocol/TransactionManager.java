@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TransactionManager extends Manager {
+    private final static int RECEIVE_TIMEOUT = 100;
     private final static int ABORT_TIMEOUT = 100;
     // Resource managers managed by TM (as specified in the configuration)
     private final Set<String> resourceManagers;
@@ -35,33 +36,29 @@ public class TransactionManager extends Manager {
         // commit message
         this.preparedRMs = new ArrayList<>();
         // this.preparedRMs = new HashSet<>();
-        this.specMessages = spec.getVariable("msgs");
-        this.specTmPrepared = spec.getVariable("tmPrepared");
+        this.specMessages = spec.getVariableTracer("msgs");
+        this.specTmPrepared = spec.getVariableTracer("tmPrepared");
     }
 
     @Override
     public void run() throws IOException {
         long startTime = System.currentTimeMillis();
         do {
-            // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
-            if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
-                this.abort();
-            }
-            if (!this.isShutdown()) {
+            if (!this.isTerminated()) {
                 // block on receiving message until timeout, retry if timeout
                 boolean received = false;
                 do {
                     try {
-                        Message message = networkManager.syncReceive(this.getName(), 100);
+                        Message message = networkManager.syncReceive(this.getName(), RECEIVE_TIMEOUT);
                         this.receive(message);
                         received = true;
                     } catch (TimeOutException e) {
                         System.out.println("TM receive TIMEOUT");
-                        // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
-                        if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
-                            this.abort();
-                            break;
-                        }
+                    }
+                    // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
+                    if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
+                        this.abort();
+                        break;
                     }
                 } while (!received);
 
@@ -69,7 +66,7 @@ public class TransactionManager extends Manager {
                     this.commit();
                 }
             }
-        } while (!this.isShutdown());
+        } while (!this.isTerminated());
     }
 
     /**
@@ -83,7 +80,7 @@ public class TransactionManager extends Manager {
         }
         specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); // add Add op for Messages to the trace
         spec.endLog("TMAbort"); // log event
-        this.shutdown();
+        this.terminate();
 
         System.out.println("TM sends Abort");
     }
@@ -123,6 +120,6 @@ public class TransactionManager extends Manager {
 
         System.out.println("TM sent Commits");
 
-        this.shutdown();
+        this.terminate();
     }
 }
