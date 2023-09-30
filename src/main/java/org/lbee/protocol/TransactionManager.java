@@ -46,12 +46,12 @@ public class TransactionManager extends Manager {
         do {
             if (!this.isTerminated()) {
                 // block on receiving message until timeout, retry if timeout
-                boolean received = false;
+                boolean messageReceived = false;
                 do {
                     try {
-                        Message message = networkManager.syncReceive(this.getName(), RECEIVE_TIMEOUT);
-                        this.receive(message);
-                        received = true;
+                        Message message = networkManager.receive(this.getName(), RECEIVE_TIMEOUT);
+                        this.handleMessage(message);
+                        messageReceived = true;
                     } catch (TimeOutException e) {
                         System.out.println("TM receive TIMEOUT");
                     }
@@ -60,9 +60,9 @@ public class TransactionManager extends Manager {
                         this.abort();
                         break;
                     }
-                } while (!received);
+                } while (!messageReceived);
 
-                if (checkCommit()) {
+                if (checkAllPrepared()) {
                     this.commit();
                 }
             }
@@ -85,7 +85,7 @@ public class TransactionManager extends Manager {
         System.out.println("TM sends Abort");
     }
 
-    protected void receive(Message message) throws IOException {
+    protected void handleMessage(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             String preparedRM = message.getFrom();
             // if the message is from an RM managed by the TM
@@ -101,7 +101,7 @@ public class TransactionManager extends Manager {
                 "TM received " + message.getContent() + " from " + message.getFrom() + " => " + this.preparedRMs);
     }
 
-    protected boolean checkCommit() {
+    protected boolean checkAllPrepared() {
         // System.out.println("TM check commit (rms = " + this.preparedRMs + ")");
         return this.preparedRMs.size() >= this.resourceManagers.size();
     }

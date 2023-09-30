@@ -26,20 +26,20 @@ public class NetworkManager {
         return !data.equals("null");
     }
 
-    public Message receive(String processName) throws IOException {
-        // Request for message destined to me
-        writer.println("r:" + processName);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(this.inputStream));
-        String data = reader.readLine();
-        if (data.equals("null"))
-            return null;
-        else {
-            String[] components = data.split(";");
-            return new Message(components);
-        }
-    }
+    // public Message receive(String processName) throws IOException {
+    //     // Request for message destined to me
+    //     writer.println("r:" + processName);
+    //     BufferedReader reader = new BufferedReader(new InputStreamReader(this.inputStream));
+    //     String data = reader.readLine();
+    //     if (data.equals("null"))
+    //         return null;
+    //     else {
+    //         String[] components = data.split(";");
+    //         return new Message(components);
+    //     }
+    // }
 
-    public Message syncReceive(String processName, int timeout) throws IOException, TimeOutException {
+    public Message receive(String processName, int timeout) throws IOException, TimeOutException {
         long lastSendTime = System.currentTimeMillis();
         while (true) {
             // Request for message destined to me
