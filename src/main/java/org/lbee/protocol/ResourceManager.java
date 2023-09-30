@@ -78,7 +78,7 @@ public class ResourceManager extends Manager {
             // block on receiving message until timeout, send again if timeout
             try {
                 Message message = networkManager.receive(this.getName(), this.taskDuration * 2);
-                this.receive(message);
+                this.handleMessage(message);
             } catch (TimeOutException e) {
                 System.out.println("RM " + this.getName() + " received TIMEOUT ");
             }
@@ -118,7 +118,7 @@ public class ResourceManager extends Manager {
         System.out.println("RM " + this.getName() + " send " + TwoPhaseMessage.Prepared);
     }
 
-    private void receive(Message message) throws IOException {
+    private void handleMessage(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             spec.startLog(); // prepare to log event
             this.state = ResourceManagerState.COMMITTED;
