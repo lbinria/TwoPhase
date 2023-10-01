@@ -2,6 +2,7 @@ package org.lbee.network;
 
 import org.lbee.protocol.Message;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -18,7 +19,7 @@ public class UnorderedMessageBox implements MessageBox {
     private final List<Message> messages;
 
     public UnorderedMessageBox() {
-        messages = new LinkedList<>();
+        messages = new ArrayList<>();
     }
 
     /**
@@ -41,6 +42,7 @@ public class UnorderedMessageBox implements MessageBox {
 
         // Take a message in box randomly
         int rndIdx = new Random().nextInt(0, messages.size());
+        // System.out.println("Take message from "+messages+" at index "+rndIdx);
         Message message = messages.get(rndIdx);
         messages.remove(rndIdx);
         return message;

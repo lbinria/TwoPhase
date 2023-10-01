@@ -40,8 +40,9 @@ public class MessageBucket<TMessageBox extends MessageBox> {
         // Get message queue of recipient
         MessageBox messageBox = this.messageBoxes.get(recipientName);
         // No message, return null
-        if (messageBox == null)
+        if (messageBox == null) {
             return null;
+        }
 
         return messageBox.take();
     }
