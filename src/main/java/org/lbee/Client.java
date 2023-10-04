@@ -44,12 +44,12 @@ public class Client {
                 case "tm" -> {
                     String tmName = "tm";
                     TLATracer spec = TLATracer.getTracer(tmName + ".ndjson",
-                            SharedClock.get("twophase.clock"));
+                            new SharedClock("twophase.clock"));
                     manager = new TransactionManager(networkManager, tmName, config.getResourceManagerNames(), spec);
                 }
                 case "rm" -> {
                     TLATracer spec = TLATracer.getTracer(resourceManagerName + ".ndjson",
-                            SharedClock.get("twophase.clock"));
+                            new SharedClock("twophase.clock"));
                     manager = new ResourceManager(networkManager, resourceManagerName, "tm", duration, spec);
                 }
                 default -> {

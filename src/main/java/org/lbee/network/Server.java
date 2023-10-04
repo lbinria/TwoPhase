@@ -11,7 +11,7 @@ public class Server {
     public static void main(String[] args) throws IOException {
         if (args.length < 1) return;
 
-        SharedClock.get("twophase.clock").reset();
+        new SharedClock("twophase.clock");
         int port = Integer.parseInt(args[0]);
 
         final MessageBucket<MessageBox> messageBucket;
