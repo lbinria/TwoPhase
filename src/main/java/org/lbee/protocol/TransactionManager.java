@@ -69,36 +69,33 @@ public class TransactionManager extends Manager {
         } while (!this.isTerminated());
     }
 
-    /**
-     * @TLAAction TMAbort
-     */
-    private void abort() throws IOException {
-        spec.startLog(); // prepare to log event
-        // sends Abort to all RM
-        for (String rmName : resourceManagers) {
-            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
-        }
-        specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); // add Add op for Messages to the trace
-        spec.endLog("TMAbort"); // log event
-        this.terminate();
-
-        System.out.println("TM sends Abort");
-    }
-
     protected void handleMessage(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Prepared.toString())) {
             String preparedRM = message.getFrom();
             // if the message is from an RM managed by the TM
             if (resourceManagers.contains(preparedRM)) {
-                spec.startLog(); // prepare to log event
                 this.preparedRMs.add(preparedRM);
                 specTmPrepared.add(preparedRM); // add tm state change to the trace
-                spec.endLog("TMRcvPrepared"); // log event
+                spec.log("TMRcvPrepared"); // log event
             }
         }
 
         System.out.println(
                 "TM received " + message.getContent() + " from " + message.getFrom() + " => " + this.preparedRMs);
+    }
+
+     private void abort() throws IOException {
+        // add Add operator for Messages to the trace (corresponding to sending a message)
+        specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); 
+        // should log before the message is sent                                                                                       // Messages to the trace
+        spec.log("TMAbort"); // log event
+        // sends Abort to all RM
+        for (String rmName : resourceManagers) {
+            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
+        }
+        this.terminate();
+
+        System.out.println("TM sends Abort");
     }
 
     protected boolean checkAllPrepared() {
@@ -110,14 +107,14 @@ public class TransactionManager extends Manager {
      * @TLAAction TMCommit
      */
     private void commit() throws IOException {
-        spec.startLog(); // prepare to log event
+        // add Add operator for Messages to the trace (corresponding to sending a message)
+        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString())); 
+        // should log before the message is sent                                  
+        spec.log("TMCommit"); 
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
         }
-        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString())); // add Add op for Messages to the trace
-        spec.endLog("TMCommit"); // log event
-
         System.out.println("TM sent Commits");
 
         this.terminate();

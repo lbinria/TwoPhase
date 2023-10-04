@@ -93,6 +93,24 @@ public class ResourceManager extends Manager {
         }
     }
 
+    private void handleMessage(Message message) throws IOException {
+        if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
+            this.state = ResourceManagerState.COMMITTED;
+            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
+            spec.log("RMRcvCommitMsg", new Object[] {this.getName()});
+            // spec.log("RMRcvCommitMsg"); 
+            this.terminate();
+        } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
+            this.state = ResourceManagerState.ABORTED;
+            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
+            spec.log("RMRcvAbortMsg");
+            this.terminate();
+        }
+
+        System.out.println("RM " + this.getName() +
+                " received: " + message.getContent() + " from " + message.getFrom());
+    }
+
     private void sendPrepared() throws IOException {
         // Trace optimization (specify event name to reduce state space)
         final String eventName;
@@ -102,38 +120,18 @@ public class ResourceManager extends Manager {
             eventName = "Stuttering";
         }
 
-        spec.startLog(); // prepare to log event
         this.state = ResourceManagerState.PREPARED;
         this.specState.set(state.toString().toLowerCase(Locale.ROOT));
-        // spec.log(eventName);
-        this.networkManager.send(new Message(
-                this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
-
         // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type",
         // TwoPhaseMessage.Prepared.toString(), "rm", getName())));
         specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())); // add Add op for
-                                                                                                // Messages to the trace
-        spec.endLog(eventName); // log event
+        // should log before the message is sent                                                                                       // Messages to the trace
+        spec.log(eventName);
+
+        this.networkManager.send(new Message(
+                this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
 
         System.out.println("RM " + this.getName() + " send " + TwoPhaseMessage.Prepared);
     }
 
-    private void handleMessage(Message message) throws IOException {
-        if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
-            spec.startLog(); // prepare to log event
-            this.state = ResourceManagerState.COMMITTED;
-            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
-            spec.endLog("RMRcvCommitMsg");
-            this.terminate();
-        } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
-            spec.startLog(); // prepare to log event
-            this.state = ResourceManagerState.ABORTED;
-            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
-            spec.endLog("RMRcvAbortMsg");
-            this.terminate();
-        }
-
-        System.out.println("RM " + this.getName() +
-                " received: " + message.getContent() + " from " + message.getFrom());
-    }
 }
