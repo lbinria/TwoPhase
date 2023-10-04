@@ -2,9 +2,11 @@ package org.lbee;
 
 import com.google.gson.JsonObject;
 
+import main.java.org.lbee.instrumentation.clock.ClockException;
+
 import org.lbee.instrumentation.trace.TLATracer;
+import org.lbee.instrumentation.clock.ClockFactory;
 import org.lbee.instrumentation.helper.ConfigurationManager;
-import org.lbee.instrumentation.clock.SharedClock;
 import org.lbee.network.NetworkManager;
 import org.lbee.protocol.Configuration;
 import org.lbee.protocol.Manager;
@@ -20,7 +22,7 @@ import java.net.UnknownHostException;
  */
 public class Client {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClockException {
 
         if (args.length < 5) {
             System.out.println("Missing arguments. hostname, port, type={tm, rm}, rmName, duration expected.");
@@ -44,12 +46,12 @@ public class Client {
                 case "tm" -> {
                     String tmName = "tm";
                     TLATracer spec = TLATracer.getTracer(tmName + ".ndjson",
-                            new SharedClock("twophase.clock"));
+                            ClockFactory.getClock(ClockFactory.LOCAL,"twophase.clock"));
                     manager = new TransactionManager(networkManager, tmName, config.getResourceManagerNames(), spec);
                 }
                 case "rm" -> {
                     TLATracer spec = TLATracer.getTracer(resourceManagerName + ".ndjson",
-                            new SharedClock("twophase.clock"));
+                            ClockFactory.getClock(ClockFactory.LOCAL,"twophase.clock"));
                     manager = new ResourceManager(networkManager, resourceManagerName, "tm", duration, spec);
                 }
                 default -> {
