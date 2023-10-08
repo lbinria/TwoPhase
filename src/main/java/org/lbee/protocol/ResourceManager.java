@@ -31,8 +31,8 @@ public class ResourceManager extends Manager {
     private final int taskDuration;
 
     // tracing
-    private final VirtualField specMessages;
-    private final VirtualField specState;
+    private final VirtualField traceMessages;
+    private final VirtualField traceState;
 
     /**
      * Construct a resource manager
@@ -41,11 +41,11 @@ public class ResourceManager extends Manager {
      * @param name                   Resource manager name
      * @param transactionManagerName Attached transaction manager name
      * @param taskDuration           Duration of underlying task
-     * @param spec                   Trace instrumentation
+     * @param tracer                   Trace instrumentation
      */
     public ResourceManager(NetworkManager networkManager, String name, String transactionManagerName,
-            int taskDuration, TLATracer spec) {
-        super(name, networkManager, spec);
+            int taskDuration, TLATracer tracer) {
+        super(name, networkManager, tracer);
         this.transactionManagerName = transactionManagerName;
         this.state = ResourceManagerState.WORKING;
         if (taskDuration == -1) {
@@ -54,8 +54,8 @@ public class ResourceManager extends Manager {
             this.taskDuration = taskDuration;
         }
         // prepare tracing
-        this.specMessages = spec.getVariableTracer("msgs");
-        this.specState = spec.getVariableTracer("rmState").getField(getName());
+        this.traceMessages = tracer.getVariableTracer("msgs");
+        this.traceState = tracer.getVariableTracer("rmState").getField(getName());
 
         System.out.println("RM " + name + " WORKING - " + taskDuration + " ms");
     }
@@ -96,14 +96,14 @@ public class ResourceManager extends Manager {
     private void handleMessage(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.state = ResourceManagerState.COMMITTED;
-            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
-            spec.log("RMRcvCommitMsg", new Object[] {this.getName()});
+            this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
+            tracer.log("RMRcvCommitMsg", new Object[] {this.getName()});
             // spec.log("RMRcvCommitMsg"); 
             this.terminate();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             this.state = ResourceManagerState.ABORTED;
-            this.specState.set(state.toString().toLowerCase(Locale.ROOT));
-            spec.log("RMRcvAbortMsg");
+            this.traceState.set(state.toString().toLowerCase(Locale.ROOT));
+            tracer.log("RMRcvAbortMsg");
             this.terminate();
         }
 
@@ -121,12 +121,12 @@ public class ResourceManager extends Manager {
         }
 
         this.state = ResourceManagerState.PREPARED;
-        this.specState.set(state.toString().toLowerCase(Locale.ROOT));
+        this.traceState.set(state.toString().toLowerCase(Locale.ROOT));
         // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type",
         // TwoPhaseMessage.Prepared.toString(), "rm", getName())));
-        specMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())); // add Add op for
+        traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())); // add Add op for
         // should log before the message is sent                                                                                       // Messages to the trace
-        spec.log(eventName);
+        tracer.log(eventName);
 
         this.networkManager.send(new Message(
                 this.getName(), transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));

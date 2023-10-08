@@ -6,7 +6,7 @@ import java.io.*;
 public abstract class Manager {
     private final String name;
     public final NetworkManager networkManager;
-    protected final TLATracer spec;
+    protected final TLATracer tracer;
     private boolean shutdown;
 
     public String getName() {
@@ -30,12 +30,12 @@ public abstract class Manager {
         shutdown = true;
     }
 
-    public Manager(String name, NetworkManager networkManager, TLATracer spec) {
+    public Manager(String name, NetworkManager networkManager, TLATracer tracer) {
         this.name = name;
         this.networkManager = networkManager;
         this.shutdown = false;
 
-        this.spec = spec;
+        this.tracer = tracer;
     }
 
     public abstract void run() throws IOException;

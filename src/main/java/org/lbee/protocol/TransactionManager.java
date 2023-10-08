@@ -21,12 +21,12 @@ public class TransactionManager extends Manager {
     // Number of resource managers prepared to commit
     private final Collection<String> preparedRMs;
 
-    private final VirtualField specMessages;
-    private final VirtualField specTmPrepared;
+    private final VirtualField traceMessages;
+    private final VirtualField traceTmPrepared;
 
     public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
-            TLATracer spec) {
-        super(name, networkManager, spec);
+            TLATracer tracer) {
+        super(name, networkManager, tracer);
         this.resourceManagers = new HashSet<>(resourceManagerNames);
         // Even if preparedRMs.size doesn't neccesarily reflect the number of prepared
         // RM when
@@ -36,8 +36,8 @@ public class TransactionManager extends Manager {
         // commit message
         this.preparedRMs = new ArrayList<>();
         // this.preparedRMs = new HashSet<>();
-        this.specMessages = spec.getVariableTracer("msgs");
-        this.specTmPrepared = spec.getVariableTracer("tmPrepared");
+        this.traceMessages = tracer.getVariableTracer("msgs");
+        this.traceTmPrepared = tracer.getVariableTracer("tmPrepared");
     }
 
     @Override
@@ -75,8 +75,8 @@ public class TransactionManager extends Manager {
             // if the message is from an RM managed by the TM
             if (resourceManagers.contains(preparedRM)) {
                 this.preparedRMs.add(preparedRM);
-                specTmPrepared.add(preparedRM); // add tm state change to the trace
-                spec.log("TMRcvPrepared"); // log event
+                traceTmPrepared.add(preparedRM); // add tm state change to the trace
+                tracer.log("TMRcvPrepared"); // log event
             }
         }
 
@@ -86,9 +86,9 @@ public class TransactionManager extends Manager {
 
      private void abort() throws IOException {
         // add Add operator for Messages to the trace (corresponding to sending a message)
-        specMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); 
+        traceMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); 
         // should log before the message is sent                                                                                       // Messages to the trace
-        spec.log("TMAbort"); // log event
+        tracer.log("TMAbort"); // log event
         // sends Abort to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
@@ -108,9 +108,9 @@ public class TransactionManager extends Manager {
      */
     private void commit() throws IOException {
         // add Add operator for Messages to the trace (corresponding to sending a message)
-        specMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString())); 
+        traceMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString())); 
         // should log before the message is sent                                  
-        spec.log("TMCommit"); 
+        tracer.log("TMCommit"); 
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
