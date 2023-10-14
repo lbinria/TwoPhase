@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ public class TransactionManager extends Manager {
 
     private final VirtualField traceMessages;
     private final VirtualField traceTmPrepared;
+    private final VirtualField traceState;
 
     public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
             TLATracer tracer) {
@@ -38,6 +40,7 @@ public class TransactionManager extends Manager {
         // this.preparedRMs = new HashSet<>();
         this.traceMessages = tracer.getVariableTracer("msgs");
         this.traceTmPrepared = tracer.getVariableTracer("tmPrepared");
+        this.traceState = tracer.getVariableTracer("tmState");
     }
 
     @Override
@@ -84,10 +87,13 @@ public class TransactionManager extends Manager {
                 "TM received " + message.getContent() + " from " + message.getFrom() + " => " + this.preparedRMs);
     }
 
-     private void abort() throws IOException {
-        // add Add operator for Messages to the trace (corresponding to sending a message)
-        traceMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); 
-        // should log before the message is sent                                                                                       // Messages to the trace
+    private void abort() throws IOException {
+        // add Add operator for Messages to the trace (corresponding to sending a
+        // message)
+        traceMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString()));
+        // we can also trace the state
+        traceState.set("done");
+        // should log before the message is sent // Messages to the trace
         tracer.log("TMAbort"); // log event
         // sends Abort to all RM
         for (String rmName : resourceManagers) {
@@ -107,10 +113,13 @@ public class TransactionManager extends Manager {
      * @TLAAction TMCommit
      */
     private void commit() throws IOException {
-        // add Add operator for Messages to the trace (corresponding to sending a message)
-        traceMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString())); 
-        // should log before the message is sent                                  
-        tracer.log("TMCommit"); 
+        // add Add operator for Messages to the trace (corresponding to sending a
+        // message)
+        traceMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
+        // we can also trace the state
+        traceState.set("done");
+        // should log before the message is sent
+        tracer.log("TMCommit");
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
