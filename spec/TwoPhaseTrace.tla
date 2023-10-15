@@ -12,7 +12,8 @@ TraceNil == "null"
 
 (* Replace RM constant *)
 TraceRM ==
-    ToSet(JsonTrace[1].RM)
+    ToSet(JsonConfig[1].RM)
+    \* ToSet(JsonTrace[1].RM)
 
 (* Can be extracted from init *)
 TPDefault(varName) ==

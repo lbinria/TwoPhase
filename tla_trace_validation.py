@@ -10,8 +10,9 @@ community_modules_jar = os.path.join(tla_dir, "CommunityModules-deps.jar")
 tla_cp = f"{tla_jar}:{community_modules_jar}"
 
 # Run TLC
-def run_tla(trace_spec,trace="trace-tla.ndjson"):
+def run_tla(trace_spec,trace="trace-tla.ndjson",config="config-tla.ndjson"):
     os.environ["TRACE_PATH"] = trace
+    os.environ["CONFIG_PATH"] = config
     tla_trace_validation_process = Popen([
         "java",
         "-XX:+UseParallelGC",
@@ -27,7 +28,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('spec', type=str, help="Specification file")
     parser.add_argument('--trace', type=str, required=False, default="trace-tla.ndjson", help="Trace file")
+    parser.add_argument('--config', type=str, required=False, default="config-tla.ndjson", help="Config file")
     args = parser.parse_args()
     # Run
-    run_tla(args.spec,args.trace)
+    run_tla(args.spec,args.trace,args.config)
 

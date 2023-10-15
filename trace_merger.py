@@ -20,8 +20,8 @@ def run(files, config=None, sort=False, remove_meta=False):
         merged_trace = [{k:v for k, v in t.items() if k != "clock" and k != "sender"} for t in merged_trace]
 
     # Append config line at beginning of the trace file
-    if config:
-        merged_trace = [read_trace(config)[0]] + merged_trace
+    # if config:
+    #     merged_trace = [read_trace(config)[0]] + merged_trace
 
     # Dump
     return ndjson.dumps(merged_trace)

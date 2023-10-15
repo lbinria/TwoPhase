@@ -23,12 +23,20 @@ JsonTrace ==
     ELSE
         Print(<<"Failed to validate the trace. TRACE_PATH environnement variable was expected.">>, "")
 
+(* Read config *)
+JsonConfig ==
+    IF "CONFIG_PATH" \in DOMAIN IOEnv THEN
+        ndJsonDeserialize(IOEnv.CONFIG_PATH)
+    ELSE
+        Print(<<"Failed to read the config. CONFIG_PATH environnement variable was expected.">>, "")
+
 (* Manage exceptions: assume that trace is free of any exception *)
 ASSUME \A t \in ToSet(JsonTrace) : "event" \notin DOMAIN t \/ ("event" \in DOMAIN t /\ t.event /= "__exception")
 
 (* Get trace skipping config line *)
 Trace ==
-    SubSeq(JsonTrace, 2, Len(JsonTrace))
+    \* SubSeq(JsonTrace, 2, Len(JsonTrace))
+    JsonTrace
 
 logline ==
     Trace[l]
