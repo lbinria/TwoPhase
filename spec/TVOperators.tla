@@ -37,7 +37,7 @@ SubInteger(cur, val) == cur - val
 Unchanged(cur, val) == cur
 
 
-Apply(var, default, op, args) ==
+Apply(op, var, default, args) ==
     CASE op = "Replace" -> Replace(var, args[1])
     []   op = "AddElement" -> AddElement(var, args[1])
     []   op = "AddElements" -> AddElements(var, args[1])
@@ -55,12 +55,12 @@ Apply(var, default, op, args) ==
     []   op = "Unchanged" -> Unchanged(var, args[1])
 
 RECURSIVE ExceptAtPath(_,_,_,_,_)
-LOCAL ExceptAtPath(var, default, path, op, args) ==
+LOCAL ExceptAtPath(op, var, default, path, args) ==
     LET h == Head(path) IN
     IF Len(path) > 1 THEN
-        [var EXCEPT ![h] = ExceptAtPath(var[h], default[h], Tail(path), op, args)]
+        [var EXCEPT ![h] = ExceptAtPath(op, var[h], default[h], Tail(path), args)]
     ELSE
-        [var EXCEPT ![h] = Apply(@, default[h], op, args)]
+        [var EXCEPT ![h] = Apply(op, @, default[h], args)]
 
 RECURSIVE ApplyUpdates(_,_,_,_)
 LOCAL ApplyUpdates(var, varName, updates, event) ==
@@ -68,15 +68,15 @@ LOCAL ApplyUpdates(var, varName, updates, event) ==
 
     LET applied ==
         IF Len(update.path) > 0 THEN
-            ExceptAtPath(var, Default(varName), update.path, update.op, update.args)
+            ExceptAtPath(update.op, var, Default(varName), update.path, update.args)
         ELSE
             LET mapArgs ==
                 IF "map" \in DOMAIN update THEN
-                    MapArgs(update.map, var, Default(varName), update.op, update.args, event)
+                    MapArgs(update.op, update.map, var, Default(varName), update.args, event)
                 ELSE
                     update.args
             IN
-            Apply(var, Default(varName), update.op, mapArgs)
+            Apply(update.op, var, Default(varName), mapArgs)
     IN
     IF Len(updates) > 1 THEN
         ApplyUpdates(applied, varName, Tail(updates), event)
