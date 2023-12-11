@@ -110,3 +110,12 @@ modules.xml
 
 # Sonarlint plugin
 .idea/sonarlint
+
+# cache
+__pycache__
+.DS_Store
+
+# temporary trace and clock
+trace-tla.ndjson
+twophase.clock
+default
