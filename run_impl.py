@@ -1,11 +1,17 @@
 import os
+import argparse
+import ndjson
 import time
 import signal
 from subprocess import Popen
 
 jar_name = "TwoPhase-1.1-noabort-demo-jar-with-dependencies.jar"
 
-def run():
+def read_json(filename):
+    with open(filename) as f:
+        return ndjson.load(f)
+
+def run(RMs, TM):
     print("--- Run server ---")
     server_process = Popen([
         "java",
@@ -14,7 +20,8 @@ def run():
         "org.lbee.network.Server",
         "6869", "unordered"])
 
-    # Wait the server run, if comment this line, maye some manager running before the server, leading to error
+    # Wait the server to run, if not some manager might start 
+    # running before the server, leading to an error
     # This behavior might be interesting for trace validation
     time.sleep(2)
 
@@ -25,37 +32,41 @@ def run():
         "-cp",
         f"target/{jar_name}",
         "org.lbee.Client",
-        "localhost", "6869", "tm", "",f"{duration}"])
+        "localhost", "6869", f"{TM}", "",f"{duration}"])
 
     print("--- Run RM clients ---")
     rm_processes = []
     duration = 10
-    for i in range(2):
-        # print(f"Run rm{i} client")
+    for rm in RMs:
         rm_process = Popen([
             "java",
             "-cp",
             f"target/{jar_name}",
             "org.lbee.Client",
-            "localhost", "6869", "rm", f"rm-{i}", f"{duration}"])
+            "localhost", "6869", "rm", f"{rm}", f"{duration}"])
         # if duration is the same for all RMs the bug (in TM) has much less chances to appear
         duration += 10
-
         rm_processes.append(rm_process)
 
-
-    # Wait all client are finished
+    # Wait for all clients to be finished
     tm_process.wait()
     for rm_process in rm_processes:
         rm_process.wait()
-
+    # terminate
     server_process.terminate()
     tm_process.terminate()
     for rm_process in rm_processes:
         rm_process.terminate()
-
     # Kill server
     os.kill(server_process.pid, signal.SIGINT)
 
 if __name__ == "__main__":
-    run()
+    # Read program args
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument('--config', type=str, required=False, default="twophase.ndjson.conf", help="Config file")
+    args = parser.parse_args()
+    # Read config and run
+    config = read_json(args.config)
+    rms = config[0]["RM"]
+    tm = config[1]["TM"][0]
+    run(rms,tm)

@@ -1,0 +1,2 @@
+{"clock":750,"msgs":[{"op":"AddElement","path":[],"args":[{"rm":"rm-0","type":"Prepared"}]}],"rmState":[{"op":"Replace","path":["rm-0"],"args":["prepared"]}],"event":"RMPrepare","sender":"27ede2f8-a1f9-4586-b86c-aa3839e44f0d"}
+{"clock":756,"rmState":[{"op":"Replace","path":["rm-0"],"args":["committed"]}],"event":"RMRcvCommitMsg","event_args":["rm-0"],"sender":"27ede2f8-a1f9-4586-b86c-aa3839e44f0d"}

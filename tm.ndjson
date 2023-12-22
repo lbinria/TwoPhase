@@ -1,0 +1,3 @@
+{"clock":751,"tmPrepared":[{"op":"AddElement","path":[],"args":["rm-0"]}],"event":"TMRcvPrepared","sender":"13bdfee0-137a-4ba1-a8d1-9b57c6ecf5e4"}
+{"clock":753,"tmPrepared":[{"op":"AddElement","path":[],"args":["rm-1"]}],"event":"TMRcvPrepared","sender":"13bdfee0-137a-4ba1-a8d1-9b57c6ecf5e4"}
+{"clock":754,"msgs":[{"op":"AddElement","path":[],"args":[{"type":"Commit"}]}],"tmState":[{"op":"Replace","path":[],"args":["done"]}],"event":"TMCommit","sender":"13bdfee0-137a-4ba1-a8d1-9b57c6ecf5e4"}

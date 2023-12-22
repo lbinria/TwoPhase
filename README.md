@@ -44,25 +44,28 @@ It consists of the following steps:
 - clean old trace files
 - compile implementation of TwoPhase
 - run implementation of TwoPhase
-- [merge trace files / config into one trace file (when different processes produce different trace files)]
+- merge trace files 
 - Run TLC on the resulting trace file
 
 ### Perform trace validation on a trace file
 
 Alternatively, we can run the implementation with the command
 
-`mvn exec:java`
-
-or
-
 `python run_impl.py`
 
-and then perform the trace validation on the obtained trace file
-`trace-tla.ndjson` by using the command:
+The default configuration file `twophase.ndjson.conf` used by `run_impl.py` declares two ressource managers; this can be changed in the file or by using another file (specified with `--config`).
 
-`python tla_trace_validation.py spec/TwoPhaseTrace.tla --trace trace-tla.ndjson`
+Then, traces can be merged
+
+`python trace_merger.py --sort True`
+
+The same configuration file `twophase.ndjson.conf` is used by default (can be changed with `--config`). The files to be merged can be also specified explicitly as arguments for the script (if no file is pspecified, the list of files is extracted from the config file supposing that each line corresponds to a process that logs in a file named accordingly). By default the result of the merge is dumped in the file `trace-tla.ndjson` (a different one can be specified with `--out`).
+
+Finally, we can perform the trace validation on the obtained trace file `trace-tla.ndjson` (a different one can be specified with `--trace`) with the configuration specified in the file `twophase.ndjson.conf` (a different one can be specified with `--config`) by using the command:
+
+`python tla_trace_validation.py spec/TwoPhaseTrace.tla`
 
 # Directory structure
 
-- `spec/**`: contains TwoPhase specification and trace specification
-- `src/**`: contains TwoPhase implementation
+- `spec/**`: contains the `TwoPhase` specification and trace specification
+- `src/**`: contains the `TwoPhase` implementation

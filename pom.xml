@@ -26,15 +26,14 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <!-- MainClass in manifest make a executable jar -->
-                    <archive>
+                    <!-- <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>org.lbee.Client</mainClass>
                             <mainClass>org.lbee.Server</mainClass>
                         </manifest>
-                    </archive>
-
+                    </archive> -->
                 </configuration>
                 <executions>
                     <execution>
