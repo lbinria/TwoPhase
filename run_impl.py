@@ -27,23 +27,28 @@ def run(RMs, TM):
 
     print("--- Run TM client ---")
     duration = -1
-    tm_process = Popen([
+    args = [
         "java",
         "-cp",
         f"target/{jar_name}",
         "org.lbee.Client",
-        "localhost", "6869", f"{TM}", "",f"{duration}"])
+        "localhost", "6869", "tm",f"{TM}"] 
+    for rm in RMs:
+        args += [f"{rm}"];
+    args += [f"{duration}"]
+    tm_process = Popen(args)
 
     print("--- Run RM clients ---")
     rm_processes = []
     duration = 10
     for rm in RMs:
-        rm_process = Popen([
+        args = [
             "java",
             "-cp",
             f"target/{jar_name}",
             "org.lbee.Client",
-            "localhost", "6869", "rm", f"{rm}", f"{duration}"])
+            "localhost", "6869", "rm", f"{rm}", f"{TM}", f"{duration}"];
+        rm_process = Popen(args)
         # if duration is the same for all RMs the bug (in TM) has much less chances to appear
         duration += 10
         rm_processes.append(rm_process)

@@ -115,7 +115,11 @@ modules.xml
 __pycache__
 .DS_Store
 
+# VScode
+.vscode/
+
 # temporary trace and clock
 trace-tla.ndjson
 twophase.clock
 default
+
