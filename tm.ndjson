@@ -1,3 +1,2 @@
-{"clock":751,"tmPrepared":[{"op":"AddElement","path":[],"args":["rm-0"]}],"event":"TMRcvPrepared","sender":"13bdfee0-137a-4ba1-a8d1-9b57c6ecf5e4"}
-{"clock":753,"tmPrepared":[{"op":"AddElement","path":[],"args":["rm-1"]}],"event":"TMRcvPrepared","sender":"13bdfee0-137a-4ba1-a8d1-9b57c6ecf5e4"}
-{"clock":754,"msgs":[{"op":"AddElement","path":[],"args":[{"type":"Commit"}]}],"tmState":[{"op":"Replace","path":[],"args":["done"]}],"event":"TMCommit","sender":"13bdfee0-137a-4ba1-a8d1-9b57c6ecf5e4"}
+{"clock":1272,"tmPrepared":[{"op":"AddElement","path":[],"args":["rm-0"]}],"event":"TMRcvPrepared","sender":"a71e68c6-f3a7-4c94-be95-71ec56416d3a"}
+{"clock":1274,"msgs":[{"op":"AddElement","path":[],"args":[{"type":"Abort"}]}],"tmState":[{"op":"Replace","path":[],"args":["done"]}],"event":"TMAbort","sender":"a71e68c6-f3a7-4c94-be95-71ec56416d3a"}
