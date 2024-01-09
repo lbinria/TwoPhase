@@ -1,3 +1,0 @@
-{"clock":1270,"msgs":[{"op":"AddElement","path":[],"args":[{"type":"Prepared","rm":"rm-0"}]}],"rmState":[{"op":"Replace","path":["rm-0"],"args":["prepared"]}],"event":"RMPrepare","sender":"bca5b2d3-b77a-41ad-ac68-070e238db9c1"}
-{"clock":1273,"msgs":[{"op":"AddElement","path":[],"args":[{"type":"Prepared","rm":"rm-0"}]}],"rmState":[{"op":"Replace","path":["rm-0"],"args":["prepared"]}],"event":"Stuttering","sender":"bca5b2d3-b77a-41ad-ac68-070e238db9c1"}
-{"clock":1276,"rmState":[{"op":"Replace","path":["rm-0"],"args":["aborted"]}],"event":"RMRcvAbortMsg","sender":"bca5b2d3-b77a-41ad-ac68-070e238db9c1"}

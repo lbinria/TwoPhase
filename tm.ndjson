@@ -1,2 +1,0 @@
-{"clock":1272,"tmPrepared":[{"op":"AddElement","path":[],"args":["rm-0"]}],"event":"TMRcvPrepared","sender":"a71e68c6-f3a7-4c94-be95-71ec56416d3a"}
-{"clock":1274,"msgs":[{"op":"AddElement","path":[],"args":[{"type":"Abort"}]}],"tmState":[{"op":"Replace","path":[],"args":["done"]}],"event":"TMAbort","sender":"a71e68c6-f3a7-4c94-be95-71ec56416d3a"}
