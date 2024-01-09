@@ -41,7 +41,7 @@ public class ResourceManager extends Manager {
      * @param name                   Resource manager name
      * @param transactionManagerName Attached transaction manager name
      * @param taskDuration           Duration of underlying task
-     * @param tracer                   Trace instrumentation
+     * @param tracer                 Trace instrumentation
      */
     public ResourceManager(NetworkManager networkManager, String name, String transactionManagerName,
             int taskDuration, TLATracer tracer) {
@@ -62,11 +62,12 @@ public class ResourceManager extends Manager {
 
     @Override
     public void run() throws IOException {
-        // possible crash of the RM
+        boolean done = false;
+        // Simulate a crash of the RM
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
         if (possibleAbort == 1) {
             System.out.println("RM " + this.getName() + " ABORT ");
-            this.terminate();
+            done = true;
             return;
         }
         // work
@@ -79,10 +80,11 @@ public class ResourceManager extends Manager {
             try {
                 Message message = networkManager.receive(this.getName(), this.taskDuration * 2);
                 this.handleMessage(message);
+                done = true;
             } catch (TimeOutException e) {
                 System.out.println("RM " + this.getName() + " received TIMEOUT ");
             }
-        } while (!this.isTerminated());
+        } while (!done);
     }
 
     private void working() {
@@ -97,15 +99,13 @@ public class ResourceManager extends Manager {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.state = ResourceManagerState.COMMITTED;
             this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
-            tracer.log("RMRcvCommitMsg", new Object[] {this.getName()});
-            // tracer.log(); 
-            // tracer.log("RMRcvCommitMsg"); 
-            this.terminate();
+            tracer.log("RMRcvCommitMsg", new Object[] { this.getName() });
+            // tracer.log();
+            // tracer.log("RMRcvCommitMsg");
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             this.state = ResourceManagerState.ABORTED;
             this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
             tracer.log("RMRcvAbortMsg");
-            this.terminate();
         }
 
         System.out.println("RM " + this.getName() +
@@ -126,7 +126,7 @@ public class ResourceManager extends Manager {
         // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type",
         // TwoPhaseMessage.Prepared.toString(), "rm", getName())));
         traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", getName())); // add Add op for
-        // should log before the message is sent                                                                                       // Messages to the trace
+        // should log before the message is sent // Messages to the trace
         tracer.log(eventName);
 
         this.networkManager.send(new Message(

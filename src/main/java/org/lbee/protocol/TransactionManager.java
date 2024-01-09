@@ -52,8 +52,9 @@ public class TransactionManager extends Manager {
 
     @Override
     public void run() throws IOException {
+        boolean done = false;
         long startTime = System.currentTimeMillis();
-        while (!this.isTerminated()) {
+        while (!done) {
             // block on receiving message until timeout, retry if timeout
             boolean messageReceived = false;
             do {
@@ -67,14 +68,17 @@ public class TransactionManager extends Manager {
                 // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
                 if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
                     this.abort();
+                    done = true;
                     break;
                 }
             } while (!messageReceived);
 
             if (checkAllPrepared()) {
                 this.commit();
+                done = true;
             }
         }
+        System.out.println("-- TM  shutdown");
     }
 
     /**
@@ -114,7 +118,6 @@ public class TransactionManager extends Manager {
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
         }
-        this.terminate();
 
         System.out.println("TM sends Abort");
     }
@@ -140,7 +143,5 @@ public class TransactionManager extends Manager {
             this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
         }
         System.out.println("TM sent Commits");
-
-        this.terminate();
     }
 }

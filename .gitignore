@@ -120,6 +120,8 @@ __pycache__
 
 # temporary trace and clock
 trace-tla.ndjson
+rm-*.ndjson
+tm.ndjson
 twophase.clock
 default
 
