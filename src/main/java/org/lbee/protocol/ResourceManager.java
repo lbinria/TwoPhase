@@ -73,7 +73,7 @@ public class ResourceManager extends Manager {
         // work
         working();
         // Continuously send prepared while not committed
-        do {
+        while (!done) {
             // send Prepared message
             this.sendPrepared();
             // block on receiving message until timeout, send again if timeout
@@ -84,7 +84,7 @@ public class ResourceManager extends Manager {
             } catch (TimeOutException e) {
                 System.out.println("RM " + this.getName() + " received TIMEOUT ");
             }
-        } while (!done);
+        } 
     }
 
     private void working() {
