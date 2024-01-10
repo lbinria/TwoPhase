@@ -1,16 +1,13 @@
 package org.lbee.protocol;
+
 import org.lbee.instrumentation.trace.TLATracer;
 import org.lbee.network.NetworkManager;
 import java.io.*;
 
 public abstract class Manager {
-    private final String name;
-    public final NetworkManager networkManager;
-    protected final TLATracer tracer;
-
-    public String getName() {
-        return name;
-    }
+    final String name;
+    final NetworkManager networkManager;
+    final TLATracer tracer;
 
     public Manager(String name, NetworkManager networkManager, TLATracer tracer) {
         this.name = name;

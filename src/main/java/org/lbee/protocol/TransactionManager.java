@@ -19,7 +19,7 @@ public class TransactionManager extends Manager {
     // Abort if not all RMs sent before ABORT_TIMEOUT
     private final static int ABORT_TIMEOUT = 100;
 
-    // Resource managers managed by TM (as specified in the configuration)
+    // Resource managers managed by TM
     private final Set<String> resourceManagers;
     // Number of resource managers prepared to commit
     private final Collection<String> preparedRMs;
@@ -59,11 +59,11 @@ public class TransactionManager extends Manager {
             boolean messageReceived = false;
             do {
                 try {
-                    Message message = networkManager.receive(this.getName(), RECEIVE_TIMEOUT);
+                    Message message = networkManager.receive(this.name, RECEIVE_TIMEOUT);
                     this.handleMessage(message);
                     messageReceived = true;
                 } catch (TimeOutException e) {
-                    System.out.println("TM receive TIMEOUT");
+                    System.out.println("TM received TIMEOUT");
                 }
                 // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
                 if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
@@ -116,7 +116,7 @@ public class TransactionManager extends Manager {
         tracer.log("TMAbort"); // log event
         // sends Abort to all RMs
         for (String rmName : resourceManagers) {
-            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Abort.toString(), 0));
+            this.networkManager.send(new Message(this.name, rmName, TwoPhaseMessage.Abort.toString(), 0));
         }
 
         System.out.println("TM sends Abort");
@@ -140,7 +140,7 @@ public class TransactionManager extends Manager {
         tracer.log("TMCommit");
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
-            this.networkManager.send(new Message(this.getName(), rmName, TwoPhaseMessage.Commit.toString(), 0));
+            this.networkManager.send(new Message(this.name, rmName, TwoPhaseMessage.Commit.toString(), 0));
         }
         System.out.println("TM sent Commits");
     }
