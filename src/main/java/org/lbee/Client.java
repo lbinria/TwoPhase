@@ -41,7 +41,7 @@ public class Client {
             final Manager manager;
             NetworkManager networkManager = new NetworkManager(socket);
             TLATracer spec = TLATracer.getTracer(managerName + ".ndjson",
-                                ClockFactory.getClock(ClockFactory.LOCAL,"twophase.clock"));
+                                ClockFactory.getClock(ClockFactory.FILE,"twophase.clock"));
             switch (type) {
                 case "tm" -> {
                     List<String> rmNames = new ArrayList<>();
