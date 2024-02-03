@@ -31,12 +31,7 @@ Config ==
         Print(<<"Failed to read the config. CONFIG_PATH environnement variable was expected.">>, "")
 
 (* Manage exceptions: assume that trace is free of any exception *)
-\* ASSUME \A t \in ToSet(JsonTrace) : "event" \notin DOMAIN t \/ ("event" \in DOMAIN t /\ t.event /= "__exception")
 ASSUME \A t \in ToSet(Trace) : "event" \notin DOMAIN t \/ ("event" \in DOMAIN t /\ t.event /= "__exception")
-
-(* Get trace skipping config line *)
-\* Trace ==
-    \* SubSeq(JsonTrace, 2, Len(JsonTrace))
 
 logline ==
     Trace[l]

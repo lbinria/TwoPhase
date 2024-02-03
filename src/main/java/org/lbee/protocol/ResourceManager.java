@@ -6,6 +6,7 @@ import org.lbee.instrumentation.trace.VirtualField;
 import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -124,8 +125,8 @@ public class ResourceManager extends Manager {
 
         this.state = ResourceManagerState.PREPARED;
         this.traceState.set(state.toString().toLowerCase(Locale.ROOT));
-        // spec.notifyChange("msgs", "Add", List.of(), List.of(Map.of("type",
-        // TwoPhaseMessage.Prepared.toString(), "rm", getName())));
+        // alternative explicit recording of the state change
+        // tracer.notifyChange("rmState", "Replace", List.of(name), List.of(state.toString().toLowerCase(Locale.ROOT)));
         traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
         // should log before the message is sent // Messages to the trace
         tracer.log(eventName);
