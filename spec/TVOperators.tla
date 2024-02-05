@@ -11,25 +11,29 @@ MapArgs(mapFunction, cur, default, op, args, eventName) == Print(<<"Trace spec i
 MapArgsBase(mapFunction, cur, default, op, args, eventName) == args
 
 (* Generic operators *)
-Replace(cur, val) == val
+Set(cur, val) == val
+
 AddElement(cur, val) == cur \cup {val}
 AddElements(cur, vals) == cur \cup ToSet(vals)
 RemoveElement(cur, val) == cur \ {val}
 Clear(cur, val) == {}
-AppendElement(cur, val) == Append(cur, val)
-RemoveKey(cur, val) == [k \in DOMAIN cur |-> IF k = val THEN Nil ELSE cur[k]]
-UpdateRec(cur, val) == [k \in DOMAIN cur |-> IF k \in DOMAIN val THEN val[k] ELSE cur[k]]
-AddToBag(cur, val) ==
+
+AddElementToBag(cur, val) ==
     IF val \in DOMAIN cur THEN
         [cur EXCEPT ![val] = cur[val] + 1]
     ELSE
         cur @@ (val :> 1)
-
-RemoveFromBag(cur, val) ==
+RemoveElementFromBag(cur, val) ==
     IF val \in DOMAIN cur THEN
         [cur EXCEPT ![val] = cur[val] - 1]
     ELSE
         cur
+ClearBag(cur, val) == <<>>
+
+AppendElement(cur, val) == Append(cur, val)
+
+ResetKey(cur, val) == [k \in DOMAIN cur |-> IF k = val THEN Nil ELSE cur[k]]
+UpdateRec(cur, val) == [k \in DOMAIN cur |-> IF k \in DOMAIN val THEN val[k] ELSE cur[k]]
 
 AddInteger(cur, val) == cur + val
 SubInteger(cur, val) == cur - val
@@ -38,20 +42,22 @@ Unchanged(cur, val) == cur
 
 
 Apply(op, var, default, args) ==
-    CASE op = "Replace" -> Replace(var, args[1])
+    CASE op = "Init" -> Set(var, default)
+    []   op = "Set" -> Set(var, args[1])
     []   op = "AddElement" -> AddElement(var, args[1])
     []   op = "AddElements" -> AddElements(var, args[1])
     []   op = "RemoveElement" -> RemoveElement(var, args[1])
-    []   op = "AddToBag" -> AddToBag(var, args[1])
-    []   op = "RemoveFromBag" -> RemoveFromBag(var, args[1])
+    []   op = "Clear" -> Clear(var, {})
+    []   op = "AddElementToBag" -> AddElementToBag(var, args[1])
+    []   op = "RemoveElementFromBag" -> RemoveElementFromBag(var, args[1])
+    []   op = "ClearBag" -> Clear(var, <<>>)
+    []   op = "AppendElement" -> AppendElement(var, args[1])
+    []   op = "ResetKey" -> ResetKey(var, args[1])
+    []   op = "UpdateRec" -> UpdateRec(var, args[1])
+    \* []   op = "InitWithValue" -> UpdateRec(default, args[1])
+    []   op = "InitRec" -> UpdateRec(var,default)
     []   op = "Add" -> AddInteger(var, args[1])
     []   op = "Sub" -> SubInteger(var, args[1])
-    []   op = "Clear" -> Clear(var, <<>>)
-    []   op = "AppendElement" -> AppendElement(var, args[1])
-    []   op = "RemoveKey" -> RemoveKey(var, args[1])
-    []   op = "UpdateRec" -> UpdateRec(var, args[1])
-    []   op = "Init" -> Replace(var, default)
-    []   op = "InitWithValue" -> UpdateRec(default, args[1])
     []   op = "Unchanged" -> Unchanged(var, args[1])
 
 RECURSIVE ExceptAtPath(_,_,_,_,_)
