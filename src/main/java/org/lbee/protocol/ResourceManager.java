@@ -64,6 +64,9 @@ public class ResourceManager extends Manager {
     @Override
     public void run() throws IOException {
         boolean done = false;
+        // trace the initial state of the RM
+        this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
+        tracer.log();
         // Simulate a crash of the RM
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
         if (possibleAbort == 1) {

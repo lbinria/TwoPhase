@@ -54,6 +54,13 @@ public class TransactionManager extends Manager {
     public void run() throws IOException {
         boolean done = false;
         long startTime = System.currentTimeMillis();
+        // log that implicitly the state is init, no messages have been sent or received 
+        traceState.set("init");
+        traceTmPrepared.clear();
+        traceMessages.clear();
+        tracer.log();
+        // keep receiving messages until all RMs are prepared or they take too long to
+        // send PREPARED
         while (!done) {
             // block on receiving message until timeout, retry if timeout
             boolean messageReceived = false;

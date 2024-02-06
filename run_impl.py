@@ -50,7 +50,7 @@ def run(RMs, TM):
             "localhost", "6869", "rm", f"{rm}", f"{TM}", f"{duration}"];
         rm_process = Popen(args)
         # if duration is the same for all RMs the bug (in TM) has much less chances to appear
-        duration += 10
+        duration += 20
         rm_processes.append(rm_process)
 
     # Wait for all clients to be finished
