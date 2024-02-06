@@ -54,7 +54,7 @@ public class TransactionManager extends Manager {
     public void run() throws IOException {
         boolean done = false;
         long startTime = System.currentTimeMillis();
-        // log that implicitly the state is init, no messages have been sent or received 
+        // log that implicitly the state is init, no messages have been sent or received
         traceState.set("init");
         traceTmPrepared.clear();
         traceMessages.clear();
@@ -65,18 +65,20 @@ public class TransactionManager extends Manager {
             // block on receiving message until timeout, retry if timeout
             boolean messageReceived = false;
             do {
+                // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT.
+                // This test should be done before receiving a message, otherwise the TM might
+                // sent an abort even if all RMs are prepared.
+                if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
+                    this.abort();
+                    done = true;
+                    break;
+                }
                 try {
                     Message message = networkManager.receive(this.name, RECEIVE_TIMEOUT);
                     this.handleMessage(message);
                     messageReceived = true;
                 } catch (TimeOutException e) {
                     System.out.println("TM received TIMEOUT");
-                }
-                // Abort if not all RMs sent PREPARED before ABORT_TIMEOUT
-                if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
-                    this.abort();
-                    done = true;
-                    break;
                 }
             } while (!messageReceived);
 
