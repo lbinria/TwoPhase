@@ -34,6 +34,8 @@ public class ResourceManager extends Manager {
     // tracing
     private final VirtualField traceMessages;
     private final VirtualField traceState;
+    // just for showing alternative way of tracing
+    private final VirtualField traceStateRMs;
 
     /**
      * Construct a resource manager
@@ -57,6 +59,7 @@ public class ResourceManager extends Manager {
         // prepare tracing
         this.traceMessages = tracer.getVariableTracer("msgs");
         this.traceState = tracer.getVariableTracer("rmState").getField(this.name);
+        this.traceStateRMs = tracer.getVariableTracer("rmState");
 
         System.out.println("RM " + name + " WORKING - " + taskDuration + " ms");
     }
@@ -128,6 +131,10 @@ public class ResourceManager extends Manager {
 
         this.state = ResourceManagerState.PREPARED;
         this.traceState.set(state.toString().toLowerCase(Locale.ROOT));
+        // alternative log with apply
+        // this.traceState.apply("Set", state.toString().toLowerCase(Locale.ROOT));
+        // alternative log: get the state of all RMs and then field for this RM
+        // this.traceStateRMs.getField(this.name).set(state.toString().toLowerCase(Locale.ROOT));
         // alternative explicit recording of the state change
         // tracer.notifyChange("rmState", "Set", List.of(name), List.of(state.toString().toLowerCase(Locale.ROOT)));
         traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for

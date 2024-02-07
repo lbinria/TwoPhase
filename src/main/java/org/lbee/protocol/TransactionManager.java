@@ -145,6 +145,9 @@ public class TransactionManager extends Manager {
         traceMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
         // we can also trace the state
         traceState.set("done");
+        // alternative log directly with the tracer
+        // tracer.notifyChange("tmState", "Set", new ArrayList<>(), List.of("done"));
+
         // should log before the message is sent
         tracer.log("TMCommit");
         // sends Commits to all RM
