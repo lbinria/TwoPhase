@@ -139,8 +139,10 @@ public class ResourceManager extends Manager {
         // tracer.notifyChange("rmState", "Set", List.of(name), List.of(state.toString().toLowerCase(Locale.ROOT)));
         traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
         // should log before the message is sent // Messages to the trace
-        tracer.log(eventName);
-
+        tracer.log(eventName, this.name);
+        // we could also log without specifying the event name
+        // tracer.log();
+ 
         this.networkManager.send(new Message(
                 this.name, transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
 
