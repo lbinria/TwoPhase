@@ -26,15 +26,19 @@ def run(RMs, TM):
     time.sleep(2)
 
     print("--- Run TM client ---")
-    duration = -1
+    # set initialisation duration long enough to make sure all 
+    # RMs are working and already sent the prepare message
+    # (if we try to log init state shared by RMs and TM, like messages,
+    # this results in a false negative)
+    duration = 40
     args = [
         "java",
         "-cp",
         f"target/{jar_name}",
         "org.lbee.Client",
-        "localhost", "6869", "tm",f"{TM}"] 
+        "localhost", "6869", "tm", f"{TM}"]
     for rm in RMs:
-        args += [f"{rm}"];
+        args += [f"{rm}"]
     args += [f"{duration}"]
     tm_process = Popen(args)
 
@@ -47,7 +51,7 @@ def run(RMs, TM):
             "-cp",
             f"target/{jar_name}",
             "org.lbee.Client",
-            "localhost", "6869", "rm", f"{rm}", f"{TM}", f"{duration}"];
+            "localhost", "6869", "rm", f"{rm}", f"{TM}", f"{duration}"]
         rm_process = Popen(args)
         # if duration is the same for all RMs the bug (in TM) has much less chances to appear
         duration += 20
@@ -65,13 +69,15 @@ def run(RMs, TM):
     # Kill server
     os.kill(server_process.pid, signal.SIGINT)
 
+
 if __name__ == "__main__":
     # Read program args
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument('--config', type=str, required=False, default="twophase.ndjson.conf", help="Config file")
+    parser.add_argument('--config', type=str, required=False,
+                        default="twophase.ndjson.conf", help="Config file")
     args = parser.parse_args()
     # Read config and run
     config = read_json(args.config)
     rms = config[0]["RM"]
     tm = config[1]["TM"][0]
-    run(rms,tm)
+    run(rms, tm)

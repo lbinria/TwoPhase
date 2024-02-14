@@ -48,7 +48,7 @@ public class Client {
                     for (int i = 0; i < nbManagers; i++) {
                         rmNames.add(args[i+4]);
                     }
-                    manager = new TransactionManager(networkManager, managerName, rmNames, spec);
+                    manager = new TransactionManager(networkManager, managerName, rmNames, duration, spec);
                 }
                 case "rm" -> {
                     String tmName = args[4];

@@ -29,6 +29,7 @@ public class ResourceManager extends Manager {
     private final String transactionManagerName;
     // Current state
     private ResourceManagerState state;
+    // Duration of underlying task
     private final int taskDuration;
 
     // tracing

@@ -1,5 +1,6 @@
 package org.lbee.protocol;
 
+import org.lbee.helpers.Helper;
 import org.lbee.instrumentation.trace.TLATracer;
 import org.lbee.instrumentation.trace.VirtualField;
 import org.lbee.network.NetworkManager;
@@ -18,11 +19,15 @@ public class TransactionManager extends Manager {
     private final static int RECEIVE_TIMEOUT = 100;
     // Abort if not all RMs sent before ABORT_TIMEOUT
     private final static int ABORT_TIMEOUT = 100;
+    // maximum duration of the initialisation phase
+    private static final int MAX_INIT_DURATION = 100;
 
     // Resource managers managed by TM
     private final Set<String> resourceManagers;
     // Number of resource managers prepared to commit
     private final Collection<String> preparedRMs;
+    // Duration of the initialisation phase
+    private final int initDuration;
 
     // Tracing variables
     private final VirtualField traceMessages;
@@ -30,7 +35,7 @@ public class TransactionManager extends Manager {
     private final VirtualField traceState;
 
     public TransactionManager(NetworkManager networkManager, String name, List<String> resourceManagerNames,
-            TLATracer tracer) {
+            int initDuration, TLATracer tracer) {
         super(name, networkManager, tracer);
         this.resourceManagers = new HashSet<>(resourceManagerNames);
         // If we use a list (potentially containing duplicates) instead of a set, the
@@ -45,19 +50,36 @@ public class TransactionManager extends Manager {
         // TM sends the commit message.
         this.preparedRMs = new ArrayList<>();
         // this.preparedRMs = new HashSet<>();
+        if (initDuration == -1) {
+            this.initDuration = Helper.next(MAX_INIT_DURATION);
+        } else {
+            this.initDuration = initDuration;
+        }
         this.traceMessages = tracer.getVariableTracer("msgs");
         this.traceTmPrepared = tracer.getVariableTracer("tmPrepared");
         this.traceState = tracer.getVariableTracer("tmState");
+    }
+
+    private void initialising() {
+        // Simulate initialisation phase
+        try {
+            Thread.sleep(this.initDuration);
+        } catch (InterruptedException ex) {
+        }
     }
 
     @Override
     public void run() throws IOException {
         boolean done = false;
         long startTime = System.currentTimeMillis();
+        // initialising phase
+        this.initialising();
         // log that implicitly the state is init, no messages have been sent or received
         traceState.set("init");
         traceTmPrepared.clear();
-        traceMessages.clear();
+        // shouldn't log initial state for variables potentially modified
+        // by several processes
+        // traceMessages.clear();
         tracer.log();
         // keep receiving messages until all RMs are prepared or they take too long to
         // send PREPARED
