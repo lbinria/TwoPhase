@@ -154,7 +154,7 @@ public class TransactionManager extends Manager {
     }
 
     protected boolean checkAllPrepared() {
-        // System.out.println("TM check commit (rms = " + this.preparedRMs + ")");
+        // System.out.println("TM check commit (rms = " + this.preparedRMs + ", this.resourceManagers = " + this.resourceManagers + ")");
         return this.preparedRMs.size() >= this.resourceManagers.size();
     }
 

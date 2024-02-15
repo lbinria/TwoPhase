@@ -7,7 +7,6 @@ ASSUME TLCGet("config").mode = "bfs"
 
 VARIABLES l
 
-
 (* Operators to override *)
 Vars == Print(<<"Trace spec isn't valid, you should override 'Vars'.">>, <<>>)
 BaseInit == Print(<<"Trace spec isn't valid, you should override 'BaseInit'.">>, Nil)
@@ -53,7 +52,7 @@ IsStuttering ==
 
 TraceSpec ==
     \* Because of  [A]_v <=> A \/ v=v'  , the following formula is logically
-     \* equivalent to the (canonical) Spec formual  Init /\ [][Next]_vars  .
+     \* equivalent to the (canonical) Spec formula Init /\ [][Next]_vars.
      \* However, TLC's breadth-first algorithm does not explore successor
      \* states of a *seen* state.  Since one or more states may appear one or
      \* more times in the the trace, the  UNCHANGED vars  combined with the
