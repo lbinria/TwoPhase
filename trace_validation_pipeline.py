@@ -45,7 +45,7 @@ tm = config[1]["TM"][0]
 run_impl.run(rms,tm)
 
 # Merge traces 
-print("# Merge trace with config.\n")
+print("# Merge traces.\n")
 trace_merger.run(files,sort=True, remove_meta=True, out="trace-tla.ndjson")
 
 # Validate trace

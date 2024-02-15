@@ -105,6 +105,8 @@ public class TransactionManager extends Manager {
             } while (!messageReceived);
 
             if (checkAllPrepared()) {
+                // the trace is still consistent (but if not complete) even if the TM doesn't
+                // send the last commit message (comment out the next line to get this behaviour)
                 this.commit();
                 done = true;
             }
@@ -154,7 +156,8 @@ public class TransactionManager extends Manager {
     }
 
     protected boolean checkAllPrepared() {
-        // System.out.println("TM check commit (rms = " + this.preparedRMs + ", this.resourceManagers = " + this.resourceManagers + ")");
+        // System.out.println("TM check commit (rms = " + this.preparedRMs + ", this.resourceManagers = "
+        //         + this.resourceManagers + ")");
         return this.preparedRMs.size() >= this.resourceManagers.size();
     }
 

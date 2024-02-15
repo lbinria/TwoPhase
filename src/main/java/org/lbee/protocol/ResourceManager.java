@@ -24,6 +24,8 @@ public class ResourceManager extends Manager {
 
     private final static int PROBABILITY_TO_ABORT = 100;
     private static final int MAX_TASK_DURATION = 100;
+    // Abort if no message from TM for ABORT_TIMEOUT
+    private final static int ABORT_TIMEOUT = 200;
 
     // Transaction manager (to send message)
     private final String transactionManagerName;
@@ -68,6 +70,7 @@ public class ResourceManager extends Manager {
     @Override
     public void run() throws IOException {
         boolean done = false;
+        long startTime = System.currentTimeMillis();
         // trace the initial state of the RM
         this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
         tracer.log();
@@ -91,6 +94,11 @@ public class ResourceManager extends Manager {
                 done = true;
             } catch (TimeOutException e) {
                 System.out.println("RM " + this.name + " received TIMEOUT ");
+            }
+
+            if (System.currentTimeMillis() - startTime > ABORT_TIMEOUT) {
+                System.out.println("-- RM " + this.name + " aborted (timeout)");
+                done = true;
             }
         }
         System.out.println("-- RM " + this.name + " shutdown");
