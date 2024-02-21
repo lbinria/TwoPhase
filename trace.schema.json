@@ -1,6 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lbinria.com/traceentry.schema.json",
   "title": "TraceEntry",
   "description": "An entry in a trace",
   "type": "object",
@@ -27,17 +25,19 @@
         },
         "required": [ "op", "path", "args"]
       },
-      "minItems": 1,
-      "uniqueItems": true
+      "minItems": 1
     },
     "event": {
       "description": "Name of the event",
       "type": "string"
     },
-    "args": {
-      "type": "array"
+    "event_args": {
+      "description": "Arguments of the event",
+      "type": "array",
+      "items": {
+        "type": "string"
+      } 
     }
-    
   },
   "required": [ "clock"]
 }
