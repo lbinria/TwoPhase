@@ -116,7 +116,7 @@ public class ResourceManager extends Manager {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.state = ResourceManagerState.COMMITTED;
             this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
-            tracer.log("RMRcvCommitMsg", this.name);
+            tracer.log("RMRcvCommitMsg", new Object[]{this.name});
             // tracer.log();
             // tracer.log("RMRcvCommitMsg");
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
@@ -147,8 +147,8 @@ public class ResourceManager extends Manager {
         // alternative explicit recording of the state change
         // tracer.notifyChange("rmState", "Set", List.of(name), List.of(state.toString().toLowerCase(Locale.ROOT)));
         traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
-        // should log before the message is sent // Messages to the trace
-        tracer.log(eventName, this.name);
+        // should log before the message is sent 
+        tracer.log(eventName, new Object[]{this.name});
         // we could also log without specifying the event name
         // tracer.log();
  

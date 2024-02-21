@@ -6,3 +6,5 @@
 {"msgs": [{"op": "AddElement", "path": [], "args": [{"type": "Prepared", "rm": "rm-1"}]}], "rmState": [{"op": "Set", "path": ["rm-1"], "args": ["prepared"]}], "event": "RMPrepare", "desc": "rm-1"}
 {"tmPrepared": [{"op": "AddElement", "path": [], "args": ["rm-1"]}], "event": "TMRcvPrepared"}
 {"msgs": [{"op": "AddElement", "path": [], "args": [{"type": "Commit"}]}], "tmState": [{"op": "Set", "path": [], "args": ["done"]}], "event": "TMCommit"}
+{"rmState": [{"op": "Set", "path": ["rm-0"], "args": ["committed"]}], "event": "RMRcvCommitMsg", "desc": "rm-0"}
+{"rmState": [{"op": "Set", "path": ["rm-1"], "args": ["committed"]}], "event": "RMRcvCommitMsg", "desc": "rm-1"}
