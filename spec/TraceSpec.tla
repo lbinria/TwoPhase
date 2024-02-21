@@ -20,14 +20,14 @@ Trace ==
     IF "TRACE_PATH" \in DOMAIN IOEnv THEN
         ndJsonDeserialize(IOEnv.TRACE_PATH)
     ELSE
-        Print(<<"Failed to validate the trace. TRACE_PATH environnement variable was expected.">>, "")
+        Print(<<"TRACE_PATH environnement variable not found, use default trace file.">>, ndJsonDeserialize("trace.ndjson"))
 
 (* Read config *)
 Config ==
     IF "CONFIG_PATH" \in DOMAIN IOEnv THEN
         ndJsonDeserialize(IOEnv.CONFIG_PATH)
     ELSE
-        Print(<<"Failed to read the config. CONFIG_PATH environnement variable was expected.">>, "")
+        Print(<<"CONFIG_PATH environnement variable not found, use default config file.">>, ndJsonDeserialize("ndjson.conf"))
 
 (* Manage exceptions: assume that trace is free of any exception *)
 ASSUME \A t \in ToSet(Trace) : "event" \notin DOMAIN t \/ ("event" \in DOMAIN t /\ t.event /= "__exception")
