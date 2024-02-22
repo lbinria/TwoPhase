@@ -15,7 +15,7 @@ def get_files(config):
             files += [f+".ndjson" for f in v]
     return files
         
-def run(files, sort=False, remove_meta=False, out="trace-tla.ndjson"):
+def run(files, sort=False, remove_meta=False, out="trace.ndjson"):
     # Get all trace files - either the files themselves or all ndjson files in the directories
     all_paths = reduce(lambda a, b: a + b, ([f] if os.path.isfile(f) else [os.path.join(f, filename) for filename in os.listdir(f) if filename.endswith('.ndjson')] for f in files))
     # Open trace files and concatenate events
@@ -32,10 +32,10 @@ if __name__ == "__main__":
     # Read program args
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('files', type=str, nargs="*", help="Trace files to merge")
-    parser.add_argument('--config', type=str, required=False, default="twophase.ndjson.conf", help="Config file")
+    parser.add_argument('--config', type=str, required=False, default="conf.ndjson", help="Config file")
     parser.add_argument('--sort', type=bool, required=False, default=False, help="Sort by clock")
     parser.add_argument('--remove_meta', type=bool, required=False, default=False, help="Remove clock and sender data")
-    parser.add_argument('--out', type=str, required=False, default="trace-tla.ndjson", help="Output file")
+    parser.add_argument('--out', type=str, required=False, default="trace.ndjson", help="Output file")
     args = parser.parse_args()
     # Get files
     if len(args.files) > 0:

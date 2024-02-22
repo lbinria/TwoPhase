@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # Read program args
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('--config', type=str, required=False,
-                        default="twophase.ndjson.conf", help="Config file")
+                        default="conf.ndjson", help="Config file")
     args = parser.parse_args()
     # Read config and run
     config = read_json(args.config)

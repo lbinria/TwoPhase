@@ -121,7 +121,7 @@ __pycache__
 .vscode/
 
 # temporary trace and clock
-trace-tla.ndjson
+trace.ndjson
 rm-*.ndjson
 tm.ndjson
 twophase.clock
