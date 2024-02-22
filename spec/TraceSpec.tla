@@ -27,7 +27,7 @@ Config ==
     IF "CONFIG_PATH" \in DOMAIN IOEnv THEN
         ndJsonDeserialize(IOEnv.CONFIG_PATH)
     ELSE
-        Print(<<"CONFIG_PATH environnement variable not found, use default config file.">>, ndJsonDeserialize("ndjson.conf"))
+        Print(<<"CONFIG_PATH environnement variable not found, use default config file.">>, ndJsonDeserialize("conf.ndjson"))
 
 (* Manage exceptions: assume that trace is free of any exception *)
 ASSUME \A t \in ToSet(Trace) : "event" \notin DOMAIN t \/ ("event" \in DOMAIN t /\ t.event /= "__exception")
