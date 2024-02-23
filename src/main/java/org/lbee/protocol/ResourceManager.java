@@ -117,12 +117,14 @@ public class ResourceManager extends Manager {
             this.state = ResourceManagerState.COMMITTED;
             this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
             tracer.log("RMRcvCommitMsg", new Object[]{this.name});
-            // tracer.log();
             // tracer.log("RMRcvCommitMsg");
+            // tracer.log();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             this.state = ResourceManagerState.ABORTED;
             this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
-            tracer.log("RMRcvAbortMsg");
+            tracer.log("RMRcvAbortMsg", new Object[]{this.name});
+            // tracer.log("RMRcvAbortMsg");
+            // tracer.log();
         }
 
         System.out.println("RM " + this.name +
@@ -149,7 +151,7 @@ public class ResourceManager extends Manager {
         traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
         // should log before the message is sent 
         tracer.log(eventName, new Object[]{this.name});
-        // we could also log without specifying the event name
+        // tracer.log(eventName);
         // tracer.log();
  
         this.networkManager.send(new Message(

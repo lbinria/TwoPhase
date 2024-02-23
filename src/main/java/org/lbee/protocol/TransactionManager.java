@@ -105,7 +105,7 @@ public class TransactionManager extends Manager {
             } while (!messageReceived);
 
             if (checkAllPrepared()) {
-                // the trace is still consistent (but if not complete) even if the TM doesn't
+                // the trace is still consistent (but not complete) even if the TM doesn't
                 // send the last commit message (comment out the next line to get this behaviour)
                 this.commit();
                 done = true;
@@ -129,6 +129,7 @@ public class TransactionManager extends Manager {
                 // trace the state change
                 traceTmPrepared.add(preparedRM); // the RM is added to the set of prepared RMs
                 tracer.log("TMRcvPrepared"); // log corresponding event
+                // tracer.log();
             }
         }
 
@@ -147,6 +148,7 @@ public class TransactionManager extends Manager {
         traceState.set("done"); // the state is set to done
         // should log before the message is sent
         tracer.log("TMAbort"); // log event
+        // tracer.log();
         // sends Abort to all RMs
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.name, rmName, TwoPhaseMessage.Abort.toString(), 0));
@@ -172,9 +174,9 @@ public class TransactionManager extends Manager {
         traceState.set("done");
         // alternative log directly with the tracer
         // tracer.notifyChange("tmState", "Set", new ArrayList<>(), List.of("done"));
-
         // should log before the message is sent
         tracer.log("TMCommit");
+        // tracer.log();
         // sends Commits to all RM
         for (String rmName : resourceManagers) {
             this.networkManager.send(new Message(this.name, rmName, TwoPhaseMessage.Commit.toString(), 0));
