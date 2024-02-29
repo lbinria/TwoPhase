@@ -22,22 +22,22 @@ TPDefault(varName) ==
     []  varName = "tmPrepared" -> {}
     []  varName = "msgs" -> {}
 
-TPMapVariables(t) ==
+TPUpdateVariables(t) ==
     /\
         IF "rmState" \in DOMAIN t
-        THEN rmState' = MapVariable(rmState, "rmState", t)
+        THEN rmState' = UpdateVariable(rmState, "rmState", t)
         ELSE TRUE
     /\
         IF "tmState" \in DOMAIN t
-        THEN tmState' = MapVariable(tmState, "tmState", t)
+        THEN tmState' = UpdateVariable(tmState, "tmState", t)
         ELSE TRUE
     /\
         IF "tmPrepared" \in DOMAIN t
-        THEN tmPrepared' = MapVariable(tmPrepared, "tmPrepared", t)
+        THEN tmPrepared' = UpdateVariable(tmPrepared, "tmPrepared", t)
         ELSE TRUE
     /\
         IF "msgs" \in DOMAIN t
-        THEN msgs' = MapVariable(msgs, "msgs", t)
+        THEN msgs' = UpdateVariable(msgs, "msgs", t)
         ELSE TRUE
 
 (* Predicate actions *)
