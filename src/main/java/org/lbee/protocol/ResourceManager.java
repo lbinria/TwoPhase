@@ -116,13 +116,13 @@ public class ResourceManager extends Manager {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.state = ResourceManagerState.COMMITTED;
             this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
-            tracer.log("RMRcvCommitMsg", new Object[]{this.name});
+            tracer.log("RMRcvCommitMsg", new Object[] { this.name });
             // tracer.log("RMRcvCommitMsg");
             // tracer.log();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             this.state = ResourceManagerState.ABORTED;
             this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
-            tracer.log("RMRcvAbortMsg", new Object[]{this.name});
+            tracer.log("RMRcvAbortMsg", new Object[] { this.name });
             // tracer.log("RMRcvAbortMsg");
             // tracer.log();
         }
@@ -132,28 +132,28 @@ public class ResourceManager extends Manager {
     }
 
     private void sendPrepared() throws IOException {
-        // Trace optimization (specify event name to reduce state space)
-        final String eventName;
+        // if the RM already sent the prepared message, it is a stuttering
+        // and thus, doesn't worth logging the event
         if (this.state != ResourceManagerState.PREPARED) {
-            eventName = "RMPrepare";
+            this.state = ResourceManagerState.PREPARED;
+            this.traceState.set(state.toString().toLowerCase(Locale.ROOT));
+            // alternative log with apply
+            // this.traceState.apply("Set", state.toString().toLowerCase(Locale.ROOT));
+            // alternative log: get the state of all RMs and then field for this RM
+            // this.traceStateRMs.getField(this.name).set(state.toString().toLowerCase(Locale.ROOT));
+            // alternative explicit recording of the state change
+            // tracer.notifyChange("rmState", "Set", List.of(name),
+            // List.of(state.toString().toLowerCase(Locale.ROOT)));
+            traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
+            // should log before the message is sent
+            tracer.log("RMPrepare", new Object[] { this.name });
+            // tracer.log(eventName);
+            // tracer.log();
         } else {
-            eventName = "Stuttering";
+            // or we can log the stuttering
+            tracer.log("Stuttering");
         }
 
-        this.state = ResourceManagerState.PREPARED;
-        this.traceState.set(state.toString().toLowerCase(Locale.ROOT));
-        // alternative log with apply
-        // this.traceState.apply("Set", state.toString().toLowerCase(Locale.ROOT));
-        // alternative log: get the state of all RMs and then field for this RM
-        // this.traceStateRMs.getField(this.name).set(state.toString().toLowerCase(Locale.ROOT));
-        // alternative explicit recording of the state change
-        // tracer.notifyChange("rmState", "Set", List.of(name), List.of(state.toString().toLowerCase(Locale.ROOT)));
-        traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
-        // should log before the message is sent 
-        tracer.log(eventName, new Object[]{this.name});
-        // tracer.log(eventName);
-        // tracer.log();
- 
         this.networkManager.send(new Message(
                 this.name, transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
 
