@@ -46,7 +46,7 @@ run_impl.run(rms,tm)
 
 # Merge traces 
 print("# Merge traces.\n")
-trace_merger.run(files,sort=True, remove_meta=True, out="trace.ndjson")
+trace_merger.run(files, sort=True, remove_meta=True, out="trace.ndjson")
 
 # Validate trace
 print("# Start TLA+ trace spec.\n")

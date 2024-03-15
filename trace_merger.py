@@ -33,8 +33,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('files', type=str, nargs="*", help="Trace files to merge")
     parser.add_argument('--config', type=str, required=False, default="conf.ndjson", help="Config file")
-    parser.add_argument('--sort', type=bool, required=False, default=False, help="Sort by clock")
-    parser.add_argument('--remove_meta', type=bool, required=False, default=False, help="Remove clock and sender data")
+    parser.add_argument('--sort', type=bool, required=False, default=True, help="Sort by clock")
+    parser.add_argument('--remove_meta', type=bool, required=False, default=True, help="Remove clock and sender data")
     parser.add_argument('--out', type=str, required=False, default="trace.ndjson", help="Output file")
     args = parser.parse_args()
     # Get files

@@ -40,7 +40,6 @@ SubInteger(cur, val) == cur - val
 
 Unchanged(cur, val) == cur
 
-
 Apply(op, var, default, args) ==
     CASE op = "Init" -> Set(var, default)
     []   op = "Set" -> Set(var, args[1])
