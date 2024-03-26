@@ -6,6 +6,7 @@ import org.lbee.instrumentation.trace.VirtualField;
 import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -143,15 +144,19 @@ public class ResourceManager extends Manager {
             // this.traceStateRMs.getField(this.name).set(state.toString().toLowerCase(Locale.ROOT));
             // alternative explicit recording of the state change
             // tracer.notifyChange("rmState", "Set", List.of(name),
-            // List.of(state.toString().toLowerCase(Locale.ROOT)));
+            //         List.of(state.toString().toLowerCase(Locale.ROOT)));
             traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
+            // tracer.notifyChange("msgs", "AddElement", new ArrayList<String>(),
+            //         List.of(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)));
+
             // should log before the message is sent
             // tracer.log("RMPrepare", new Object[] { this.name });
             // tracer.log("RMPrepare");
-            // if we log the event name the potential stuttering steps are not detected as such
+            // if we log the event name the potential stuttering steps are not detected as
+            // such
             // (since RMPrepare demands the state to be necessarily WORKING, no PREPARED)
             tracer.log();
-        } 
+        }
 
         this.networkManager.send(new Message(
                 this.name, transactionManagerName, TwoPhaseMessage.Prepared.toString(), 0));
