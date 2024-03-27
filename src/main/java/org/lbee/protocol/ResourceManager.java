@@ -6,8 +6,6 @@ import org.lbee.instrumentation.trace.VirtualField;
 import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -73,7 +71,7 @@ public class ResourceManager extends Manager {
         boolean done = false;
         long startTime = System.currentTimeMillis();
         // trace the initial state of the RM
-        this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
+        this.traceState.update(this.state.toString().toLowerCase(Locale.ROOT));
         tracer.log();
         // Simulate a crash of the RM
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
@@ -116,13 +114,13 @@ public class ResourceManager extends Manager {
     private void handleMessage(Message message) throws IOException {
         if (message.getContent().equals(TwoPhaseMessage.Commit.toString())) {
             this.state = ResourceManagerState.COMMITTED;
-            this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
+            this.traceState.update(this.state.toString().toLowerCase(Locale.ROOT));
             tracer.log("RMRcvCommitMsg", new Object[] { this.name });
             // tracer.log("RMRcvCommitMsg");
             // tracer.log();
         } else if (message.getContent().equals(TwoPhaseMessage.Abort.toString())) {
             this.state = ResourceManagerState.ABORTED;
-            this.traceState.set(this.state.toString().toLowerCase(Locale.ROOT));
+            this.traceState.update(this.state.toString().toLowerCase(Locale.ROOT));
             tracer.log("RMRcvAbortMsg", new Object[] { this.name });
             // tracer.log("RMRcvAbortMsg");
             // tracer.log();
@@ -137,13 +135,13 @@ public class ResourceManager extends Manager {
         // and thus, doesn't worth logging the event
         if (this.state != ResourceManagerState.PREPARED) {
             this.state = ResourceManagerState.PREPARED;
-            this.traceState.set(state.toString().toLowerCase(Locale.ROOT));
+            this.traceState.update(state.toString().toLowerCase(Locale.ROOT));
             // alternative log with apply
-            // this.traceState.apply("Set", state.toString().toLowerCase(Locale.ROOT));
+            // this.traceState.apply("Update", state.toString().toLowerCase(Locale.ROOT));
             // alternative log: get the state of all RMs and then field for this RM
-            // this.traceStateRMs.getField(this.name).set(state.toString().toLowerCase(Locale.ROOT));
+            // this.traceStateRMs.getField(this.name).update(state.toString().toLowerCase(Locale.ROOT));
             // alternative explicit recording of the state change
-            // tracer.notifyChange("rmState", "Set", List.of(name),
+            // tracer.notifyChange("rmState", "Update", List.of(name),
             //         List.of(state.toString().toLowerCase(Locale.ROOT)));
             traceMessages.add(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)); // add Add op for
             // tracer.notifyChange("msgs", "AddElement", new ArrayList<String>(),

@@ -7,7 +7,6 @@ import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +74,7 @@ public class TransactionManager extends Manager {
         // initialising phase
         this.initialising();
         // log that implicitly the state is init, no messages have been sent or received
-        traceState.set("init");
+        traceState.update("init");
         traceTmPrepared.clear();
         // shouldn't log initial state for variables potentially modified
         // by several processes
@@ -145,7 +144,7 @@ public class TransactionManager extends Manager {
         // trace the state change
         traceMessages.add(Map.of("type", TwoPhaseMessage.Abort.toString())); // the abort message is added to the set of
                                                                              // messages
-        traceState.set("done"); // the state is set to done
+        traceState.update("done"); // the state is set to done
         // should log before the message is sent
         tracer.log("TMAbort"); // log event
         // tracer.log();
@@ -171,9 +170,9 @@ public class TransactionManager extends Manager {
         // message)
         traceMessages.add(Map.of("type", TwoPhaseMessage.Commit.toString()));
         // we can also trace the state
-        traceState.set("done");
+        traceState.update("done");
         // alternative log directly with the tracer
-        // tracer.notifyChange("tmState", "Set", new ArrayList<>(), List.of("done"));
+        // tracer.notifyChange("tmState", "Update", new ArrayList<>(), List.of("done"));
         // should log before the message is sent
         tracer.log("TMCommit");
         // tracer.log();
