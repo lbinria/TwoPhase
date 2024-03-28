@@ -172,7 +172,7 @@ public class TransactionManager extends Manager {
         // we can also trace the state
         traceState.update("done");
         // alternative log directly with the tracer
-        // tracer.notifyChange("tmState", "Update", new ArrayList<>(), List.of("done"));
+        // tracer.notifyChange("tmState", new ArrayList<>(), "Update", List.of("done"));
         // should log before the message is sent
         tracer.log("TMCommit");
         // tracer.log();
