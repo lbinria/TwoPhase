@@ -7,6 +7,7 @@ import org.lbee.network.NetworkManager;
 import org.lbee.network.TimeOutException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,7 @@ public class TransactionManager extends Manager {
     // Timeout for receiving messages
     private final static int RECEIVE_TIMEOUT = 100;
     // Abort if not all RMs sent before ABORT_TIMEOUT
-    private final static int ABORT_TIMEOUT = 100;
+    private final static int ABORT_TIMEOUT = 4000; // 100
     // maximum duration of the initialisation phase
     private static final int MAX_INIT_DURATION = 100;
 

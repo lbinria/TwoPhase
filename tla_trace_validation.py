@@ -10,6 +10,7 @@ community_modules_jar = os.path.join(tla_dir, "CommunityModules-deps.jar")
 tla_cp = f"{tla_jar}:{community_modules_jar}"
 
 # Run TLC
+# use "-Dtlc2.tool.queue.IStateQueue=StateDeque" for depth-first search
 def run_tla(trace_spec,trace="trace.ndjson",config="conf.ndjson"):
     os.environ["TRACE_PATH"] = trace
     os.environ["CONFIG_PATH"] = config

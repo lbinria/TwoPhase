@@ -24,7 +24,7 @@ public class ResourceManager extends Manager {
     private final static int PROBABILITY_TO_ABORT = 100;
     private static final int MAX_TASK_DURATION = 100;
     // Abort if no message from TM for ABORT_TIMEOUT
-    private final static int ABORT_TIMEOUT = 200;
+    private final static int ABORT_TIMEOUT = 2000; //200
 
     // Transaction manager (to send message)
     private final String transactionManagerName;
@@ -148,12 +148,11 @@ public class ResourceManager extends Manager {
             //         List.of(Map.of("type", TwoPhaseMessage.Prepared.toString(), "rm", this.name)));
 
             // should log before the message is sent
-            // tracer.log("RMPrepare", new Object[] { this.name });
+            tracer.log("RMPrepare", new Object[] { this.name });
             // tracer.log("RMPrepare");
             // if we log the event name the potential stuttering steps are not detected as
-            // such
-            // (since RMPrepare demands the state to be necessarily WORKING, no PREPARED)
-            tracer.log();
+            // such (since RMPrepare demands the state to be necessarily WORKING, no PREPARED)
+            // tracer.log();
         }
 
         this.networkManager.send(new Message(
