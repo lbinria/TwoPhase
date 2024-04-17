@@ -48,8 +48,8 @@ public class TransactionManager extends Manager {
         // lead to a valid trace because the last RM (not counted by nbPrepared when the
         // commit decision was taken) has time to send its PREPARED message before the
         // TM sends the commit message.
-        this.preparedRMs = new ArrayList<>();
-        // this.preparedRMs = new HashSet<>();
+        // this.preparedRMs = new ArrayList<>();
+        this.preparedRMs = new HashSet<>();
         if (initDuration == -1) {
             this.initDuration = Helper.next(MAX_INIT_DURATION);
         } else {
