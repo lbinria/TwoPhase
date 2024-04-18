@@ -70,9 +70,9 @@ public class ResourceManager extends Manager {
     public void run() throws IOException {
         boolean done = false;
         long startTime = System.currentTimeMillis();
-        // trace the initial state of the RM
-        this.traceState.update(this.state.toString().toLowerCase(Locale.ROOT));
-        tracer.log();
+        // trace the initial state of the RM (not necessary)
+        // this.traceState.update(this.state.toString().toLowerCase(Locale.ROOT));
+        // tracer.log();
         // Simulate a crash of the RM
         int possibleAbort = Helper.next(PROBABILITY_TO_ABORT);
         if (possibleAbort == 1) {

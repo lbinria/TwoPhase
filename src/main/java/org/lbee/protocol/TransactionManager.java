@@ -77,8 +77,7 @@ public class TransactionManager extends Manager {
         // log that implicitly the state is init, no messages have been sent or received
         traceState.update("init");
         traceTmPrepared.clear();
-        // shouldn't log initial state for variables potentially modified
-        // by several processes
+        // shouldn't log initial state for variables potentially modified by several processes
         // traceMessages.clear();
         tracer.log();
         // keep receiving messages until all RMs are prepared or they take too long to

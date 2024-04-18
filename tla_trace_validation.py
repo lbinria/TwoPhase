@@ -20,6 +20,7 @@ def run_tla(trace_spec,trace="trace.ndjson",config="conf.ndjson"):
         "-cp",
         tla_cp,
         "tlc2.TLC",
+        "-note",
         trace_spec])
     tla_trace_validation_process.wait()
     tla_trace_validation_process.terminate()
