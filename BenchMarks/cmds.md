@@ -1,18 +1,23 @@
 ### Commands
 
 #### BFS (for 4 RMs)
-`KeyValueStore/spec > TRACE_PATH=../BenchMarks/trace.ndjson.4RM.VEA CONFIG_PATH=../BenchMarks/conf.4RM.ndjson java -XX:+UseParallelGC  -cp '/Users/cirstea/bin/TLA/tla2tools.jar' tlc2.TLC -note TwoPhaseTrace.tla`
+`TwoPhase/spec > TRACE_PATH=../BenchMarks/trace.ndjson.4RM.VEA CONFIG_PATH=../BenchMarks/conf.4RM.ndjson java -XX:+UseParallelGC  -cp '/Users/cirstea/bin/TLA/tla2tools.jar' tlc2.TLC -note TwoPhaseTrace.tla`
 
 #### DFS (for 4 RMs)
-`KeyValueStore/spec > TRACE_PATH=../BenchMarks/trace.ndjson.4RM.VEA CONFIG_PATH=../BenchMarks/conf.4RM.ndjson java -XX:+UseParallelGC -Dtlc2.tool.queue.IStateQueue=StateDeque -cp '/Users/cirstea/bin/TLA/tla2tools.jar' tlc2.TLC -note TwoPhaseTrace.tla`
+`TwoPhase/spec > TRACE_PATH=../BenchMarks/trace.ndjson.4RM.VEA CONFIG_PATH=../BenchMarks/conf.4RM.ndjson java -XX:+UseParallelGC -Dtlc2.tool.queue.IStateQueue=StateDeque -cp '/Users/cirstea/bin/TLA/tla2tools.jar' tlc2.TLC -note TwoPhaseTrace.tla`
 
 #### Script
 
 Alternatively, run the script `tla_trace_validation.py` on one of the trace files (the trace file should be consistent with the conf file:
-`trace.ndjson.4RM.VEA` with  `conf.4RM.ndjson`, and `-Dtlc2.tool.queue.IStateQueue=StateDeque` should be added in the script if DFS is to be used).
+`trace.ndjson.4RM.VEA` with  `conf.4RM.ndjson`).
 
-`spec > python tla_trace_validation.py --trace BenchMarks/trace.ndjson.4RM.VEA  --config BenchMarks/conf.4RM.ndjson spec/TwoPhaseTrace.tla`
+- BFS 
 
+`KeyValueStore > python tla_trace_validation.py --trace BenchMarks/trace.ndjson.4RM.VEA  --config BenchMarks/conf.4RM.ndjson spec/TwoPhaseTrace.tla`
+
+- DFS 
+
+`KeyValueStore > python tla_trace_validation.py -dfs --trace BenchMarks/trace.ndjson.4RM.VEA  --config BenchMarks/conf.4RM.ndjson spec/TwoPhaseTrace.tla`
 
 ### Benchmarks
 
