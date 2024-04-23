@@ -65,14 +65,6 @@ IsRMPrepare ==
         ELSE
             \E r \in RM : RMPrepare(r)
 
-IsRMChooseToAbort ==
-    /\ IsEvent("RMChooseToAbort")
-    /\
-        IF "event_args" \in DOMAIN logline /\ Len(logline.event_args) >= 1 THEN
-            RMChooseToAbort(logline.event_args[1])
-        ELSE
-            \E r \in RM : RMChooseToAbort(r)
-
 IsRMRcvCommitMsg ==
     /\ IsEvent("RMRcvCommitMsg")
     /\
@@ -94,7 +86,6 @@ TPTraceNext ==
         \/ IsTMAbort
         \/ IsTMRcvPrepared
         \/ IsRMPrepare
-        \/ IsRMChooseToAbort
         \/ IsRMRcvCommitMsg
         \/ IsRMRcvAbortMsg
 

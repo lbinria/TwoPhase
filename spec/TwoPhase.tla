@@ -114,15 +114,6 @@ RMPrepare(r) ==
   /\ rmState' = [rmState EXCEPT ![r] = "prepared"]
   /\ msgs' = msgs \cup {[type |-> "Prepared", rm |-> r]}
   /\ UNCHANGED <<tmState, tmPrepared>>
-  
-RMChooseToAbort(r) ==
-  (*************************************************************************)
-  (* Resource manager r spontaneously decides to abort.  As noted above, r *)
-  (* does not send any message in our simplified spec.                     *)
-  (*************************************************************************)
-  /\ rmState[r] = "working"
-  /\ rmState' = [rmState EXCEPT ![r] = "aborted"]
-  /\ UNCHANGED <<tmState, tmPrepared, msgs>>
 
 RMRcvCommitMsg(r) ==
   (*************************************************************************)
@@ -143,7 +134,7 @@ RMRcvAbortMsg(r) ==
 TPNext ==
   \/ TMCommit \/ TMAbort
   \/ \E r \in RM : 
-       TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r)
+       TMRcvPrepared(r) \/ RMPrepare(r) 
          \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r)
 -----------------------------------------------------------------------------
 (***************************************************************************)
