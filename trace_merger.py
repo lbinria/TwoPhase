@@ -4,10 +4,13 @@ import argparse
 from functools import reduce
 from itertools import groupby
 
+# Read ndjson file
 def read_json(filename):
     with open(filename) as f:
         return ndjson.load(f)
-
+    
+# Get files to be merged from the config file.
+# Should be adapted to the specific format of the config file.
 def get_files(config):
     files = []
     for line in config:  
@@ -15,16 +18,19 @@ def get_files(config):
             files += [f+".ndjson" for f in v]
     return files
         
+# Merge trace files
 def run(files, sort=False, remove_meta=False, out="trace.ndjson"):
-    # Get all trace files - either the files themselves or all ndjson files in the directories
+    # Get all trace files - either the files themselves or all ndjson files in the directories pointed by files
     all_paths = reduce(lambda a, b: a + b, ([f] if os.path.isfile(f) else [os.path.join(f, filename) for filename in os.listdir(f) if filename.endswith('.ndjson')] for f in files))
     # Open trace files and concatenate events
     merged_trace = reduce(lambda a, b: a + b, (read_json(path) for path in all_paths), [])
+    # Sort by clock
     if sort:
         merged_trace = list(sorted(merged_trace, key=lambda x: x['clock']))
+    # Remove meta data: clock and sender
     if remove_meta:
         merged_trace = [{k:v for k, v in t.items() if k != "clock" and k != "sender"} for t in merged_trace]
-    # Dump
+    # Dump in the target file
     with open(out, 'w') as f:
         ndjson.dump(merged_trace, f)
 
