@@ -4,6 +4,7 @@ import org.lbee.protocol.Message;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -12,11 +13,11 @@ import java.util.function.Supplier;
 public class MessageBucket<TMessageBox extends MessageBox> {
 
     // Map of message boxes by recipient
-    private final HashMap<String, TMessageBox> messageBoxes;
+    private final ConcurrentHashMap<String, TMessageBox> messageBoxes;
     private final Supplier<TMessageBox> messageBoxCtor;
 
     public MessageBucket(Supplier<TMessageBox> messageBoxCtor) {
-        this.messageBoxes = new HashMap<>();
+        this.messageBoxes = new ConcurrentHashMap<>();
         this.messageBoxCtor = Objects.requireNonNull(messageBoxCtor);
     }
 
@@ -24,7 +25,7 @@ public class MessageBucket<TMessageBox extends MessageBox> {
      * Send a message to another process
      * @param message Message to send
      */
-    public void put(Message message) {
+    public synchronized void put(Message message) {
         if (!this.messageBoxes.containsKey(message.getTo()))
             this.messageBoxes.put(message.getTo(), messageBoxCtor.get());
 
@@ -36,7 +37,7 @@ public class MessageBucket<TMessageBox extends MessageBox> {
      * @param recipientName Recipient process name
      * @return Received message
      */
-    public Message take(String recipientName) {
+    public synchronized Message take(String recipientName) {
         // Get message queue of recipient
         MessageBox messageBox = this.messageBoxes.get(recipientName);
         // No message, return null
