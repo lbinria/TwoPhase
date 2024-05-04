@@ -20,6 +20,14 @@ def run(RMs, TM):
         "org.lbee.network.Server",
         "6869", "unordered"])
 
+    print("--- Run server ---")
+    clock_process = Popen([
+        "java",
+        "-cp",
+        f"target/{jar_name}",
+        "org.lbee.instrumentation.clock.ServerClock",
+        "6666"])
+
     # Wait the server to run, if not some manager might start 
     # running before the server, leading to an error
     # This behavior might be interesting for trace validation
@@ -68,7 +76,7 @@ def run(RMs, TM):
         rm_process.terminate()
     # Kill server
     os.kill(server_process.pid, signal.SIGINT)
-
+    os.kill(clock_process.pid, signal.SIGINT)
 
 if __name__ == "__main__":
     # Read program args

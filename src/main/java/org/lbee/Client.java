@@ -31,22 +31,19 @@ public class Client {
         final String type = args[2];
         final String managerName = args[3];
         final int nbManagers = args.length - 5;
-        final int duration = Integer.parseInt(args[args.length-1]);
-    
-        // final JsonObject jsonConfig = ConfigurationManager.read("twophase.ndjson.conf");
-        // System.out.println(jsonConfig);
-        // final Configuration config = new Configuration(jsonConfig);
+        final int duration = Integer.parseInt(args[args.length - 1]);
 
         try (Socket socket = new Socket(hostname, port)) {
             final Manager manager;
             NetworkManager networkManager = new NetworkManager(socket);
             TLATracer spec = TLATracer.getTracer(managerName + ".ndjson",
-                                ClockFactory.getClock(ClockFactory.FILE,"twophase.clock"));
+                    ClockFactory.getClock(ClockFactory.FILE,"twophase.clock"));
+                    // ClockFactory.getClock(ClockFactory.SERVER, "localhost", "6666"));
             switch (type) {
                 case "tm" -> {
                     List<String> rmNames = new ArrayList<>();
                     for (int i = 0; i < nbManagers; i++) {
-                        rmNames.add(args[i+4]);
+                        rmNames.add(args[i + 4]);
                     }
                     manager = new TransactionManager(networkManager, managerName, rmNames, duration, spec);
                 }
