@@ -29,7 +29,7 @@ def run(files, sort=False, remove_meta=False, out="trace.ndjson"):
         merged_trace = list(sorted(merged_trace, key=lambda x: x['clock']))
     # Remove meta data: clock and sender
     if remove_meta:
-        merged_trace = [{k:v for k, v in t.items() if k != "clock" and k != "sender"} for t in merged_trace]
+        merged_trace = [{k:v for k, v in t.items() if k != "clock" and k != "logger"} for t in merged_trace]
     # Dump in the target file
     with open(out, 'w') as f:
         ndjson.dump(merged_trace, f)
